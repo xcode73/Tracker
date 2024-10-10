@@ -7,12 +7,11 @@
 
 import UIKit
 
-private enum Titles {
-    static let trackers = "Трекеры"
-    static let statistic = "Статистика"
-}
-
 final class TabBarController: UITabBarController {
+    private enum Titles {
+        static let trackers = "Трекеры"
+        static let statistic = "Статистика"
+    }
 
     // MARK: - UI Components
     private lazy var trackersTabBarItem: UITabBarItem = {

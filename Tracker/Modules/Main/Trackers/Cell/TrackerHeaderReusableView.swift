@@ -15,6 +15,7 @@ class TrackerHeaderReusableView: UICollectionReusableView {
         label.font = UIFont.systemFont(ofSize: 19, weight: .bold)
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
+        label.sizeToFit()
         return label
     }()
     

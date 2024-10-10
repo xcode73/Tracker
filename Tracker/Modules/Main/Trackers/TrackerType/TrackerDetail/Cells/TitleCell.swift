@@ -38,14 +38,14 @@ final class TitleCell: UITableViewCell {
         view.clearButtonMode = .whileEditing
         view.delegate = self
 
-        view.addTarget(self, action: #selector(TitleCell.textFieldDidChange(_:)), for: .editingChanged)
+        view.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         view.placeholder = "Введите название трекера"
         view.translatesAutoresizingMaskIntoConstraints = false
         
         return view
     }()
 
-    //MARK: - Initialization
+    //MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
@@ -56,14 +56,14 @@ final class TitleCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configure(with title: String) {
-        titleTextField.text = title
+    func configure(with model: Tracker?) {
+        guard let model = model else { return }
+        titleTextField.text = model.name
     }
     
     // MARK: - Actions
     @objc
     private func textFieldDidChange(_ textField: UITextField) {
-        print(textField.text ?? "")
         delegate?.titleChanged(title: textField.text)
     }
     

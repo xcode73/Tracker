@@ -8,6 +8,7 @@
 import UIKit
 
 final class OnboardingCell: UICollectionViewCell {
+    static let reuseIdentifier = "OnboardingCell"
     // MARK: - UI Components
     private lazy var featureLabel: UILabel = {
         let view = UILabel()

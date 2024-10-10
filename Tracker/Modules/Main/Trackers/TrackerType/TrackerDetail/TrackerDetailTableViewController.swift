@@ -12,7 +12,7 @@ class TrackerDetailTableViewController: UITableViewController {
     // MARK: - Properties
     private var tracker: Tracker?
     private var trackerCategories: [TrackerCategory] = []
-    private var isRegular: Bool
+    private var isRegular: Bool?
     
     private var trackerSettings = [String]()
     private var titleSectionItems: [String]?
@@ -30,7 +30,7 @@ class TrackerDetailTableViewController: UITableViewController {
     )
     
     // MARK: - Initialization
-    init(tracker: Tracker?, isRegular: Bool) {
+    init(tracker: Tracker?, isRegular: Bool?) {
         self.tracker = tracker
         self.isRegular = isRegular
         super.init(nibName: nil, bundle: nil)
@@ -59,18 +59,28 @@ class TrackerDetailTableViewController: UITableViewController {
         
         titleSectionItems = data.titleSectionItems
         
-        if isRegular {
-            trackerSettings = ["Категория", "Расписание"]
-        } else {
-            trackerSettings = ["Категория"]
-        }
     }
     
     private func checkTracker() {
-        if tracker != nil {
-            title = "Редактирование привычки"
-        } else {
+        if tracker == nil {
             title = "Новая привычка"
+            tracker = Tracker(id: UUID(), name: "", color: "", emoji: "", schedule: nil, daysCompleted: nil)
+            
+            guard let isRegular else { return }
+            
+            if isRegular {
+                trackerSettings = ["Категория", "Расписание"]
+            } else {
+                trackerSettings = ["Категория"]
+            }
+        } else {
+            title = "Редактирование привычки"
+            let isRegular = tracker?.schedule == nil
+            if isRegular {
+                trackerSettings = ["Категория", "Расписание"]
+            } else {
+                trackerSettings = ["Категория"]
+            }
         }
     }
     
@@ -119,7 +129,7 @@ class TrackerDetailTableViewController: UITableViewController {
             switch indexPath.row {
                 case 0:
                     let cell = TitleCell()
-                    cell.configure(with: titleSectionItems?[indexPath.row] ?? "")
+                    cell.configure(with: tracker)
                     cell.delegate = self
                     return cell
                 case 1:
@@ -130,6 +140,10 @@ class TrackerDetailTableViewController: UITableViewController {
             }
         case 1:
             let cell = SettingsCell()
+            guard let isRegular = isRegular else {
+                return UITableViewCell()
+            }
+            
             cell.configure(with: trackerSettings[indexPath.row], isRegular: isRegular)
             return cell
         case 2:

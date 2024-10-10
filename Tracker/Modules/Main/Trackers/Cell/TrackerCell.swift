@@ -7,7 +7,16 @@
 
 import UIKit
 
-class TrackerCell: UICollectionViewCell {
+protocol TrackerCellDelegate: AnyObject {
+    func changeTrackerState(for tracker: Tracker, at indexPath: IndexPath)
+}
+
+final class TrackerCell: UICollectionViewCell {
+    weak var delegate: TrackerCellDelegate?
+    static let reuseIdentifier = "TrackerCell"
+    private var tracker: Tracker?
+    private var indexPath: IndexPath?
+    
     // MARK: - UI Components
     private lazy var verticalStackView: UIStackView = {
         let view = UIStackView()
@@ -73,18 +82,18 @@ class TrackerCell: UICollectionViewCell {
         return view
     }()
     
-    private var addButton: UIButton = {
+    private lazy var checkButton: UIButton = {
         let view = UIButton(type: .custom)
         view.layer.cornerRadius = 17
         view.tintColor = .ypWhite
-        view.addTarget(TrackerCell.self, action: #selector(didTapAddButton), for: .touchUpInside)
+        view.addTarget(self, action: #selector(didTapCheckButton), for: .touchUpInside)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     
     //MARK: - Init
     override init(frame: CGRect) {
-        super.init(frame: frame)
+        super.init(frame: .zero)
         
         setupUI()
     }
@@ -94,36 +103,44 @@ class TrackerCell: UICollectionViewCell {
     }
     
     //MARK: - Configuration
-    func configure(with model: Tracker) {
-        colorView.backgroundColor = model.color
-        addButton.backgroundColor = model.color
-        emojiLabel.text = model.emoji
-        titleLabel.text = model.name
-        if let dayCount = model.schedule?.count {
-            switch dayCount {
-            case 1:
-                dayLabel.text = "\(dayCount) день"
-            case 2...4:
-                dayLabel.text = "\(dayCount) дня"
-            case 7:
-                dayLabel.text = "Каждый день"
-            default:
-                dayLabel.text = "\(dayCount) дней"
-            }
-        } else {
-            dayLabel.text = "1 день"
+    func configure(
+        with trackerModel: Tracker,
+        recordModel: TrackerRecord?,
+        indexPath: IndexPath
+    ) {
+        guard let schedule = trackerModel.schedule else { return }
+        
+        self.tracker = trackerModel
+        self.indexPath = indexPath
+        
+        colorView.backgroundColor = UIColor(named: trackerModel.color)
+        checkButton.backgroundColor = UIColor(named: trackerModel.color)
+        emojiLabel.text = trackerModel.emoji
+        titleLabel.text = trackerModel.name
+        
+        let dayCount = schedule.count
+        switch dayCount {
+        case 1:
+            dayLabel.text = "\(dayCount) день"
+        case 2...4:
+            dayLabel.text = "\(dayCount) дня"
+        case 7:
+            dayLabel.text = "Каждый день"
+        default:
+            dayLabel.text = "\(dayCount) дней"
         }
-//        configureAddButton(isCompleted: isCompleted)
+        
+        if recordModel == nil {
+            checkButton.layer.opacity = 1
+            checkButton.setImage(UIImage(systemName: "plus"), for: .normal)
+        } else {
+            checkButton.layer.opacity = 0.3
+            checkButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+        }
     }
     
-    func configureAddButton(isCompleted: Bool) {
-        if isCompleted {
-            addButton.layer.opacity = 0.3
-            addButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-        } else {
-            addButton.layer.opacity = 1
-            addButton.setImage(UIImage(systemName: "plus"), for: .normal)
-        }
+    func configureSelectedView() -> UIView {
+        return colorView
     }
     
     //MARK: - Constraints
@@ -135,7 +152,7 @@ class TrackerCell: UICollectionViewCell {
         emojiBackgroundView.addSubview(emojiLabel)
         verticalStackView.addArrangedSubview(horizontalStackView)
         horizontalStackView.addArrangedSubview(dayLabel)
-        horizontalStackView.addArrangedSubview(addButton)
+        horizontalStackView.addArrangedSubview(checkButton)
         
         NSLayoutConstraint.activate([
             verticalStackView.widthAnchor.constraint(equalTo: contentView.widthAnchor),
@@ -158,14 +175,21 @@ class TrackerCell: UICollectionViewCell {
 
             dayLabel.widthAnchor.constraint(equalToConstant: 101),
             
-            addButton.widthAnchor.constraint(equalToConstant: 34),
-            addButton.heightAnchor.constraint(equalToConstant: 34),
+            checkButton.widthAnchor.constraint(equalToConstant: 34),
+            checkButton.heightAnchor.constraint(equalToConstant: 34),
         ])
     }
     
     // MARK: - Actions
-    @objc private func didTapAddButton() {
-        print("didTapAddButton")
+    @objc
+    private func didTapCheckButton() {
+        guard let tracker = tracker,
+              let indexPath = indexPath
+        else {
+            return
+        }
+        
+        delegate?.changeTrackerState(for: tracker, at: indexPath)
     }
 }
 
