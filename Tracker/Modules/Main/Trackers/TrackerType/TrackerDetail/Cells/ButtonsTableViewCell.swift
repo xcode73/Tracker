@@ -73,10 +73,12 @@ final class ButtonsTableViewCell: UITableViewCell {
 
 
 // MARK: - Preview
+#if DEBUG
 @available(iOS 17, *)
-#Preview() {
-    let navigationController = UINavigationController(rootViewController: TrackerDetailTableViewController(tracker: nil, isRegular: true))
+#Preview("Regular") {
+    let navigationController = UINavigationController(rootViewController: DetailTableViewController(tableType: .regular, categories: nil, currentDate: nil))
     navigationController.modalPresentationStyle = .pageSheet
     
     return navigationController
 }
+#endif

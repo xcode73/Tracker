@@ -36,6 +36,10 @@ enum WeekDay: Int, CaseIterable, Codable {
 
 // MARK: - CustomStringConvertible
 extension WeekDay: CustomStringConvertible {
+    var dateFromWeekDay: Date {
+        let cal = Calendar.current
+        return cal.date(from: DateComponents(weekday: self.rawValue))!
+    }
     var localizedName: String {
         let cal = Calendar.current
         guard cal.standaloneWeekdaySymbols.count == WeekDay.allCases.count else {

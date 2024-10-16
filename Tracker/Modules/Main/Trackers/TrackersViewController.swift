@@ -112,7 +112,6 @@ final class TrackersViewController: UIViewController {
         loadCompletedTrackers()
         
         currentDate = datePicker.date.truncated
-        print("Debug", "Current date", currentDate ?? "nil", separator: " -- ")
         
         filteredCategories = filterCategories(with: currentDate)
         
@@ -130,12 +129,21 @@ final class TrackersViewController: UIViewController {
         return categories.compactMap { category in
             // Фильтруем трекеры, которые имеют расписание на текущий день
             let filteredTrackers = category.trackers?.filter { tracker in
-                tracker.schedule?.contains(weekDay) == true
+                if tracker.isRegular {
+                    return tracker.schedule.contains(weekDay) == true
+                } else {
+                    if let trackerDate = tracker.schedule.first?.dateFromWeekDay {
+                        if trackerDate == date {
+                            return tracker.schedule.contains(WeekDay(date: trackerDate)) == true
+                        }
+                    }
+                    return false
+                }
             }
             
             // Если есть хотя бы один трекер с расписанием на текущий день, возвращаем новую категорию
             if let filteredTrackers = filteredTrackers, !filteredTrackers.isEmpty {
-                return TrackerCategory(title: category.title, trackers: filteredTrackers)
+                return TrackerCategory(id: category.id, title: category.title, trackers: filteredTrackers)
             } else {
                 return nil
             }
@@ -175,7 +183,8 @@ final class TrackersViewController: UIViewController {
         trackerStorage.categories = Mock.categories
         trackerStorage.saveCategories()
     }
-
+    
+    // MARK: - UI Setup
     func setupUI() {
         title = "Трекеры"
         setupNavigationBar()
@@ -188,13 +197,11 @@ final class TrackersViewController: UIViewController {
         }
     }
     
-    // MARK: - UI Setup
     private func setupNavigationBar() {
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationItem.leftBarButtonItem = addButton
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         navigationItem.searchController = UISearchController()
-        navigationItem.searchController?.searchBar.placeholder = "Поиск"
         
         NSLayoutConstraint.activate([
             datePicker.widthAnchor.constraint(equalToConstant: 95)
@@ -215,38 +222,71 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Actions
     private func showTrackerDetail(indexPath: IndexPath) {
-        guard let trackers = categories[indexPath.section].trackers else { return }
+        guard
+            let filtered = filteredCategories,
+            let trackers = filtered[indexPath.section].trackers
+        else { return }
         
+        let category = filtered[indexPath.section]
         let tracker = trackers[indexPath.item]
-        let navigationController = UINavigationController(rootViewController: TrackerDetailTableViewController(tracker: tracker, isRegular: true))
+        
+        // Count tracker records with tracker id
+        let completedTimes = completedTrackers.filter { $0.trackerId == tracker.id }.count
+        
+
+        let navigationController = UINavigationController(
+            rootViewController: DetailTableViewController(
+                tableType: .edit(
+                    tracker,
+                    category,
+                    completedTimes
+                ),
+                categories: categories,
+                currentDate: currentDate
+            )
+        )
         navigationController.modalPresentationStyle = .pageSheet
         
         present(navigationController, animated: true)
     }
     
     private func deleteTracker(at indexPath: IndexPath) {
-        guard let trackers = categories[indexPath.section].trackers else { return }
-
+        guard
+            let filtered = filteredCategories,
+            let trackers = filtered[indexPath.section].trackers
+        else { return }
+        
         let tracker = trackers[indexPath.item]
+        let trackerId = tracker.id
         
         categories = categories.map {
             var trackers = $0.trackers
-            if let index = trackers?.firstIndex(where: { $0.id == tracker.id }) {
+            
+            if let index = trackers?.firstIndex(where: { $0.id == trackerId }) {
                 trackers?.remove(at: index)
             }
-            return TrackerCategory(title: $0.title, trackers: trackers)
+            return TrackerCategory(id: $0.id, title: $0.title, trackers: trackers)
         }
-
         saveCategories()
         
-        collectionView.performBatchUpdates {
-            collectionView.deleteItems(at: [indexPath])
-        }
+        // remove from completed
+        completedTrackers = completedTrackers.filter { $0.trackerId == trackerId }
+        saveCompletedTrackers()
+        print("Debug", completedTrackers, separator: " -- ")
+        
+        filteredCategories = filterCategories(with: currentDate)
+        
+        collectionView.reloadData()
     }
     
     @objc
     private func didTapAddButton() {
-        let navigationController = UINavigationController(rootViewController: TrackerTypeViewController())
+        let navigationController = UINavigationController(
+            rootViewController: TrackerTypeViewController(
+                categories: categories,
+                currentDate: currentDate
+            )
+        )
         navigationController.modalPresentationStyle = .pageSheet
         
         present(navigationController, animated: true)
@@ -292,8 +332,7 @@ extension TrackersViewController: UICollectionViewDataSource {
      }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if let filteredCategories,
-           let trackers = filteredCategories[section].trackers {
+        if let filteredCategories, let trackers = filteredCategories[section].trackers {
             return trackers.count
         } else {
             return 0
@@ -314,18 +353,37 @@ extension TrackersViewController: UICollectionViewDataSource {
         let tracker = trackers[indexPath.row]
         
         // Debug
-        print(tracker)
+        print(
+            "\n=======================",
+            "Debug",
+            "cellForItemAt",
+            "Tracker",
+            tracker,
+            separator: "\n",
+            terminator: "\n======================="
+        )
         
         let trackerRecord = completedTrackers.first(where: {
-            $0.id == tracker.id && $0.date == currentDate
+            $0.trackerId == tracker.id && $0.date == currentDate
         })
+        
         // Debug
-        print(trackerRecord ?? "No record")
+        print(
+            "\n=======================",
+            "Debug",
+            "cellForItemAt",
+            "Tracker Record:",
+            trackerRecord ?? "No record",
+            separator: "\n",
+            terminator: "\n======================="
+        )
         
         cell.delegate = self
-        cell.configure(with: tracker,
-                       recordModel: trackerRecord,
-                       indexPath: indexPath)
+        cell.configure(
+            tracker: tracker,
+            record: trackerRecord,
+            indexPath: indexPath
+        )
         
         return cell
     }
@@ -344,7 +402,12 @@ extension TrackersViewController: UICollectionViewDataSource {
         }
         
         if let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: id, for: indexPath) as? TrackerHeaderReusableView {
-            guard let filteredCategories = filteredCategories else { return UICollectionReusableView() }
+            guard
+                let filteredCategories = filteredCategories
+            else {
+                return UICollectionReusableView()
+            }
+            
             let title = filteredCategories[indexPath.section].title
             view.configure(with: title)
             return view
@@ -445,65 +508,31 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 // MARK: - TrackerCellDelegate
 extension TrackersViewController: TrackerCellDelegate {
     /// Когда пользователь нажимает на + в ячейке трекера, добавляется соответствующая запись в completedTrackers. Если пользователь убирает пометку о выполненности в ячейке трекера, элемент удаляется из массива.
-    func changeTrackerState(for tracker: Tracker, at indexPath: IndexPath) {
+    func changeTrackerState(tracker: Tracker?, record: TrackerRecord?, indexPath: IndexPath?) {
         
-        guard let currentDate = currentDate, currentDate <= Date() else { return }
-
-        let trackerRecord = TrackerRecord(id: tracker.id, date: currentDate)
-        
-        var daysCounter = 0
-        if let daysCompleted = tracker.daysCompleted {
-            daysCounter = daysCompleted
+        guard
+            let currentDate = currentDate,
+                currentDate <= Date(),
+            let tracker = tracker,
+            let indexPath = indexPath
+        else {
+            return
         }
         
-        var newCategories: [TrackerCategory] = []
-        
-        if let completedTracker = completedTrackers.first(where: { $0.date == currentDate && $0.id == tracker.id && currentDate <= Date() }) {
-            completedTrackers.remove(completedTracker)
-            
-            // decreaseDayCount
-            daysCounter -= 1
-            let newTracker = Tracker(id: tracker.id, name: tracker.name, color: tracker.color, emoji: tracker.emoji, schedule: tracker.schedule, daysCompleted: daysCounter)
-            
-            for category in categories {
-                if let trackers = category.trackers {
-                    if let index = trackers.firstIndex(where: { $0.id == tracker.id }) {
-                        let newTrackers = trackers.map { $0.id == tracker.id ? newTracker : $0 }
-                        newCategories.insert(TrackerCategory(title: category.title, trackers: newTrackers), at: index)
-                    } else {
-                        newCategories.append(category)
-                    }
-                } else {
-                    newCategories.append(category)
-                }
-            }
-//            categories = newCategories
-            
+        if let record {
+            // remove record from completed
+            completedTrackers = completedTrackers.filter { $0.id != record.id }
         } else {
-            completedTrackers.insert(trackerRecord)
-
-            daysCounter += 1
-            let newTracker = Tracker(id: tracker.id, name: tracker.name, color: tracker.color, emoji: tracker.emoji, schedule: tracker.schedule, daysCompleted: daysCounter)
-            
-            // Скопировать содержимое categories в newCategories
-            // Заменить tracker на newTracker
-            for category in categories {
-                if let trackers = category.trackers {
-                    if let index = trackers.firstIndex(where: { $0.id == tracker.id }) {
-                        let newTrackers = trackers.map { $0.id == tracker.id ? newTracker : $0 }
-                        newCategories.insert(TrackerCategory(title: category.title, trackers: newTrackers), at: index)
-                    } else {
-                        newCategories.append(category)
-                    }
-                } else {
-                    newCategories.append(category)
-                }
-            }
-            
+            // add record to completed
+            completedTrackers.insert(
+                TrackerRecord(
+                    id: UUID(),
+                    trackerId: tracker.id,
+                    date: currentDate
+                )
+            )
         }
-        categories = newCategories
-        filteredCategories = filterCategories(with: currentDate)
-        saveCategories()
+        
         saveCompletedTrackers()
         
         collectionView.performBatchUpdates {

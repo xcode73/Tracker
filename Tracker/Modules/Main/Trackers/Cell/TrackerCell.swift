@@ -8,13 +8,14 @@
 import UIKit
 
 protocol TrackerCellDelegate: AnyObject {
-    func changeTrackerState(for tracker: Tracker, at indexPath: IndexPath)
+    func changeTrackerState(tracker: Tracker?, record: TrackerRecord?, indexPath: IndexPath?)
 }
 
 final class TrackerCell: UICollectionViewCell {
     weak var delegate: TrackerCellDelegate?
     static let reuseIdentifier = "TrackerCell"
     private var tracker: Tracker?
+    private var record: TrackerRecord?
     private var indexPath: IndexPath?
     
     // MARK: - UI Components
@@ -104,21 +105,20 @@ final class TrackerCell: UICollectionViewCell {
     
     //MARK: - Configuration
     func configure(
-        with trackerModel: Tracker,
-        recordModel: TrackerRecord?,
-        indexPath: IndexPath
+        tracker: Tracker,
+        record: TrackerRecord?,
+        indexPath: IndexPath?
     ) {
-        guard let schedule = trackerModel.schedule else { return }
-        
-        self.tracker = trackerModel
+        self.tracker = tracker
+        self.record = record
         self.indexPath = indexPath
         
-        colorView.backgroundColor = UIColor(named: trackerModel.color)
-        checkButton.backgroundColor = UIColor(named: trackerModel.color)
-        emojiLabel.text = trackerModel.emoji
-        titleLabel.text = trackerModel.name
+        colorView.backgroundColor = UIColor(named: tracker.color)
+        checkButton.backgroundColor = UIColor(named: tracker.color)
+        emojiLabel.text = tracker.emoji
+        titleLabel.text = tracker.title
         
-        let dayCount = schedule.count
+        let dayCount = tracker.schedule.count
         switch dayCount {
         case 1:
             dayLabel.text = "\(dayCount) день"
@@ -130,7 +130,7 @@ final class TrackerCell: UICollectionViewCell {
             dayLabel.text = "\(dayCount) дней"
         }
         
-        if recordModel == nil {
+        if record == nil {
             checkButton.layer.opacity = 1
             checkButton.setImage(UIImage(systemName: "plus"), for: .normal)
         } else {
@@ -183,13 +183,11 @@ final class TrackerCell: UICollectionViewCell {
     // MARK: - Actions
     @objc
     private func didTapCheckButton() {
-        guard let tracker = tracker,
-              let indexPath = indexPath
-        else {
-            return
-        }
-        
-        delegate?.changeTrackerState(for: tracker, at: indexPath)
+        delegate?.changeTrackerState(
+            tracker: tracker,
+            record: record,
+            indexPath: indexPath
+        )
     }
 }
 

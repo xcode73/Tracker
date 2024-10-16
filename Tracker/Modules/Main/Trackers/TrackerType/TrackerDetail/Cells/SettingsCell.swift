@@ -18,6 +18,7 @@ final class SettingsCell: UITableViewCell {
     private lazy var containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .ypBackground
+        view.layer.masksToBounds = true
         view.translatesAutoresizingMaskIntoConstraints = false
         
         return view
@@ -37,17 +38,16 @@ final class SettingsCell: UITableViewCell {
     private lazy var verticalStackView: UIStackView = {
         let view = UIStackView()
         view.axis = .vertical
-        view.distribution = .fillEqually
-
+        view.distribution = .fill
+        view.alignment = .leading
         view.translatesAutoresizingMaskIntoConstraints = false
-        
         
         return view
     }()
     
     private lazy var titleLabel: UILabel = {
         let view = UILabel()
-        view.font = .systemFont(ofSize: 17, weight: .regular)
+        view.font = Constants.Fonts.ypRegular17
         view.textColor = .ypBlack
         view.translatesAutoresizingMaskIntoConstraints = false
         
@@ -56,9 +56,8 @@ final class SettingsCell: UITableViewCell {
     
     private lazy var descriptionLabel: UILabel = {
         let view = UILabel()
-        view.font = .systemFont(ofSize: 17, weight: .regular)
+        view.font = Constants.Fonts.ypRegular17
         view.textColor = .ypGray
-        view.text = "Важное"
         view.translatesAutoresizingMaskIntoConstraints = false
         
         return view
@@ -66,9 +65,15 @@ final class SettingsCell: UITableViewCell {
     
     private lazy var disclosureIndicatorImageView: UIImageView = {
         let view = UIImageView()
-        view.image = UIImage(systemName: "chevron.right")
         view.tintColor = .ypGray
+        view.contentMode = .center
+        view.translatesAutoresizingMaskIntoConstraints = false
         
+        return view
+    }()
+    
+    private lazy var disclosureIndicatorSwitch: UISwitch = {
+        let view = UISwitch()
         view.translatesAutoresizingMaskIntoConstraints = false
         
         return view
@@ -93,30 +98,103 @@ final class SettingsCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configure(with trackerSettings: String, isRegular: Bool) {
-        titleLabel.text = trackerSettings
-        switch trackerSettings {
-        case "Категория":
-            addDescriptionLabel()
-            containerView.layer.masksToBounds = true
+    // MARK: - Configuration
+//    func configureForCategory(category: String, selected: Bool?) {
+//        titleLabel.text = category
+//        disclosureIndicatorImageView.image = UIImage(systemName: "checkmark")
+//        
+//        if let selected = selected {
+//            if selected {
+//                disclosureIndicatorImageView.tintColor = .ypBlue
+//            }
+//        }
+//    }
+    
+    func configure(
+        itemTitle: String,
+        cellPosition: CellPosition,
+        category: TrackerCategory?,
+        tracker: Tracker?,
+        indexPath: IndexPath,
+        cellType: TableCellType,
+        selected: Bool?
+    ) {
+        titleLabel.text = itemTitle
+        
+        switch cellPosition {
+        case .first:
             containerView.layer.cornerRadius = 16
             containerView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-            if isRegular {
-                addSeparatorView()
-            }
-        case "Расписание":
-            containerView.layer.masksToBounds = true
+            separatorView.isHidden = false
+        case .single:
+            containerView.layer.cornerRadius = 16
+            separatorView.isHidden = true
+        case .last:
             containerView.layer.cornerRadius = 16
             containerView.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
             separatorView.isHidden = true
-        default:
-            break
+        case .regular:
+            separatorView.isHidden = false
+        }
+        
+        switch cellType {
+        case .chevron:
+            addImageViewDisclosureIndicator()
+            disclosureIndicatorImageView.image = UIImage(systemName: "chevron.right")
+            
+            if indexPath.row == 0 {
+                if let category = category {
+                    descriptionLabel.text = category.title
+                }
+            }
+            
+            if indexPath.row == 1 {
+                if let tracker = tracker {
+                    var schedule = ""
+                    for day in tracker.schedule {
+                        schedule += day.localizedShortName
+                        if day != tracker.schedule.last {
+                            schedule += ", "
+                        }
+                    }
+                    descriptionLabel.text = schedule
+                }
+            }
+        case .checkmark:
+            if let selected = selected {
+                if selected {
+                    disclosureIndicatorImageView.image = UIImage(systemName: "checkmark")
+                    disclosureIndicatorImageView.tintColor = .ypBlue
+                    addImageViewDisclosureIndicator()
+                }
+            }
+        case .`switch`:
+            addSwitchDisclosureIndicator()
+            disclosureIndicatorImageView.isHidden = true
+            disclosureIndicatorSwitch.isHidden = false
         }
     }
     
     // MARK: - Constraints
-    private func addDescriptionLabel() {
+    private func setupViews() {
+        selectionStyle = .none
+        contentView.addSubview(containerView)
+        containerView.addSubview(horizontalStackView)
+        addSeparatorView()
+        horizontalStackView.addArrangedSubview(verticalStackView)
+        verticalStackView.addArrangedSubview(titleLabel)
         verticalStackView.addArrangedSubview(descriptionLabel)
+        
+        NSLayoutConstraint.activate([
+            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+            containerView.heightAnchor.constraint(equalToConstant: 75),
+            
+            horizontalStackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
+            horizontalStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
+            horizontalStackView.heightAnchor.constraint(equalToConstant: 46),
+            horizontalStackView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor)
+        ])
     }
     
     private func addSeparatorView() {
@@ -130,35 +208,65 @@ final class SettingsCell: UITableViewCell {
         ])
     }
     
-    private func setupViews() {
-        selectionStyle = .none
-        contentView.addSubview(containerView)
-        containerView.addSubview(horizontalStackView)
-        horizontalStackView.addArrangedSubview(verticalStackView)
+    private func addSwitchDisclosureIndicator() {
+        horizontalStackView.addArrangedSubview(disclosureIndicatorSwitch)
+    }
+    
+    private func addImageViewDisclosureIndicator() {
         horizontalStackView.addArrangedSubview(disclosureIndicatorImageView)
-        verticalStackView.addArrangedSubview(titleLabel)
         
         NSLayoutConstraint.activate([
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            containerView.heightAnchor.constraint(equalToConstant: 75),
-            
-            horizontalStackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
-            horizontalStackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
-            horizontalStackView.heightAnchor.constraint(equalToConstant: 46),
-            horizontalStackView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
-            
-            disclosureIndicatorImageView.widthAnchor.constraint(equalToConstant: 10),
-            disclosureIndicatorImageView.heightAnchor.constraint(equalToConstant: 17),
+            disclosureIndicatorImageView.widthAnchor.constraint(equalToConstant: 24),
+            disclosureIndicatorImageView.heightAnchor.constraint(equalToConstant: 24)
         ])
     }
+    
 }
 
 // MARK: - Preview
-@available(iOS 17, *)
-#Preview() {
-    let navigationController = UINavigationController(rootViewController: TrackerDetailTableViewController(tracker: nil, isRegular: true))
-    navigationController.modalPresentationStyle = .pageSheet
-    
-    return navigationController
-}
+//#if DEBUG
+//@available(iOS 17, *)
+//#Preview("Special") {
+//    let navigationController = UINavigationController(rootViewController: DetailTableViewController(tableType: .special, currentDate: nil))
+//    navigationController.modalPresentationStyle = .pageSheet
+//    
+//    return navigationController
+//}
+//
+//@available(iOS 17, *)
+//#Preview("Regular") {
+//    let navigationController = UINavigationController(rootViewController: DetailTableViewController(tableType: .regular, currentDate: nil))
+//    navigationController.modalPresentationStyle = .pageSheet
+//    
+//    return navigationController
+//}
+
+//@available(iOS 17, *)
+//#Preview("Edit") {
+//    let category = TrackerCategory(id: UUID(), title: "Foo", trackers: [
+//        Tracker(
+//            id: UUID(),
+//            title: "Lorem ipsum dolor sit amet, consetetur",
+//            color: Constants.selectionColors[4],
+//            emoji: Constants.emojis[0],
+//            schedule: [WeekDay.tuesday, WeekDay.friday],
+//            daysCompleted: 1,
+//            isRegular: true
+//        )
+//    ])
+//    let tracker = category.trackers![0]
+//    let navigationController = UINavigationController(rootViewController: DetailTableViewController(tableType: .edit(tracker, category), currentDate: nil))
+//    navigationController.modalPresentationStyle = .pageSheet
+//    
+//    return navigationController
+//}
+//
+//@available(iOS 17, *)
+//#Preview("Categories") {
+//    let category = TrackerCategory(id: UUID(), title: "Foo", trackers: [])
+//    let navigationController = UINavigationController(rootViewController: DetailTableViewController(tableType: .categories(category), currentDate: nil))
+//    navigationController.modalPresentationStyle = .pageSheet
+//    
+//    return navigationController
+//}
+//#endif

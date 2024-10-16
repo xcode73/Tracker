@@ -8,6 +8,8 @@
 import UIKit
 
 class TrackerTypeViewController: UIViewController {
+    private var currentDate: Date?
+    private var categories: [TrackerCategory]?
     
     // MARK: - UI Components
     private lazy var buttonsStackView: UIStackView = {
@@ -40,6 +42,21 @@ class TrackerTypeViewController: UIViewController {
         return button
     }()
     
+    // MARK: - Init
+    init(
+        categories: [TrackerCategory]?,
+        currentDate: Date?
+    ) {
+        self.categories = categories
+        self.currentDate = currentDate
+        
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,7 +67,13 @@ class TrackerTypeViewController: UIViewController {
     // MARK: - Actions
     @objc
     private func didTapRegularButton() {
-        let navigationController = UINavigationController(rootViewController: TrackerDetailTableViewController(tracker: nil, isRegular: true))
+        let navigationController = UINavigationController(
+            rootViewController: DetailTableViewController(
+                tableType: .regular,
+                categories: categories,
+                currentDate: currentDate
+            )
+        )
         navigationController.modalPresentationStyle = .pageSheet
         
         present(navigationController, animated: true)
@@ -58,7 +81,13 @@ class TrackerTypeViewController: UIViewController {
     
     @objc
     private func didTapNonRegularButton() {
-        let navigationController = UINavigationController(rootViewController: TrackerDetailTableViewController(tracker: nil, isRegular: false))
+        let navigationController = UINavigationController(
+            rootViewController: DetailTableViewController(
+                tableType: .special,
+                categories: categories,
+                currentDate: currentDate
+            )
+        )
         navigationController.modalPresentationStyle = .pageSheet
         
         present(navigationController, animated: true)
@@ -85,7 +114,7 @@ class TrackerTypeViewController: UIViewController {
 // MARK: - Preview
 @available(iOS 17, *)
 #Preview() {
-    let viewController = TrackerTypeViewController()
+    let viewController = TrackerTypeViewController(categories: nil, currentDate: nil)
     let navigationController = UINavigationController(rootViewController: viewController)
     navigationController.modalPresentationStyle = .pageSheet
     

@@ -39,7 +39,7 @@ final class TitleCell: UITableViewCell {
         view.delegate = self
 
         view.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-        view.placeholder = "Введите название трекера"
+//        view.placeholder = "Введите название трекера"
         view.translatesAutoresizingMaskIntoConstraints = false
         
         return view
@@ -56,9 +56,12 @@ final class TitleCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configure(with model: Tracker?) {
-        guard let model = model else { return }
-        titleTextField.text = model.name
+    // MARK: - Configuration
+    func configure(with title: String?, placeholder: String) {
+        titleTextField.placeholder = "Введите название трекера"
+        
+        guard let title else { return }
+        titleTextField.text = title
     }
     
     // MARK: - Actions
@@ -66,7 +69,6 @@ final class TitleCell: UITableViewCell {
     private func textFieldDidChange(_ textField: UITextField) {
         delegate?.titleChanged(title: textField.text)
     }
-    
     
     // MARK: - Setup
     func setupViews() {
@@ -107,10 +109,12 @@ extension TitleCell: UITextFieldDelegate {
 }
 
 // MARK: - Preview
+#if DEBUG
 @available(iOS 17, *)
-#Preview() {
-    let navigationController = UINavigationController(rootViewController: TrackerDetailTableViewController(tracker: nil, isRegular: true))
+#Preview("Regular") {
+    let navigationController = UINavigationController(rootViewController: DetailTableViewController(tableType: .regular, categories: nil, currentDate: nil))
     navigationController.modalPresentationStyle = .pageSheet
     
     return navigationController
 }
+#endif
