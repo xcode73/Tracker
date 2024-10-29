@@ -10,7 +10,7 @@ import Foundation
 struct TrackerCategory: Codable, Identifiable {
     let id: UUID
     let title: String
-    let trackers: [Tracker]?
+    let trackers: [Tracker]
 }
 
 struct Tracker: Codable, Identifiable {
@@ -18,8 +18,8 @@ struct Tracker: Codable, Identifiable {
     let title: String
     let color: String
     let emoji: String
-    let schedule: [WeekDay]
-    let isRegular: Bool
+    let schedule: [WeekDay]?
+    let date: Date?
 }
 
 /// сущность для хранения записи о том, что некий трекер был выполнен на некоторую дату;

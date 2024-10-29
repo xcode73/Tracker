@@ -8,7 +8,13 @@
 import UIKit
 
 enum Constants {
-    static let weekDays: [WeekDay] = WeekDay.allCases
+    enum ButtonTitles {
+        static let pin = "Закрепить"
+        static let edit = "Редактировать"
+        static let delete = "Удалить"
+    }
+    
+    static let weekDays: [WeekDay] = WeekDay.ordered()
     
     static let emojis: [String] = [
         "🙂", "😻", "🌺", "🐶","❤️", "😱", "😇", "😡","🥶",

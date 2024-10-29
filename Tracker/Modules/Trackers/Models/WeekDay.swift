@@ -17,13 +17,11 @@ enum WeekDay: Int, CaseIterable, Codable {
     case saturday = 7
     
     // MARK: - Public Type Properties
-    
     static var today: WeekDay {
         return WeekDay()
     }
     
     // MARK: - Setup
-    
     init(date: Date = Date()) {
         let cal = Calendar.current
         let weekDay = cal.component(.weekday, from: date)

@@ -8,7 +8,7 @@
 import UIKit
 
 final class TabBarController: UITabBarController {
-    private enum Titles {
+    private enum LocalConst {
         static let trackers = "Трекеры"
         static let statistic = "Статистика"
     }
@@ -16,20 +16,18 @@ final class TabBarController: UITabBarController {
     // MARK: - UI Components
     private lazy var trackersTabBarItem: UITabBarItem = {
         let view = UITabBarItem()
-        view.title = Titles.trackers
+        view.title = LocalConst.trackers
         view.image = .icTrackers
         view.selectedImage = nil
-        view.accessibilityIdentifier = "Trackers Tab"
         
         return view
     }()
     
     private lazy var statisticsTabBarItem: UITabBarItem = {
         let view = UITabBarItem()
-        view.title = Titles.statistic
+        view.title = LocalConst.statistic
         view.image = .icStats
         view.selectedImage = nil
-        view.accessibilityIdentifier = "Statistics Tab"
         
         return view
     }()
@@ -39,19 +37,26 @@ final class TabBarController: UITabBarController {
         super.viewDidLoad()
         
         setupTabs()
+        //Set the background color
+        UITabBar.appearance().backgroundColor = .ypWhite
+        tabBar.isTranslucent = false
     }
     
     private func setupTabs() {
         // Trackers Tab
-        let trackerViewController = TrackersViewController()
-        trackerViewController.title = Titles.trackers
-        let trackerNavigationController = UINavigationController(rootViewController: trackerViewController)
+        let trackersViewController = TrackersViewController()
+        trackersViewController.title = LocalConst.trackers
+        let trackerNavigationController = UINavigationController(rootViewController: trackersViewController)
+
+        
         trackerNavigationController.navigationBar.prefersLargeTitles = true
-        trackerViewController.tabBarItem = trackersTabBarItem
+        trackerNavigationController.navigationItem.largeTitleDisplayMode = .always
+        
+        trackersViewController.tabBarItem = trackersTabBarItem
         
         // Statistic Tab
         let statisticViewController = StatisticViewController()
-        statisticViewController.title = Titles.statistic
+        statisticViewController.title = LocalConst.statistic
         let statNavigationController = UINavigationController(rootViewController: statisticViewController)
         statNavigationController.navigationBar.prefersLargeTitles = true
         statNavigationController.tabBarItem = statisticsTabBarItem

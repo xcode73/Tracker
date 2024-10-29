@@ -7,9 +7,14 @@
 
 import UIKit
 
-class TrackerTypeViewController: UIViewController {
-    private var currentDate: Date?
-    private var categories: [TrackerCategory]?
+protocol TrackerTypeViewControllerDelegate: AnyObject {
+    func didUpdateCategories(categories: [TrackerCategory])
+}
+
+final class TrackerTypeViewController: UIViewController {
+    weak var delegate: TrackerTypeViewControllerDelegate?
+    private var currentDate: Date
+    private var categories: [TrackerCategory]
     
     // MARK: - UI Components
     private lazy var buttonsStackView: UIStackView = {
@@ -44,8 +49,8 @@ class TrackerTypeViewController: UIViewController {
     
     // MARK: - Init
     init(
-        categories: [TrackerCategory]?,
-        currentDate: Date?
+        categories: [TrackerCategory],
+        currentDate: Date
     ) {
         self.categories = categories
         self.currentDate = currentDate
@@ -64,29 +69,31 @@ class TrackerTypeViewController: UIViewController {
         setupUI()
     }
     
+    
     // MARK: - Actions
     @objc
     private func didTapRegularButton() {
+        let vc = TrackerTableViewController(
+            tableType: .regular,
+            categories: categories
+        )
+        vc.delegate = self
         let navigationController = UINavigationController(
-            rootViewController: DetailTableViewController(
-                tableType: .regular,
-                categories: categories,
-                currentDate: currentDate
-            )
+            rootViewController: vc
         )
         navigationController.modalPresentationStyle = .pageSheet
-        
         present(navigationController, animated: true)
     }
     
     @objc
     private func didTapNonRegularButton() {
+        let vc = TrackerTableViewController(
+            tableType: .special(currentDate),
+            categories: categories
+        )
+        vc.delegate = self
         let navigationController = UINavigationController(
-            rootViewController: DetailTableViewController(
-                tableType: .special,
-                categories: categories,
-                currentDate: currentDate
-            )
+            rootViewController: vc
         )
         navigationController.modalPresentationStyle = .pageSheet
         
@@ -111,12 +118,24 @@ class TrackerTypeViewController: UIViewController {
     }
 }
 
+extension TrackerTypeViewController: TrackerTableViewControllerDelegate {
+    func didTapDoneButton(categories: [TrackerCategory]) {
+        
+        print(delegate ?? "delegate is nil")
+
+        dismiss(animated: true)
+        delegate?.didUpdateCategories(categories: categories)
+    }
+}
+
 // MARK: - Preview
+#if DEBUG
 @available(iOS 17, *)
 #Preview() {
-    let viewController = TrackerTypeViewController(categories: nil, currentDate: nil)
+    let viewController = TrackerTypeViewController(categories: [], currentDate: Date())
     let navigationController = UINavigationController(rootViewController: viewController)
     navigationController.modalPresentationStyle = .pageSheet
     
     return navigationController
 }
+#endif

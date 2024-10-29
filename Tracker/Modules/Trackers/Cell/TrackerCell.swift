@@ -118,16 +118,20 @@ final class TrackerCell: UICollectionViewCell {
         emojiLabel.text = tracker.emoji
         titleLabel.text = tracker.title
         
-        let dayCount = tracker.schedule.count
-        switch dayCount {
-        case 1:
-            dayLabel.text = "\(dayCount) день"
-        case 2...4:
-            dayLabel.text = "\(dayCount) дня"
-        case 7:
-            dayLabel.text = "Каждый день"
-        default:
-            dayLabel.text = "\(dayCount) дней"
+        if let trackerSchedule = tracker.schedule {
+            let dayCount = trackerSchedule.count
+            switch dayCount {
+            case 1:
+                dayLabel.text = "\(dayCount) день"
+            case 2...4:
+                dayLabel.text = "\(dayCount) дня"
+            case 7:
+                dayLabel.text = "Каждый день"
+            default:
+                dayLabel.text = "\(dayCount) дней"
+            }
+        } else {
+            dayLabel.text = "1 день"
         }
         
         if record == nil {

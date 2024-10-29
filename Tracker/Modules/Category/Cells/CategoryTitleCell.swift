@@ -1,18 +1,19 @@
 //
-//  SearchTableViewCell.swift
+//  CategoryTitleCell.swift
 //  Tracker
 //
-//  Created by Nikolai Eremenko on 27.09.2024.
+//  Created by Nikolai Eremenko on 17.10.2024.
 //
 
 import UIKit
 
-protocol TitleCellDelegate: AnyObject {
-    func titleChanged(title: String?)
+protocol CategoryTitleCellDelegate: AnyObject {
+    func titleChanged(title: String)
 }
 
-final class TitleCell: UITableViewCell {
-    weak var delegate: TitleCellDelegate?
+final class CategoryTitleCell: UITableViewCell {
+    // MARK: - Properties
+    weak var delegate: CategoryTitleCellDelegate?
     
     // MARK: - UI Components
     private lazy var containerView: UIView = {
@@ -39,40 +40,56 @@ final class TitleCell: UITableViewCell {
         view.delegate = self
 
         view.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-//        view.placeholder = "Введите название трекера"
         view.translatesAutoresizingMaskIntoConstraints = false
         
         return view
     }()
-
+    
     //MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-        setupViews()
+        setupUI()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        // Initialization code
+    }
+
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+
+        // Configure the view for the selected state
+    }
+    
     // MARK: - Configuration
     func configure(with title: String?, placeholder: String) {
-        titleTextField.placeholder = "Введите название трекера"
+        titleTextField.placeholder = placeholder
         
         guard let title else { return }
         titleTextField.text = title
     }
     
+    // MARK: - Setup UI
+    private func setupUI() {
+        selectionStyle = .none
+        addViews()
+    }
+    
     // MARK: - Actions
     @objc
     private func textFieldDidChange(_ textField: UITextField) {
-        delegate?.titleChanged(title: textField.text)
+        guard let text = textField.text else { return }
+        delegate?.titleChanged(title: text)
     }
     
-    // MARK: - Setup
-    func setupViews() {
-        selectionStyle = .none
+    // MARK: - Constraints
+    func addViews() {
         contentView.addSubview(titleView)
         titleView.addSubview(titleTextField)
         
@@ -91,16 +108,19 @@ final class TitleCell: UITableViewCell {
 }
 
 // MARK: - UITextFieldDelegate
-extension TitleCell: UITextFieldDelegate {
+extension CategoryTitleCell: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        let currentText = textField.text ?? ""
-        
-        guard let stringRange = Range(range, in: currentText) else { return false }
+        guard
+            let currentText =  textField.text,
+            let stringRange = Range(range, in: currentText)
+        else {
+            return false
+        }
         
         let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
         
@@ -111,8 +131,22 @@ extension TitleCell: UITextFieldDelegate {
 // MARK: - Preview
 #if DEBUG
 @available(iOS 17, *)
-#Preview("Regular") {
-    let navigationController = UINavigationController(rootViewController: DetailTableViewController(tableType: .regular, categories: nil, currentDate: nil))
+#Preview("Add Category") {
+    let navigationController = UINavigationController(
+        rootViewController: CategoryViewController(categoryTitle: nil, indexPath: nil)
+    )
+    navigationController.modalPresentationStyle = .pageSheet
+    
+    return navigationController
+}
+
+@available(iOS 17, *)
+#Preview("Edit Category") {
+    let categoryTitle = "Foo"
+    let indexPath = IndexPath(row: 0, section: 0)
+    let navigationController = UINavigationController(
+        rootViewController: CategoryViewController(categoryTitle: categoryTitle, indexPath: indexPath)
+    )
     navigationController.modalPresentationStyle = .pageSheet
     
     return navigationController
