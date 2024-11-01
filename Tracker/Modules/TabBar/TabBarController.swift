@@ -32,14 +32,31 @@ final class TabBarController: UITabBarController {
         return view
     }()
     
+    private lazy var topBorderView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .ypGray
+        
+        return view
+    }()
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupTabBar()
         setupTabs()
-        //Set the background color
-        UITabBar.appearance().backgroundColor = .ypWhite
-        tabBar.isTranslucent = false
+    }
+    
+    private func setupTabBar() {
+        let appearance = self.tabBar.standardAppearance
+        appearance.shadowImage = nil
+        appearance.shadowColor = nil
+        appearance.backgroundEffect = nil
+        appearance.backgroundColor = .ypWhite
+        self.tabBar.standardAppearance = appearance
+        
+        self.tabBar.layer.borderColor = UIColor.ypGray.cgColor
+        self.tabBar.layer.borderWidth = 1
     }
     
     private func setupTabs() {
@@ -66,8 +83,9 @@ final class TabBarController: UITabBarController {
 }
 
 // MARK: - Preview
+#if DEBUG
 @available(iOS 17, *)
 #Preview("TabController") {
     TabBarController()
 }
-
+#endif

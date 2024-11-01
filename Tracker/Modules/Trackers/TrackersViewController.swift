@@ -104,19 +104,15 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
         
         // Debug
-        addMockData()
+//        addMockData()
         
         loadCategories()
         
         // Debug: clear tracker records
-        completedTrackers = []
-        saveCompletedTrackers()
+//        completedTrackers = []
+//        saveCompletedTrackers()
         
         loadCompletedTrackers()
-        
-        if let truncatedDate = datePicker.date.truncated {
-            currentDate = truncatedDate
-        }
         
         filteredCategories = filterCategories(with: currentDate)
         
