@@ -104,13 +104,13 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
         
         // Debug
-//        addMockData()
+        addMockData()
         
         loadCategories()
         
         // Debug: clear tracker records
-//        completedTrackers = []
-//        saveCompletedTrackers()
+        completedTrackers = []
+        saveCompletedTrackers()
         
         loadCompletedTrackers()
         
@@ -369,10 +369,13 @@ extension TrackersViewController: UICollectionViewDataSource {
             $0.trackerId == tracker.id && $0.date == currentDate
         })
         
+        let completedCount = completedTrackers.filter { $0.trackerId == tracker.id }.count
+        
         cell.delegate = self
         cell.configure(
             tracker: tracker,
             record: trackerRecord,
+            completedCount: completedCount,
             indexPath: indexPath
         )
         

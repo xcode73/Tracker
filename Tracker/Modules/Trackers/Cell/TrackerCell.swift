@@ -51,7 +51,7 @@ final class TrackerCell: UICollectionViewCell {
     
     private lazy var emojiLabel: UILabel = {
         let view = UILabel()
-        view.font = .systemFont(ofSize: 12, weight: .regular)
+        view.font = Constants.Fonts.ypRegular12
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -67,7 +67,7 @@ final class TrackerCell: UICollectionViewCell {
     
     private lazy var titleLabel: UILabel = {
         let view = UILabel()
-        view.font = .systemFont(ofSize: 12, weight: .medium)
+        view.font = Constants.Fonts.ypMedium12
         view.numberOfLines = 0
         view.lineBreakMode = .byWordWrapping
         view.textColor = .ypWhite
@@ -75,9 +75,9 @@ final class TrackerCell: UICollectionViewCell {
         return view
     }()
     
-    private lazy var dayLabel: UILabel = {
+    private lazy var daysCompletedLabel: UILabel = {
         let view = UILabel()
-        view.font = .systemFont(ofSize: 12, weight: .medium)
+        view.font = Constants.Fonts.ypMedium12
         view.textColor = .ypBlack
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -107,6 +107,7 @@ final class TrackerCell: UICollectionViewCell {
     func configure(
         tracker: Tracker,
         record: TrackerRecord?,
+        completedCount: Int,
         indexPath: IndexPath?
     ) {
         self.tracker = tracker
@@ -118,21 +119,21 @@ final class TrackerCell: UICollectionViewCell {
         emojiLabel.text = tracker.emoji
         titleLabel.text = tracker.title
         
-        if let trackerSchedule = tracker.schedule {
-            let dayCount = trackerSchedule.count
-            switch dayCount {
-            case 1:
-                dayLabel.text = "\(dayCount) день"
-            case 2...4:
-                dayLabel.text = "\(dayCount) дня"
-            case 7:
-                dayLabel.text = "Каждый день"
-            default:
-                dayLabel.text = "\(dayCount) дней"
-            }
-        } else {
-            dayLabel.text = "1 день"
+        var title: String
+        let lastDigit = completedCount % 10
+        
+        switch lastDigit {
+        case 1:
+            title = "день"
+        case 2, 3, 4:
+            title = "дня"
+        case 5, 6, 7, 8, 9, 0:
+            title = "дней"
+        default:
+            title = "дней"
         }
+        
+        daysCompletedLabel.text = "\(completedCount) " + title
         
         if record == nil {
             checkButton.layer.opacity = 1
@@ -155,7 +156,7 @@ final class TrackerCell: UICollectionViewCell {
         colorView.addSubview(titleLabel)
         emojiBackgroundView.addSubview(emojiLabel)
         verticalStackView.addArrangedSubview(horizontalStackView)
-        horizontalStackView.addArrangedSubview(dayLabel)
+        horizontalStackView.addArrangedSubview(daysCompletedLabel)
         horizontalStackView.addArrangedSubview(checkButton)
         
         NSLayoutConstraint.activate([
@@ -177,7 +178,7 @@ final class TrackerCell: UICollectionViewCell {
             titleLabel.trailingAnchor.constraint(equalTo: colorView.trailingAnchor, constant: -12),
             titleLabel.bottomAnchor.constraint(equalTo: colorView.bottomAnchor, constant: -12),
 
-            dayLabel.widthAnchor.constraint(equalToConstant: 101),
+            daysCompletedLabel.widthAnchor.constraint(equalToConstant: 101),
             
             checkButton.widthAnchor.constraint(equalToConstant: 34),
             checkButton.heightAnchor.constraint(equalToConstant: 34),
