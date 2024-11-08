@@ -57,6 +57,7 @@ class ScheduleCell: UITableViewCell {
     private lazy var disclosureIndicatorSwitch: UISwitch = {
         let view = UISwitch()
         view.isOn = false
+        view.onTintColor = .ypBlue
         view.addTarget(self, action: #selector(didTapSwitch), for: .touchUpInside)
         view.translatesAutoresizingMaskIntoConstraints = false
         
