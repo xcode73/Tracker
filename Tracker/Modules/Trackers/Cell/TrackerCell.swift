@@ -107,7 +107,7 @@ final class TrackerCell: UICollectionViewCell {
     func configure(
         tracker: Tracker,
         record: TrackerRecord?,
-        completedCount: Int,
+        completedTitle: String,
         indexPath: IndexPath?
     ) {
         self.tracker = tracker
@@ -118,22 +118,7 @@ final class TrackerCell: UICollectionViewCell {
         checkButton.backgroundColor = UIColor(named: tracker.color)
         emojiLabel.text = tracker.emoji
         titleLabel.text = tracker.title
-        
-        var title: String
-        let lastDigit = completedCount % 10
-        
-        switch lastDigit {
-        case 1:
-            title = "день"
-        case 2, 3, 4:
-            title = "дня"
-        case 5, 6, 7, 8, 9, 0:
-            title = "дней"
-        default:
-            title = "дней"
-        }
-        
-        daysCompletedLabel.text = "\(completedCount) " + title
+        daysCompletedLabel.text = completedTitle
         
         if record == nil {
             checkButton.layer.opacity = 1

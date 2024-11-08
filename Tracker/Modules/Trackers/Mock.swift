@@ -15,35 +15,31 @@ enum Mock {
             trackers: [
                 Tracker(
                     id: UUID(),
-                    title: "Special21",
+                    title: "Special15",
                     color: Constants.selectionColors[4],
                     emoji: Constants.emojis[0],
-                    schedule: nil,
-                    date: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 21))
+                    schedule: Schedule(type: .special(Calendar.current.date(from: DateComponents(year: 2024, month: 11, day: 15))!))
                 ),
                 Tracker(
                     id: UUID(),
                     title: "Bar",
                     color: Constants.selectionColors[5],
                     emoji: Constants.emojis[9],
-                    schedule: [WeekDay.friday, WeekDay.saturday],
-                    date: nil
+                    schedule: Schedule(type: .regular([WeekDay.friday, WeekDay.saturday]))
                 ),
                 Tracker(
                     id: UUID(),
-                    title: "Special22",
+                    title: "Special14",
                     color: Constants.selectionColors[4],
                     emoji: Constants.emojis[0],
-                    schedule: nil,
-                    date: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 22))
+                    schedule: Schedule(type: .special(Calendar.current.date(from: DateComponents(year: 2024, month: 11, day: 14))!))
                 ),
                 Tracker(
                     id: UUID(),
-                    title: "Special23",
+                    title: "Special13",
                     color: Constants.selectionColors[4],
                     emoji: Constants.emojis[0],
-                    schedule: nil,
-                    date: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 23))
+                    schedule: Schedule(type: .special(Calendar.current.date(from: DateComponents(year: 2024, month: 11, day: 13))!))
                 ),
             ]
         ),
@@ -56,32 +52,28 @@ enum Mock {
                     title: "Quux",
                     color: Constants.selectionColors[2],
                     emoji: Constants.emojis[1],
-                    schedule: [WeekDay.tuesday, WeekDay.friday, WeekDay.saturday],
-                    date: nil
+                    schedule: Schedule(type: .regular([WeekDay.tuesday, WeekDay.friday, WeekDay.saturday]))
                 ),
                 Tracker(
                     id: UUID(),
                     title: "Foo",
                     color: Constants.selectionColors[8],
                     emoji: Constants.emojis[3],
-                    schedule: [WeekDay.monday, WeekDay.tuesday, WeekDay.wednesday, WeekDay.thursday, WeekDay.friday, WeekDay.saturday],
-                    date: nil
+                    schedule: Schedule(type: .regular([WeekDay.monday, WeekDay.tuesday, WeekDay.wednesday, WeekDay.thursday, WeekDay.friday, WeekDay.saturday]))
                 ),
                 Tracker(
                     id: UUID(),
                     title: "Quuuuuuuuuuuux",
                     color: Constants.selectionColors[2],
                     emoji: Constants.emojis[1],
-                    schedule: [WeekDay.tuesday, WeekDay.friday, WeekDay.saturday],
-                    date: nil
+                    schedule: Schedule(type: .regular([WeekDay.tuesday, WeekDay.friday, WeekDay.saturday]))
                 ),
                 Tracker(
                     id: UUID(),
-                    title: "Special24",
+                    title: "Special12",
                     color: Constants.selectionColors[4],
                     emoji: Constants.emojis[0],
-                    schedule: nil,
-                    date: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 24))
+                    schedule: Schedule(type: .special(Calendar.current.date(from: DateComponents(year: 2024, month: 11, day: 12))!))
                 ),
             ]
         ),
@@ -94,48 +86,42 @@ enum Mock {
                     title: "Foo",
                     color: Constants.selectionColors[10],
                     emoji: Constants.emojis[11],
-                    schedule: [WeekDay.monday],
-                    date: nil
+                    schedule: Schedule(type: .regular([WeekDay.monday]))
                 ),
                 Tracker(
                     id: UUID(),
-                    title: "Bar",
+                    title: "Special11",
                     color: Constants.selectionColors[7],
                     emoji: Constants.emojis[5],
-                    schedule: nil,
-                    date: Date()
+                    schedule: Schedule(type: .special(Calendar.current.date(from: DateComponents(year: 2024, month: 11, day: 11))!))
                 ),
                 Tracker(
                     id: UUID(),
-                    title: "Baz",
+                    title: "Special10",
                     color: Constants.selectionColors[4],
                     emoji: Constants.emojis[12],
-                    schedule: nil,
-                    date: Date()
+                    schedule: Schedule(type: .special(Calendar.current.date(from: DateComponents(year: 2024, month: 11, day: 10))!))
                 ),
                 Tracker(
                     id: UUID(),
                     title: "Quuuux",
                     color: Constants.selectionColors[2],
                     emoji: Constants.emojis[1],
-                    schedule: [WeekDay.tuesday, WeekDay.friday, WeekDay.saturday],
-                    date: nil
+                    schedule: Schedule(type: .regular([WeekDay.tuesday, WeekDay.friday, WeekDay.saturday]))
                 ),
                 Tracker(
                     id: UUID(),
-                    title: "Special25",
+                    title: "Special9",
                     color: Constants.selectionColors[4],
                     emoji: Constants.emojis[0],
-                    schedule: nil,
-                    date: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 25))
+                    schedule: Schedule(type: .special(Calendar.current.date(from: DateComponents(year: 2024, month: 11, day: 9))!))
                 ),
                 Tracker(
                     id: UUID(),
-                    title: "Special26",
+                    title: "Special8",
                     color: Constants.selectionColors[4],
                     emoji: Constants.emojis[0],
-                    schedule: nil,
-                    date: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 26))
+                    schedule: Schedule(type: .special(Calendar.current.date(from: DateComponents(year: 2024, month: 11, day: 8))!))
                 ),
             ]
         ),
@@ -148,40 +134,35 @@ enum Mock {
                     title: "Foo",
                     color: Constants.selectionColors[10],
                     emoji: Constants.emojis[11],
-                    schedule: [WeekDay.monday],
-                    date: nil
+                    schedule: Schedule(type: .regular([WeekDay.monday]))
                 ),
                 Tracker(
                     id: UUID(),
-                    title: "Bar",
+                    title: "Special7",
                     color: Constants.selectionColors[7],
                     emoji: Constants.emojis[5],
-                    schedule: nil,
-                    date: Date()
+                    schedule: Schedule(type: .special(Calendar.current.date(from: DateComponents(year: 2024, month: 11, day: 7))!))
                 ),
                 Tracker(
                     id: UUID(),
-                    title: "Baz",
+                    title: "Special6",
                     color: Constants.selectionColors[4],
                     emoji: Constants.emojis[12],
-                    schedule: nil,
-                    date: Date()
+                    schedule: Schedule(type: .special(Calendar.current.date(from: DateComponents(year: 2024, month: 11, day: 6))!))
                 ),
                 Tracker(
                     id: UUID(),
                     title: "Quuuuuux",
                     color: Constants.selectionColors[2],
                     emoji: Constants.emojis[1],
-                    schedule: [WeekDay.tuesday, WeekDay.friday, WeekDay.saturday],
-                    date: nil
+                    schedule: Schedule(type: .regular([WeekDay.tuesday, WeekDay.friday, WeekDay.saturday]))
                 ),
                 Tracker(
                     id: UUID(),
-                    title: "Special27",
+                    title: "Special5",
                     color: Constants.selectionColors[4],
                     emoji: Constants.emojis[0],
-                    schedule: nil,
-                    date: Calendar.current.date(from: DateComponents(year: 2024, month: 10, day: 27))
+                    schedule: Schedule(type: .special(Calendar.current.date(from: DateComponents(year: 2024, month: 11, day: 5))!))
                 ),
             ]
         )

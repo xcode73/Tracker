@@ -76,8 +76,7 @@ final class ColorCell: UICollectionViewCell {
             title: "Lorem ipsum dolor sit amet, consetetur",
             color: Constants.selectionColors[4],
             emoji: Constants.emojis[0],
-            schedule: [WeekDay.tuesday, WeekDay.friday],
-            date: nil
+            schedule: Schedule(type: .regular([WeekDay.tuesday, WeekDay.friday]))
         )
     ])
     let categories: [TrackerCategory] = [
@@ -87,7 +86,9 @@ final class ColorCell: UICollectionViewCell {
     ]
     
     let tracker = categories[0].trackers[0]
-    let navigationController = UINavigationController(rootViewController: TrackerTableViewController(tableType: .edit(tracker, selectedCategory, 2), categories: categories))
+    let counterTitle = "5 дней"
+    let vc = TrackerTableViewController(tableType: .edit(tracker, selectedCategory, counterTitle), categories: categories)
+    let navigationController = UINavigationController(rootViewController: vc)
     navigationController.modalPresentationStyle = .pageSheet
     
     return navigationController

@@ -102,55 +102,60 @@ final class TrackersViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         // Debug
-        addMockData()
+//        addMockData()
         
         loadCategories()
-        
-        // Debug: clear tracker records
-        completedTrackers = []
-        saveCompletedTrackers()
+        print(categories)
         
         loadCompletedTrackers()
         
-        filteredCategories = filterCategories(with: currentDate)
+        filterCategories(with: currentDate)
+        print(filteredCategories ?? [])
+        
+        // Debug: clear tracker records
+//        completedTrackers = []
+//        saveCompletedTrackers()
         
         setupUI()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
         showPlaceholderIfNeeded()
     }
     
+    // MARK: - Filters
     /// возвращает отфильтрованный массив категорий содержащий только трекеры на выбранную дату
-    private func filterCategories(with date: Date?) -> [TrackerCategory]? {
-        guard let date = date else { return nil }
-        // Определяем текущий день недели
+    private func filterCategories(with date: Date?) {
+        guard let date else { return }
+
         let weekDay = WeekDay(date: date)
+        var filteredCategories: [TrackerCategory] = []
         
-        // Фильтруем категории
-        return categories.compactMap { category in
-            // Фильтруем трекеры, которые имеют расписание на текущий день
-            let filteredTrackers = category.trackers.filter { tracker in
-                
-                if let trackerSchedule = tracker.schedule {
-                    return trackerSchedule.contains(weekDay) == true
-                }
-                
-                if let trackerDate = tracker.date {
-                    if trackerDate == date {
-                        return true
+        for category in categories {
+            var trackers: [Tracker] = []
+            for tracker in category.trackers {
+                switch tracker.schedule.type {
+                case .regular(let days):
+                    if days.contains(weekDay) == true {
+                        trackers.append(tracker)
+                    }
+                case .special(let trackerDate):
+                    if trackerDate.truncated == date.truncated {
+                        trackers.append(tracker)
                     }
                 }
-                
-                return false
             }
             
-            // Если есть хотя бы один трекер с расписанием на текущий день, возвращаем новую категорию
-            if !filteredTrackers.isEmpty {
-                return TrackerCategory(id: category.id, title: category.title, trackers: filteredTrackers)
-            } else {
-                return nil
+            if !trackers.isEmpty {
+                filteredCategories.append(TrackerCategory(id: category.id, title: category.title, trackers: trackers))
             }
         }
+        
+        self.filteredCategories = filteredCategories
     }
     
     // MARK: - Storage
@@ -159,9 +164,9 @@ final class TrackersViewController: UIViewController {
             guard let self else { return }
             self.categories = self.trackerStorage.categories
             // Debug
-            if self.categories.isEmpty {
-                self.addMockData()
-            }
+//            if self.categories.isEmpty {
+//                self.addMockData()
+//            }
         }
     }
     
@@ -190,13 +195,8 @@ final class TrackersViewController: UIViewController {
     // MARK: - UI Setup
     func setupUI() {
         setupNavigationBar()
-        
         addCollectionView()
         addPlaceholder()
-        
-        if filteredCategories != nil {
-            placeholderStackView.isHidden = true
-        }
     }
     
     private func setupNavigationBar() {
@@ -221,8 +221,28 @@ final class TrackersViewController: UIViewController {
         }
     }
     
+    private func updateCounterTitle(tracker: Tracker) -> String {
+        let completedCount = completedTrackers.filter { $0.trackerId == tracker.id }.count
+        
+        var title: String
+        let lastDigit = completedCount % 10
+        
+        switch lastDigit {
+        case 1:
+            title = "день"
+        case 2, 3, 4:
+            title = "дня"
+        case 5, 6, 7, 8, 9, 0:
+            title = "дней"
+        default:
+            title = "дней"
+        }
+        
+        return "\(completedCount) " + title
+    }
+    
     // MARK: - Delete Alert
-    func showDeleteTrackerAlert(for indexPath: IndexPath) {
+    func showDeleteTrackerAlert(for indexPaths: [IndexPath]) {
         let model = AlertModel(
             title: nil,
             message: LocalConst.deleteTrackerAlertMessage,
@@ -231,28 +251,26 @@ final class TrackersViewController: UIViewController {
             completion: { [weak self] in
                 guard let self else { return }
                 
-                self.deleteTracker(at: indexPath)
+                self.deleteTracker(at: indexPaths)
             }
         )
         
         AlertPresenter.showAlert(on: self, model: model)
     }
     
-    // MARK: - Actions
+    // MARK: - Show Tracker Detail
     private func showTrackerDetail(indexPath: IndexPath) {
         guard let filtered = filteredCategories else { return }
         
-        let trackers = filtered[indexPath.section].trackers
         let category = filtered[indexPath.section]
-        let tracker = trackers[indexPath.item]
-        
-        let completedTimes = completedTrackers.filter { $0.trackerId == tracker.id }.count
+        let tracker = filtered[indexPath.section].trackers[indexPath.item]
+        let counterTitle = updateCounterTitle(tracker: tracker)
         
         let vc = TrackerTableViewController(
             tableType: .edit(
                 tracker,
                 category,
-                completedTimes
+                counterTitle
             ),
             categories: categories
         )
@@ -266,9 +284,11 @@ final class TrackersViewController: UIViewController {
         present(navigationController, animated: true)
     }
     
-    private func deleteTracker(at indexPath: IndexPath) {
+    // MARK: - Delete Tracker
+    private func deleteTracker(at indexPaths: [IndexPath]) {
         guard let filtered = filteredCategories else { return }
         
+        let indexPath = indexPaths[0]
         let trackers = filtered[indexPath.section].trackers
         let tracker = trackers[indexPath.item]
         let trackerId = tracker.id
@@ -286,11 +306,23 @@ final class TrackersViewController: UIViewController {
         completedTrackers = completedTrackers.filter { $0.trackerId == trackerId }
         saveCompletedTrackers()
         
-        filteredCategories = filterCategories(with: currentDate)
+        filterCategories(with: currentDate)
         
-        collectionView.reloadData()
+        collectionView.performBatchUpdates({ [weak self] in
+            guard let self else { return }
+            
+            self.collectionView.deleteItems(at: indexPaths)
+            
+            if self.categories[indexPath.section].trackers.isEmpty {
+                self.collectionView.deleteSections(IndexSet(integer: indexPath.section))
+            }
+        }, completion: { [weak self] _ in
+            
+            self?.showPlaceholderIfNeeded()
+        })
     }
     
+    // MARK: - Actions
     @objc
     private func didTapAddButton() {
         let vc = TrackerTypeViewController(
@@ -306,9 +338,8 @@ final class TrackersViewController: UIViewController {
     
     @objc
     private func didSelectDate(_ sender: UIDatePicker) {
-        guard let truncatedDate = sender.date.truncated else { return }
-        currentDate = truncatedDate
-        filteredCategories = filterCategories(with: currentDate)
+        currentDate = sender.date
+        filterCategories(with: currentDate)
         collectionView.reloadData()
         showPlaceholderIfNeeded()
         self.dismiss(animated: true)
@@ -352,7 +383,11 @@ extension TrackersViewController: UICollectionViewDataSource {
         }
     }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    // MARK: - Cell
+    func collectionView(
+        _ collectionView: UICollectionView,
+        cellForItemAt indexPath: IndexPath
+    ) -> UICollectionViewCell {
         guard
             let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: TrackerCell.reuseIdentifier,
@@ -369,13 +404,11 @@ extension TrackersViewController: UICollectionViewDataSource {
             $0.trackerId == tracker.id && $0.date == currentDate
         })
         
-        let completedCount = completedTrackers.filter { $0.trackerId == tracker.id }.count
-        
         cell.delegate = self
         cell.configure(
             tracker: tracker,
             record: trackerRecord,
-            completedCount: completedCount,
+            completedTitle: updateCounterTitle(tracker: tracker),
             indexPath: indexPath
         )
         
@@ -466,10 +499,12 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
         )
     }
     
-    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemsAt indexPaths: [IndexPath], point: CGPoint) -> UIContextMenuConfiguration? {
-        guard indexPaths.count > 0 else {
-            return nil
-        }
+    func collectionView(
+        _ collectionView: UICollectionView,
+        contextMenuConfigurationForItemsAt indexPaths: [IndexPath],
+        point: CGPoint
+    ) -> UIContextMenuConfiguration? {
+        guard indexPaths.count > 0 else { return nil }
         
         let indexPath = indexPaths[0]
         
@@ -487,7 +522,7 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
                 
                 UIAction(title: Constants.ButtonTitles.delete, attributes: .destructive)
                 { [weak self] _ in
-                    self?.showDeleteTrackerAlert(for: indexPath)
+                    self?.showDeleteTrackerAlert(for: indexPaths)
                 },
             ])
         })
@@ -504,8 +539,11 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 // MARK: - TrackerCellDelegate
 extension TrackersViewController: TrackerCellDelegate {
     /// Когда пользователь нажимает на + в ячейке трекера, добавляется соответствующая запись в completedTrackers. Если пользователь убирает пометку о выполненности в ячейке трекера, элемент удаляется из массива.
-    func changeTrackerState(tracker: Tracker?, record: TrackerRecord?, indexPath: IndexPath?) {
-        
+    func changeTrackerState(
+        tracker: Tracker?,
+        record: TrackerRecord?,
+        indexPath: IndexPath?
+    ) {
         guard
             let tracker = tracker,
             let indexPath = indexPath,
@@ -557,8 +595,10 @@ extension TrackersViewController: TrackerTableViewControllerDelegate {
     func didTapDoneButton(categories: [TrackerCategory]) {
         self.categories = categories
         saveCategories()
-        filteredCategories = filterCategories(with: currentDate)
+        
+        filterCategories(with: currentDate)
         collectionView.reloadData()
+        showPlaceholderIfNeeded()
         dismiss(animated: true)
     }
 }
@@ -566,11 +606,12 @@ extension TrackersViewController: TrackerTableViewControllerDelegate {
 // MARK: - TrackerTypeViewControllerDelegate
 extension TrackersViewController: TrackerTypeViewControllerDelegate {
     func didUpdateCategories(categories: [TrackerCategory]) {
-        
         self.categories = categories
         saveCategories()
-        filteredCategories = filterCategories(with: currentDate)
+        
+        filterCategories(with: currentDate)
         collectionView.reloadData()
+        showPlaceholderIfNeeded()
         dismiss(animated: true)
     }
 }

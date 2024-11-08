@@ -21,7 +21,7 @@ final class TrackerStorage {
         do {
             categories = try jsonDecoder.decode(Array<TrackerCategory>.self, from: data)
         } catch {
-            print("ERROR: Could not load Categories data \(error.localizedDescription)")
+            print("NOTICE: Could not load Categories data \(error.localizedDescription)")
         }
         completed()
     }
@@ -38,8 +38,7 @@ final class TrackerStorage {
         }
     }
     
-    func loadCompletedTrackers(completed: @escaping ()->() ) {
-
+    func loadCompletedTrackers(completed: @escaping () -> () ) {
         let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         let documentURL = directoryURL.appendingPathComponent("completedTrackers.json")
         
@@ -48,7 +47,7 @@ final class TrackerStorage {
         do {
             completedTrackers = try jsonDecoder.decode(Set<TrackerRecord>.self, from: data)
         } catch {
-            print("ERROR: Could not load Completed Trackers data \(error.localizedDescription)")
+            print("NOTICE: Could not load Completed Trackers data \(error.localizedDescription)")
         }
         completed()
     }

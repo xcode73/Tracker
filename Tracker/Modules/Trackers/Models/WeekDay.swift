@@ -7,6 +7,7 @@
 
 import Foundation
 
+// Введите перечисление (a.k.a enum WeekDay), чтобы хранить те дни недели, по которым трекер с типом «Привычка» должен отображаться в списке.
 enum WeekDay: Int, CaseIterable, Codable {
     case sunday = 1
     case monday = 2
@@ -16,18 +17,14 @@ enum WeekDay: Int, CaseIterable, Codable {
     case friday = 6
     case saturday = 7
     
-    // MARK: - Public Type Properties
-    static var today: WeekDay {
-        return WeekDay()
-    }
-    
-    // MARK: - Setup
+    // MARK: - Init
     init(date: Date = Date()) {
         let cal = Calendar.current
         let weekDay = cal.component(.weekday, from: date)
         guard let day = WeekDay(rawValue: weekDay) else {
             fatalError("Unsupported Weekday")
         }
+        
         self = day
     }
 }
@@ -36,22 +33,31 @@ enum WeekDay: Int, CaseIterable, Codable {
 extension WeekDay: CustomStringConvertible {
     var dateFromWeekDay: Date {
         let cal = Calendar.current
-        return cal.date(from: DateComponents(weekday: self.rawValue))!
+        guard let date = cal.date(from: DateComponents(weekday: self.rawValue)) else {
+            return Date()
+        }
+        
+        return date
     }
+    
     var localizedName: String {
         let cal = Calendar.current
         guard cal.standaloneWeekdaySymbols.count == WeekDay.allCases.count else {
             return "Unsupported calendar"
         }
+        
         return cal.standaloneWeekdaySymbols[self.rawValue - 1].capitalized
     }
+    
     var localizedShortName: String {
         let cal = Calendar.current
         guard cal.shortStandaloneWeekdaySymbols.count == WeekDay.allCases.count else {
             return "Unsupported calendar"
         }
+        
         return cal.shortStandaloneWeekdaySymbols[self.rawValue - 1].capitalized
     }
+    
     var description: String {
         return localizedName
     }
@@ -68,10 +74,10 @@ extension WeekDay {
         return Array(all[firstIdx..<all.endIndex] + all[all.startIndex..<firstIdx])
     }
     
-    var next: WeekDay! {
-        let all = WeekDay.allCases
-        return all.firstIndex(of: self)
-            .map(all.index(after:))
-            .flatMap { all.indices.contains($0) ? all[$0] : all.first }
-    }
+//    var next: WeekDay! {
+//        let all = WeekDay.allCases
+//        return all.firstIndex(of: self)
+//            .map(all.index(after:))
+//            .flatMap { all.indices.contains($0) ? all[$0] : all.first }
+//    }
 }
