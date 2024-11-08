@@ -10,7 +10,6 @@ import Foundation
 enum Mock {
     static let categories: [TrackerCategory] = [
         TrackerCategory(
-            id: UUID(),
             title: "Lorem ipsum dolor sit amet, consetetur sadipscing elitr",
             trackers: [
                 Tracker(
@@ -44,7 +43,6 @@ enum Mock {
             ]
         ),
         TrackerCategory(
-            id: UUID(),
             title: "Bar",
             trackers: [
                 Tracker(
@@ -78,7 +76,6 @@ enum Mock {
             ]
         ),
         TrackerCategory(
-            id: UUID(),
             title: "Quux",
             trackers: [
                 Tracker(
@@ -126,7 +123,6 @@ enum Mock {
             ]
         ),
         TrackerCategory(
-            id: UUID(),
             title: "Quuux",
             trackers: [
                 Tracker(

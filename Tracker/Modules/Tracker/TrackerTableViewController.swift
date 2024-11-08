@@ -203,7 +203,7 @@ final class TrackerTableViewController: UITableViewController {
         var updatedCategories = [TrackerCategory]()
         
         for category in categories {
-            if category.id == selectedCategory.id {
+            if category.title == selectedCategory.title {
                 guard let tracker else { return }
                 
                 var updatedTrackers = [Tracker]()
@@ -219,7 +219,7 @@ final class TrackerTableViewController: UITableViewController {
                     updatedTrackers.append(tracker)
                 }
                 
-                updatedCategories.append(TrackerCategory(id: category.id, title: category.title, trackers: updatedTrackers))
+                updatedCategories.append(TrackerCategory(title: category.title, trackers: updatedTrackers))
             } else {
                 updatedCategories.append(category)
             }
@@ -513,8 +513,8 @@ extension TrackerTableViewController: ButtonsCellDelegate {
 @available(iOS 17, *)
 #Preview("Special") {
     let categories: [TrackerCategory] = [
-        TrackerCategory(id: UUID(), title: "Baz", trackers: []),
-        TrackerCategory(id: UUID(), title: "Bar", trackers: []),
+        TrackerCategory(title: "Baz", trackers: []),
+        TrackerCategory(title: "Bar", trackers: []),
     ]
     let navigationController = UINavigationController(rootViewController: TrackerTableViewController(tableType: .special(Date()), categories: categories))
     navigationController.modalPresentationStyle = .pageSheet
@@ -525,8 +525,8 @@ extension TrackerTableViewController: ButtonsCellDelegate {
 @available(iOS 17, *)
 #Preview("Regular") {
     let categories: [TrackerCategory] = [
-        TrackerCategory(id: UUID(), title: "Baz", trackers: []),
-        TrackerCategory(id: UUID(), title: "Bar", trackers: []),
+        TrackerCategory(title: "Baz", trackers: []),
+        TrackerCategory(title: "Bar", trackers: []),
     ]
     let navigationController = UINavigationController(rootViewController: TrackerTableViewController(tableType: .regular, categories: categories))
     navigationController.modalPresentationStyle = .pageSheet
@@ -536,7 +536,7 @@ extension TrackerTableViewController: ButtonsCellDelegate {
 
 @available(iOS 17, *)
 #Preview("Edit Regular") {
-    let selectedCategory = TrackerCategory(id: UUID(), title: "Foo", trackers: [
+    let selectedCategory = TrackerCategory(title: "Foo", trackers: [
         Tracker(
             id: UUID(),
             title: "Lorem ipsum dolor sit amet, consetetur",
@@ -547,8 +547,8 @@ extension TrackerTableViewController: ButtonsCellDelegate {
     ])
     let categories: [TrackerCategory] = [
         selectedCategory,
-        TrackerCategory(id: UUID(), title: "Baz", trackers: []),
-        TrackerCategory(id: UUID(), title: "Bar", trackers: []),
+        TrackerCategory(title: "Baz", trackers: []),
+        TrackerCategory(title: "Bar", trackers: []),
     ]
     
     let tracker = categories[0].trackers[0]
@@ -562,7 +562,7 @@ extension TrackerTableViewController: ButtonsCellDelegate {
 
 @available(iOS 17, *)
 #Preview("Edit Special") {
-    let selectedCategory = TrackerCategory(id: UUID(), title: "Foo", trackers: [
+    let selectedCategory = TrackerCategory(title: "Foo", trackers: [
         Tracker(
             id: UUID(),
             title: "Lorem ipsum dolor",
@@ -573,8 +573,8 @@ extension TrackerTableViewController: ButtonsCellDelegate {
     ])
     let categories: [TrackerCategory] = [
         selectedCategory,
-        TrackerCategory(id: UUID(), title: "Baz", trackers: []),
-        TrackerCategory(id: UUID(), title: "Bar", trackers: []),
+        TrackerCategory(title: "Baz", trackers: []),
+        TrackerCategory(title: "Bar", trackers: []),
     ]
     
     let tracker = categories[0].trackers[0]

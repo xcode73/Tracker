@@ -272,7 +272,7 @@ extension CategoriesViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         guard let categories, let selectedCategory else { return }
         
-        if selectedCategory.id == categories[indexPath.row].id {
+        if selectedCategory.title == categories[indexPath.row].title {
             tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
         }
     }
@@ -319,8 +319,8 @@ extension CategoriesViewController: CategoryViewControllerDelegate {
         if let indexPath {
             // change category title
             let newCategories = categories?.map { category in
-                if category.id == categories?[indexPath.row].id {
-                    return TrackerCategory(id: category.id, title: categoryTitle, trackers: category.trackers)
+                if category.title == categories?[indexPath.row].title {
+                    return TrackerCategory(title: categoryTitle, trackers: category.trackers)
                 }
                 return category
             }
@@ -328,7 +328,7 @@ extension CategoriesViewController: CategoryViewControllerDelegate {
             categories = newCategories
             tableView.reloadRows(at: [indexPath], with: .automatic)
         } else {
-            let newCategory = TrackerCategory(id: UUID(), title: categoryTitle, trackers: [])
+            let newCategory = TrackerCategory(title: categoryTitle, trackers: [])
             self.categories?.append(newCategory)
             tableView.reloadData()
         }
@@ -341,12 +341,12 @@ extension CategoriesViewController: CategoryViewControllerDelegate {
 #if DEBUG
 @available(iOS 17, *)
 #Preview("Categories") {
-    let selectedCategory = TrackerCategory(id: UUID(), title: "Quux", trackers: [])
+    let selectedCategory = TrackerCategory(title: "Quux", trackers: [])
     let categories: [TrackerCategory] = [
         selectedCategory,
-        TrackerCategory(id: UUID(), title: "Foo", trackers: []),
-        TrackerCategory(id: UUID(), title: "Baz", trackers: []),
-        TrackerCategory(id: UUID(), title: "Bar", trackers: []),
+        TrackerCategory(title: "Foo", trackers: []),
+        TrackerCategory(title: "Baz", trackers: []),
+        TrackerCategory(title: "Bar", trackers: []),
     ]
     let navigationController = UINavigationController(
         rootViewController: CategoriesViewController(categories: categories, selectedCategory: selectedCategory)

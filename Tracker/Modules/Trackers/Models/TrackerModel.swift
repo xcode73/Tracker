@@ -7,8 +7,7 @@
 
 import Foundation
 
-struct TrackerCategory: Codable, Identifiable {
-    let id: UUID
+struct TrackerCategory: Codable {
     let title: String
     let trackers: [Tracker]
 }
@@ -22,8 +21,6 @@ struct Tracker: Codable, Identifiable {
 }
 
 struct Schedule: Codable {
-//    let days: [WeekDay]?
-//    let date: Date?
     let type: ScheduleType
 }
 

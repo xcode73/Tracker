@@ -70,7 +70,7 @@ final class ColorCell: UICollectionViewCell {
 
 @available(iOS 17, *)
 #Preview("Edit Regular") {
-    let selectedCategory = TrackerCategory(id: UUID(), title: "Foo", trackers: [
+    let selectedCategory = TrackerCategory(title: "Foo", trackers: [
         Tracker(
             id: UUID(),
             title: "Lorem ipsum dolor sit amet, consetetur",
@@ -81,8 +81,8 @@ final class ColorCell: UICollectionViewCell {
     ])
     let categories: [TrackerCategory] = [
         selectedCategory,
-        TrackerCategory(id: UUID(), title: "Baz", trackers: []),
-        TrackerCategory(id: UUID(), title: "Bar", trackers: []),
+        TrackerCategory(title: "Baz", trackers: []),
+        TrackerCategory(title: "Bar", trackers: []),
     ]
     
     let tracker = categories[0].trackers[0]

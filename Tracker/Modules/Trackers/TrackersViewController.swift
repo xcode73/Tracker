@@ -107,8 +107,6 @@ final class TrackersViewController: UIViewController {
 //        addMockData()
         
         loadCategories()
-        print(categories)
-        
         loadCompletedTrackers()
         
         filterCategories(with: currentDate)
@@ -151,7 +149,7 @@ final class TrackersViewController: UIViewController {
             }
             
             if !trackers.isEmpty {
-                filteredCategories.append(TrackerCategory(id: category.id, title: category.title, trackers: trackers))
+                filteredCategories.append(TrackerCategory(title: category.title, trackers: trackers))
             }
         }
         
@@ -163,10 +161,6 @@ final class TrackersViewController: UIViewController {
         trackerStorage.loadCategories { [weak self] in
             guard let self else { return }
             self.categories = self.trackerStorage.categories
-            // Debug
-//            if self.categories.isEmpty {
-//                self.addMockData()
-//            }
         }
     }
     
@@ -299,7 +293,7 @@ final class TrackersViewController: UIViewController {
             if let index = trackers.firstIndex(where: { $0.id == trackerId }) {
                 trackers.remove(at: index)
             }
-            return TrackerCategory(id: $0.id, title: $0.title, trackers: trackers)
+            return TrackerCategory(title: $0.title, trackers: trackers)
         }
         saveCategories()
         

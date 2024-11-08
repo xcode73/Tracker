@@ -151,18 +151,18 @@ final class CategoryCell: UITableViewCell {
 #if DEBUG
 @available(iOS 17, *)
 #Preview("Categories") {
-    let selectedCategory = TrackerCategory(id: UUID(), title: "Quux", trackers: [])
+    let selectedCategory = TrackerCategory(title: "Quux", trackers: [])
     let categories: [TrackerCategory] = [
         selectedCategory,
-        TrackerCategory(id: UUID(), title: "Foo", trackers: []),
-        TrackerCategory(id: UUID(), title: "Baz", trackers: []),
-        TrackerCategory(id: UUID(), title: "Bar", trackers: []),
-        TrackerCategory(id: UUID(), title: "Foo", trackers: []),
-        TrackerCategory(id: UUID(), title: "Baz", trackers: []),
-        TrackerCategory(id: UUID(), title: "Bar", trackers: []),
-        TrackerCategory(id: UUID(), title: "Foo", trackers: []),
-        TrackerCategory(id: UUID(), title: "Baz", trackers: []),
-        TrackerCategory(id: UUID(), title: "Bar", trackers: []),
+        TrackerCategory(title: "Foo", trackers: []),
+        TrackerCategory(title: "Baz", trackers: []),
+        TrackerCategory(title: "Bar", trackers: []),
+        TrackerCategory(title: "Foo", trackers: []),
+        TrackerCategory(title: "Baz", trackers: []),
+        TrackerCategory(title: "Bar", trackers: []),
+        TrackerCategory(title: "Foo", trackers: []),
+        TrackerCategory(title: "Baz", trackers: []),
+        TrackerCategory(title: "Bar", trackers: []),
     ]
     let navigationController = UINavigationController(
         rootViewController: CategoriesViewController(categories: categories, selectedCategory: selectedCategory)
