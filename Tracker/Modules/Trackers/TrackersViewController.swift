@@ -16,7 +16,7 @@ final class TrackersViewController: UIViewController {
     
     /// трекеры, которые были «выполнены» в выбранную дату
     /// Чтобы не выполнять линейный поиск по массиву, используем Set, в котором хранятся id выполненных трекеров;
-    private var completedTrackers: Set<TrackerRecord> = []
+    private var completedTrackers: [TrackerRecord] = []
     
     private let params = GeometricParams(
         cellCount: 2,
@@ -548,15 +548,15 @@ extension TrackersViewController: TrackerCellDelegate {
         
         if let record {
             // remove record from completed
-            completedTrackers = completedTrackers.filter { $0.id != record.id }
+            completedTrackers = completedTrackers.filter { $0.trackerId != record.trackerId }
         } else {
             // add record to completed
             completedTrackers.insert(
                 TrackerRecord(
-                    id: UUID(),
                     trackerId: tracker.id,
                     date: currentDate
-                )
+                ),
+                at: 0
             )
         }
         

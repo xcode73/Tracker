@@ -9,7 +9,7 @@ import Foundation
 
 final class TrackerStorage {
     var categories: [TrackerCategory] = []
-    var completedTrackers: Set<TrackerRecord> = []
+    var completedTrackers: [TrackerRecord] = []
     
     func loadCategories(completed: @escaping ()->() ) {
 
@@ -45,7 +45,7 @@ final class TrackerStorage {
         guard let data = try? Data(contentsOf: documentURL) else { return }
         let jsonDecoder = JSONDecoder()
         do {
-            completedTrackers = try jsonDecoder.decode(Set<TrackerRecord>.self, from: data)
+            completedTrackers = try jsonDecoder.decode(Array<TrackerRecord>.self, from: data)
         } catch {
             print("NOTICE: Could not load Completed Trackers data \(error.localizedDescription)")
         }

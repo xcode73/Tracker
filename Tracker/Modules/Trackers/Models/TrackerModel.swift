@@ -31,8 +31,7 @@ enum ScheduleType: Codable {
 
 /// сущность для хранения записи о том, что некий трекер был выполнен на некоторую дату;
 /// хранит id трекера, который был выполнен и дату.
-struct TrackerRecord: Codable, Hashable, Identifiable {
-    let id: UUID
+struct TrackerRecord: Codable {
     let trackerId: UUID
     let date: Date
 }
