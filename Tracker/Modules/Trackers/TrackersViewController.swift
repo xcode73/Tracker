@@ -13,9 +13,6 @@ final class TrackersViewController: UIViewController {
     private var trackerStorage = TrackerStorage()
     private var currentDate: Date = Date()
     private var filteredCategories: [TrackerCategory]?
-    
-    /// трекеры, которые были «выполнены» в выбранную дату
-    /// Чтобы не выполнять линейный поиск по массиву, используем Set, в котором хранятся id выполненных трекеров;
     private var completedTrackers: [TrackerRecord] = []
     
     private let params = GeometricParams(

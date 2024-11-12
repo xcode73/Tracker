@@ -15,6 +15,8 @@ protocol TitleCellDelegate: AnyObject {
 final class TitleCell: UITableViewCell {
     weak var delegate: TitleCellDelegate?
     
+    private let maxTitleLength = 38
+    
     // MARK: - UI Components
     private lazy var containerView: UIView = {
         let view = UIView()
@@ -34,7 +36,7 @@ final class TitleCell: UITableViewCell {
     
     private lazy var titleTextField: UITextField = {
         let view = UITextField()
-        view.font = .systemFont(ofSize: 17, weight: .regular)
+        view.font = Constants.Fonts.ypRegular17
         view.returnKeyType = .done
         view.clearButtonMode = .whileEditing
         view.delegate = self
@@ -106,7 +108,7 @@ extension TitleCell: UITextFieldDelegate {
         
         let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
         
-        return updatedText.count <= 38
+        return updatedText.count <= maxTitleLength
     }
     
     func textFieldDidEndEditing(_ textField: UITextField, reason: UITextField.DidEndEditingReason) {

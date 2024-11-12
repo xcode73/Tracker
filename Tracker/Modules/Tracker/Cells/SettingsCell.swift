@@ -127,6 +127,10 @@ final class SettingsCell: UITableViewCell {
             addSeparatorView()
         }
         
+        cellStyle(cellPosition: cellPosition)
+    }
+    
+    private func cellStyle(cellPosition: CellPosition) {
         switch cellPosition {
         case .first:
             containerView.layer.cornerRadius = 16

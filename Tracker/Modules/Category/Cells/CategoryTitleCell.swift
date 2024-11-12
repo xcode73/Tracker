@@ -15,6 +15,8 @@ final class CategoryTitleCell: UITableViewCell {
     // MARK: - Properties
     weak var delegate: CategoryTitleCellDelegate?
     
+    private let maxTitleLength = 38
+    
     // MARK: - UI Components
     private lazy var containerView: UIView = {
         let view = UIView()
@@ -34,7 +36,7 @@ final class CategoryTitleCell: UITableViewCell {
     
     private lazy var titleTextField: UITextField = {
         let view = UITextField()
-        view.font = .systemFont(ofSize: 17, weight: .regular)
+        view.font = Constants.Fonts.ypRegular17
         view.returnKeyType = .done
         view.clearButtonMode = .whileEditing
         view.delegate = self
@@ -54,17 +56,6 @@ final class CategoryTitleCell: UITableViewCell {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
-    }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
     }
     
     // MARK: - Configuration
@@ -124,7 +115,7 @@ extension CategoryTitleCell: UITextFieldDelegate {
         
         let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
         
-        return updatedText.count <= 38
+        return updatedText.count <= maxTitleLength
     }
 }
 

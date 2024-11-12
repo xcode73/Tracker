@@ -7,7 +7,6 @@
 
 import Foundation
 
-// Введите перечисление (a.k.a enum WeekDay), чтобы хранить те дни недели, по которым трекер с типом «Привычка» должен отображаться в списке.
 enum WeekDay: Int, CaseIterable, Codable {
     case sunday = 1
     case monday = 2
@@ -64,7 +63,6 @@ extension WeekDay: CustomStringConvertible {
 }
 
 extension WeekDay {
-    /// Ordered list of all days according to a given calendar
     static func ordered(calendar: Calendar = .current) -> WeekDay.AllCases {
         guard let firstDay = WeekDay(rawValue: calendar.firstWeekday) else {
             return allCases
@@ -74,10 +72,10 @@ extension WeekDay {
         return Array(all[firstIdx..<all.endIndex] + all[all.startIndex..<firstIdx])
     }
     
-//    var next: WeekDay! {
-//        let all = WeekDay.allCases
-//        return all.firstIndex(of: self)
-//            .map(all.index(after:))
-//            .flatMap { all.indices.contains($0) ? all[$0] : all.first }
-//    }
+    var next: WeekDay! {
+        let all = WeekDay.allCases
+        return all.firstIndex(of: self)
+            .map(all.index(after:))
+            .flatMap { all.indices.contains($0) ? all[$0] : all.first }
+    }
 }

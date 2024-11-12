@@ -224,7 +224,8 @@ final class CategoriesViewController: UIViewController {
 
 // MARK: - UITableViewDataSource
 extension CategoriesViewController: UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView,
+                   numberOfRowsInSection section: Int) -> Int {
         guard let categories else {
             changePlaceholderState()
             return 0
@@ -233,7 +234,8 @@ extension CategoriesViewController: UITableViewDataSource {
         return categories.count
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView,
+                   cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard
             let cell = tableView.dequeueReusableCell(withIdentifier: CategoryCell.reuseIdentifier, for: indexPath) as? CategoryCell,
             let categories
@@ -271,11 +273,14 @@ extension CategoriesViewController: UITableViewDataSource {
 
 // MARK: - UITableViewDelegate
 extension CategoriesViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+    func tableView(_ tableView: UITableView,
+                   heightForRowAt indexPath: IndexPath) -> CGFloat {
         75
     }
     
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView,
+                   willDisplay cell: UITableViewCell,
+                   forRowAt indexPath: IndexPath) {
         guard let categories, let selectedCategory else { return }
         
         if selectedCategory.title == categories[indexPath.row].title {
@@ -283,13 +288,16 @@ extension CategoriesViewController: UITableViewDelegate {
         }
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView,
+                   didSelectRowAt indexPath: IndexPath) {
         guard let categories else { return }
         
         delegate?.didSelectCategory(selectedCategory: categories[indexPath.row], categories: categories)
     }
     
-    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+    func tableView(_ tableView: UITableView,
+                   contextMenuConfigurationForRowAt indexPath: IndexPath,
+                   point: CGPoint) -> UIContextMenuConfiguration? {
         
         return UIContextMenuConfiguration(identifier: indexPath as NSCopying,
                                           previewProvider: nil,
@@ -308,10 +316,16 @@ extension CategoriesViewController: UITableViewDelegate {
         })
     }
     
-    func tableView(_ tableView: UITableView, previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
-        guard let indexPath = configuration.identifier as? IndexPath else { return nil }
-        
-        guard let cell = tableView.cellForRow(at: indexPath) as? CategoryCell else { return nil }
+    func tableView(
+        _ tableView: UITableView,
+        previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration
+    ) -> UITargetedPreview? {
+        guard
+            let indexPath = configuration.identifier as? IndexPath,
+            let cell = tableView.cellForRow(at: indexPath) as? CategoryCell
+        else {
+            return nil
+        }
         
         let selectedView = cell.configureSelectedView()
         return UITargetedPreview(view: selectedView)
@@ -324,7 +338,6 @@ extension CategoriesViewController: CategoryViewControllerDelegate {
         dismiss(animated: true)
         
         if let indexPath {
-            // change category title
             let newCategories = categories?.map { category in
                 if category.title == categories?[indexPath.row].title {
                     return TrackerCategory(title: categoryTitle, trackers: category.trackers)
@@ -358,7 +371,8 @@ extension CategoriesViewController: CategoryViewControllerDelegate {
         TrackerCategory(title: "Bar", trackers: []),
     ]
     let navigationController = UINavigationController(
-        rootViewController: CategoriesViewController(categories: categories, selectedCategory: selectedCategory)
+        rootViewController: CategoriesViewController(categories: categories,
+                                                     selectedCategory: selectedCategory)
     )
     navigationController.modalPresentationStyle = .pageSheet
     
@@ -370,7 +384,8 @@ extension CategoriesViewController: CategoryViewControllerDelegate {
     let selectedCategory: TrackerCategory? = nil
     let categories: [TrackerCategory]? = nil
     let navigationController = UINavigationController(
-        rootViewController: CategoriesViewController(categories: categories, selectedCategory: selectedCategory)
+        rootViewController: CategoriesViewController(categories: categories,
+                                                     selectedCategory: selectedCategory)
     )
     navigationController.modalPresentationStyle = .pageSheet
     
