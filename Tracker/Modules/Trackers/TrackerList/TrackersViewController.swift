@@ -101,7 +101,7 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
 
         // Debug
-        addMockData()
+//        addMockData()
         
         loadCategories()
         loadCompletedTrackers()

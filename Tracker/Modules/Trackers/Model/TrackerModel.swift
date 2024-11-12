@@ -29,8 +29,6 @@ enum ScheduleType: Codable {
     case special(Date)
 }
 
-/// сущность для хранения записи о том, что некий трекер был выполнен на некоторую дату;
-/// хранит id трекера, который был выполнен и дату.
 struct TrackerRecord: Codable {
     let trackerId: UUID
     let date: Date
