@@ -21,7 +21,9 @@ enum CellPosition {
 }
 
 protocol TrackerTableViewControllerDelegate: AnyObject {
-    func didTapDoneButton(categories: [TrackerCategory])
+    func updateCategories(categories: [TrackerCategory])
+    func cancelButtonTapped(categories: [TrackerCategory])
+    func doneButtonTapped(categories: [TrackerCategory])
 }
 
 final class TrackerTableViewController: UITableViewController {
@@ -453,6 +455,11 @@ extension TrackerTableViewController: TitleCellDelegate {
 
 // MARK: - CategoriesViewControllerDelegate
 extension TrackerTableViewController: CategoriesViewControllerDelegate {
+    func updateCategories(categories: [TrackerCategory]) {
+        self.categories = categories
+        delegate?.updateCategories(categories: categories)
+    }
+    
     func didSelectCategory(
         selectedCategory: TrackerCategory,
         categories: [TrackerCategory]
@@ -499,12 +506,12 @@ extension TrackerTableViewController: ColorsCellDelegate {
 // MARK: - ButtonsCellDelegate
 extension TrackerTableViewController: ButtonsCellDelegate {
     func didTapCancelButton() {
-        dismiss(animated: true)
+        delegate?.cancelButtonTapped(categories: categories)
     }
     
     func didTapDoneButton() {
         updateCategories()
-        delegate?.didTapDoneButton(categories: categories)
+        delegate?.doneButtonTapped(categories: categories)
     }
 }
 

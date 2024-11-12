@@ -9,6 +9,7 @@ import UIKit
 
 protocol CategoriesViewControllerDelegate: AnyObject {
     func didSelectCategory(selectedCategory: TrackerCategory, categories: [TrackerCategory])
+    func updateCategories(categories: [TrackerCategory])
 }
 
 final class CategoriesViewController: UIViewController {
@@ -143,9 +144,13 @@ final class CategoriesViewController: UIViewController {
         present(navigationController, animated: true)
     }
     
+    // MARK: - Delete
     private func deleteCategory(at indexPath: IndexPath) {
         categories?.remove(at: indexPath.row)
         tableView.deleteRows(at: [indexPath], with: .automatic)
+        if let categories {
+            delegate?.updateCategories(categories: categories)
+        }
         changePlaceholderState()
     }
     
@@ -252,6 +257,7 @@ extension CategoriesViewController: UITableViewDataSource {
             cellPosition = .last
         default:
             cellPosition = .regular
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 32, bottom: 0, right: 32)
         }
         
         cell.configure(
@@ -314,7 +320,8 @@ extension CategoriesViewController: UITableViewDelegate {
 
 // MARK: - CategoryViewControllerDelegate
 extension CategoriesViewController: CategoryViewControllerDelegate {
-    func categoryButtonTapped(categoryTitle: String, indexPath: IndexPath?) {
+    func createCategory(categoryTitle: String, indexPath: IndexPath?) {
+        dismiss(animated: true)
         
         if let indexPath {
             // change category title
@@ -324,7 +331,6 @@ extension CategoriesViewController: CategoryViewControllerDelegate {
                 }
                 return category
             }
-            
             categories = newCategories
             tableView.reloadRows(at: [indexPath], with: .automatic)
         } else {
@@ -334,6 +340,9 @@ extension CategoriesViewController: CategoryViewControllerDelegate {
         }
         
         changePlaceholderState()
+        
+        guard let categories else { return }
+        delegate?.updateCategories(categories: categories)
     }
 }
 

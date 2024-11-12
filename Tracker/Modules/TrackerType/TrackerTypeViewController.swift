@@ -8,7 +8,9 @@
 import UIKit
 
 protocol TrackerTypeViewControllerDelegate: AnyObject {
-    func didUpdateCategories(categories: [TrackerCategory])
+    func updateCategories(categories: [TrackerCategory])
+    func cancelButtonTapped(categories: [TrackerCategory])
+    func doneButtonTapped(categories: [TrackerCategory])
 }
 
 final class TrackerTypeViewController: UIViewController {
@@ -119,12 +121,18 @@ final class TrackerTypeViewController: UIViewController {
 }
 
 extension TrackerTypeViewController: TrackerTableViewControllerDelegate {
-    func didTapDoneButton(categories: [TrackerCategory]) {
-        
-        print(delegate ?? "delegate is nil")
-
+    func cancelButtonTapped(categories: [TrackerCategory]) {
         dismiss(animated: true)
-        delegate?.didUpdateCategories(categories: categories)
+        delegate?.cancelButtonTapped(categories: categories)
+    }
+    
+    func doneButtonTapped(categories: [TrackerCategory]) {
+        dismiss(animated: true)
+        delegate?.doneButtonTapped(categories: categories)
+    }
+    
+    func updateCategories(categories: [TrackerCategory]) {
+        delegate?.updateCategories(categories: categories)
     }
 }
 

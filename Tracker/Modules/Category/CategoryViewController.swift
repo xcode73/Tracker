@@ -8,7 +8,7 @@
 import UIKit
 
 protocol CategoryViewControllerDelegate: AnyObject {
-    func categoryButtonTapped(categoryTitle: String, indexPath: IndexPath?)
+    func createCategory(categoryTitle: String, indexPath: IndexPath?)
 }
 
 final class CategoryViewController: UIViewController {
@@ -39,13 +39,13 @@ final class CategoryViewController: UIViewController {
         return view
     }()
     
-    private lazy var categoryButton: UIButton = {
+    private lazy var createCategoryButton: UIButton = {
         let view = UIButton()
         view.layer.masksToBounds = true
         view.layer.cornerRadius = 16
         view.titleLabel?.font = Constants.Fonts.ypMedium16
         view.setTitleColor(.white, for: .normal)
-        view.addTarget(self, action: #selector(didTapCategoryButton), for: .touchUpInside)
+        view.addTarget(self, action: #selector(didTapCreateCategoryButton), for: .touchUpInside)
         view.setTitle(LocalConst.createButtonTitle, for: .normal)
         view.translatesAutoresizingMaskIntoConstraints = false
         
@@ -90,38 +90,36 @@ final class CategoryViewController: UIViewController {
     
     private func changeCreateCategoryButtonState() {
         if categoryTitle == nil {
-            categoryButton.isEnabled = false
-            categoryButton.backgroundColor = .ypGray
+            createCategoryButton.isEnabled = false
+            createCategoryButton.backgroundColor = .ypGray
         }
         
         if let categoryTitle, !categoryTitle.trimmingCharacters(in: .whitespaces).isEmpty {
-            categoryButton.isEnabled = true
-            categoryButton.backgroundColor = .ypBlack
+            createCategoryButton.isEnabled = true
+            createCategoryButton.backgroundColor = .ypBlack
         } else {
-            categoryButton.isEnabled = false
-            categoryButton.backgroundColor = .ypGray
+            createCategoryButton.isEnabled = false
+            createCategoryButton.backgroundColor = .ypGray
         }
     }
     
     // MARK: - Actions
     @objc
-    private func didTapCategoryButton() {
+    private func didTapCreateCategoryButton() {
         guard let categoryTitle else { return }
         
-        delegate?.categoryButtonTapped(categoryTitle: categoryTitle, indexPath: indexPath)
-        
-        dismiss(animated: true)
+        delegate?.createCategory(categoryTitle: categoryTitle, indexPath: indexPath)
     }
     
     // MARK: - Constraints
     private func addCreateCategoryButton() {
-        view.addSubview(categoryButton)
+        view.addSubview(createCategoryButton)
         
         NSLayoutConstraint.activate([
-            categoryButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            categoryButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-            categoryButton.heightAnchor.constraint(equalToConstant: 60),
-            categoryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+            createCategoryButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            createCategoryButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            createCategoryButton.heightAnchor.constraint(equalToConstant: 60),
+            createCategoryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
         ])
     }
     
@@ -130,7 +128,7 @@ final class CategoryViewController: UIViewController {
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
-            tableView.bottomAnchor.constraint(equalTo: categoryButton.topAnchor, constant: -16),
+            tableView.bottomAnchor.constraint(equalTo: createCategoryButton.topAnchor, constant: -16),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])

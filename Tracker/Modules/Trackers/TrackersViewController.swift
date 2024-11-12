@@ -104,13 +104,12 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
 
         // Debug
-//        addMockData()
+        addMockData()
         
         loadCategories()
         loadCompletedTrackers()
         
         filterCategories(with: currentDate)
-        print(filteredCategories ?? [])
         
         // Debug: clear tracker records
 //        completedTrackers = []
@@ -302,18 +301,9 @@ final class TrackersViewController: UIViewController {
         
         filterCategories(with: currentDate)
         
-        collectionView.performBatchUpdates({ [weak self] in
-            guard let self else { return }
-            
-            self.collectionView.deleteItems(at: indexPaths)
-            
-            if self.categories[indexPath.section].trackers.isEmpty {
-                self.collectionView.deleteSections(IndexSet(integer: indexPath.section))
-            }
-        }, completion: { [weak self] _ in
-            
-            self?.showPlaceholderIfNeeded()
-        })
+        collectionView.reloadData()
+        
+        showPlaceholderIfNeeded()
     }
     
     // MARK: - Actions
@@ -364,12 +354,16 @@ final class TrackersViewController: UIViewController {
 
 // MARK: - UICollectionViewDataSource
 extension TrackersViewController: UICollectionViewDataSource {
+    
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         guard let filteredCategories = filteredCategories else { return 0 }
         return filteredCategories.count
      }
     
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        numberOfItemsInSection section: Int
+    ) -> Int {
         if let filteredCategories {
             return filteredCategories[section].trackers.count
         } else {
@@ -378,10 +372,8 @@ extension TrackersViewController: UICollectionViewDataSource {
     }
     
     // MARK: - Cell
-    func collectionView(
-        _ collectionView: UICollectionView,
-        cellForItemAt indexPath: IndexPath
-    ) -> UICollectionViewCell {
+    func collectionView(_ collectionView: UICollectionView,
+                        cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard
             let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: TrackerCell.reuseIdentifier,
@@ -394,9 +386,12 @@ extension TrackersViewController: UICollectionViewDataSource {
         
         let tracker = filteredCategories[indexPath.section].trackers[indexPath.row]
         
-        let trackerRecord = completedTrackers.first(where: {
-            $0.trackerId == tracker.id && $0.date == currentDate
-        })
+        let trackerRecord = completedTrackers.first(
+            where: {
+                $0.trackerId == tracker.id &&
+                $0.date.truncated == currentDate.truncated
+            }
+        )
         
         cell.delegate = self
         cell.configure(
@@ -422,7 +417,11 @@ extension TrackersViewController: UICollectionViewDataSource {
             id = ""
         }
         
-        if let view = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: id, for: indexPath) as? TrackerHeaderReusableView {
+        if let view = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            withReuseIdentifier: id,
+            for: indexPath
+        ) as? TrackerHeaderReusableView {
             guard
                 let filteredCategories = filteredCategories
             else {
@@ -440,6 +439,7 @@ extension TrackersViewController: UICollectionViewDataSource {
 
 // MARK: - UICollectionViewDelegateFlowLayout
 extension TrackersViewController: UICollectionViewDelegateFlowLayout {
+    
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
@@ -462,7 +462,11 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
         return insets
     }
     
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        minimumInteritemSpacingForSectionAt section: Int
+    ) -> CGFloat {
         
         return params.cellSpacing
     }
@@ -548,15 +552,17 @@ extension TrackersViewController: TrackerCellDelegate {
         
         if let record {
             // remove record from completed
-            completedTrackers = completedTrackers.filter { $0.trackerId != record.trackerId }
+            completedTrackers.removeAll(where: {
+                $0.trackerId == record.trackerId &&
+                $0.date.truncated == record.date.truncated
+            })
         } else {
             // add record to completed
-            completedTrackers.insert(
+            completedTrackers.append(
                 TrackerRecord(
                     trackerId: tracker.id,
                     date: currentDate
-                ),
-                at: 0
+                )
             )
         }
         
@@ -586,14 +592,33 @@ extension TrackersViewController: UISearchBarDelegate {
 
 // MARK: - TrackerTableViewControllerDelegate
 extension TrackersViewController: TrackerTableViewControllerDelegate {
-    func didTapDoneButton(categories: [TrackerCategory]) {
+    func cancelButtonTapped(categories: [TrackerCategory]) {
+        dismiss(animated: true)
         self.categories = categories
         saveCategories()
         
         filterCategories(with: currentDate)
         collectionView.reloadData()
         showPlaceholderIfNeeded()
+    }
+    
+    func doneButtonTapped(categories: [TrackerCategory]) {
         dismiss(animated: true)
+        self.categories = categories
+        saveCategories()
+        
+        filterCategories(with: currentDate)
+        collectionView.reloadData()
+        showPlaceholderIfNeeded()
+    }
+    
+    func updateCategories(categories: [TrackerCategory]) {
+        self.categories = categories
+        saveCategories()
+        
+        filterCategories(with: currentDate)
+        collectionView.reloadData()
+        showPlaceholderIfNeeded()
     }
 }
 
