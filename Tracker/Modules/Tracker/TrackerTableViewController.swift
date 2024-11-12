@@ -86,6 +86,13 @@ final class TrackerTableViewController: UITableViewController {
         return view
     }()
     
+    private lazy var tap: UITapGestureRecognizer = {
+        let view = UITapGestureRecognizer()
+        view.addTarget(self, action: #selector(hideKeyboard))
+        
+        return view
+    }()
+    
     // MARK: - Init
     init(
         tableType: TrackerTableType,
@@ -114,6 +121,8 @@ final class TrackerTableViewController: UITableViewController {
         tableView.dataSource = self
         tableView.separatorStyle = .none
         registerCells()
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
 
         switch tableType {
         case .special(let date):
@@ -238,6 +247,12 @@ final class TrackerTableViewController: UITableViewController {
         tableView.register(ButtonsCell.self, forCellReuseIdentifier: ButtonsCell.reuseIdentifier)
         tableView.register(EmojisCell.self, forCellReuseIdentifier: EmojisCell.reuseIdentifier)
         tableView.register(ColorsCell.self, forCellReuseIdentifier: ColorsCell.reuseIdentifier)
+    }
+    
+    // MARK: - Actions
+    @objc
+    private func hideKeyboard() {
+        view.endEditing(true)
     }
 
     // MARK: - Table view data source

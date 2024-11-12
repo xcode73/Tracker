@@ -52,6 +52,13 @@ final class CategoryViewController: UIViewController {
         return view
     }()
     
+    private lazy var tap: UITapGestureRecognizer = {
+        let view = UITapGestureRecognizer()
+        view.addTarget(self, action: #selector(hideKeyboard))
+        
+        return view
+    }()
+    
     // MARK: - Init
     init(
         categoryTitle: String?,
@@ -86,6 +93,8 @@ final class CategoryViewController: UIViewController {
         addTableView()
         
         changeCreateCategoryButtonState()
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
     }
     
     private func changeCreateCategoryButtonState() {
@@ -109,6 +118,11 @@ final class CategoryViewController: UIViewController {
         guard let categoryTitle else { return }
         
         delegate?.createCategory(categoryTitle: categoryTitle, indexPath: indexPath)
+    }
+    
+    @objc
+    private func hideKeyboard() {
+        view.endEditing(true)
     }
     
     // MARK: - Constraints
