@@ -7,7 +7,15 @@
 
 import UIKit
 
+protocol OnboardingCellDelegate: AnyObject {
+    func didTapConfirmButton()
+}
+
 final class OnboardingCell: UICollectionViewCell {
+    static let reuseIdentifier = "OnboardingCell"
+    
+    weak var delegate: OnboardingCellDelegate?
+    
     // MARK: - UI Components
     private lazy var featureLabel: UILabel = {
         let view = UILabel()
@@ -22,6 +30,21 @@ final class OnboardingCell: UICollectionViewCell {
     private lazy var backgroundImageView: UIImageView = {
         let view = UIImageView()
         view.contentMode = .scaleToFill
+        
+        return view
+    }()
+    
+    private lazy var confirmButton: UIButton = {
+        let view = UIButton()
+        view.layer.masksToBounds = true
+        view.layer.cornerRadius = 16
+        view.backgroundColor = .black
+        view.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        view.setTitleColor(.white, for: .normal)
+        view.setTitle("Вот это технологии!", for: .normal)
+        view.addTarget(self, action: #selector(didTapConfirmButton), for: .touchUpInside)
+        view.accessibilityIdentifier = "Switch To TabBar Button"
+        view.translatesAutoresizingMaskIntoConstraints = false
         
         return view
     }()
@@ -46,6 +69,13 @@ final class OnboardingCell: UICollectionViewCell {
     private func setupUI() {
         addBackgroundImageView()
         addFeatureLabel()
+        addConfirmButton()
+    }
+    
+    // MARK: - Action
+    @objc
+    private func didTapConfirmButton() {
+        delegate?.didTapConfirmButton()
     }
     
     //MARK: - Constraints
@@ -71,7 +101,17 @@ final class OnboardingCell: UICollectionViewCell {
             featureLabel.centerYAnchor.constraint(equalTo: backgroundImageView.centerYAnchor)
         ])
     }
-            
+    
+    private func addConfirmButton() {
+        contentView.addSubview(confirmButton)
+        
+        NSLayoutConstraint.activate([
+            confirmButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            confirmButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            confirmButton.heightAnchor.constraint(equalToConstant: 60),
+            confirmButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -50)
+        ])
+    }
 }
 
 // MARK: - Preview

@@ -41,21 +41,6 @@ final class OnboardingViewController: UIPageViewController {
         return view
     }()
     
-    private lazy var confirmButton: UIButton = {
-        let view = UIButton()
-        view.layer.masksToBounds = true
-        view.layer.cornerRadius = 16
-        view.backgroundColor = .black
-        view.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
-        view.setTitleColor(.white, for: .normal)
-        view.setTitle("Вот это технологии!", for: .normal)
-        view.addTarget(self, action: #selector(didTapConfirmButton), for: .touchUpInside)
-        view.accessibilityIdentifier = "Switch To TabBar Button"
-        view.translatesAutoresizingMaskIntoConstraints = false
-        
-        return view
-    }()
-    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -66,7 +51,6 @@ final class OnboardingViewController: UIPageViewController {
     
     private func setupUI() {
         addOnboardingCollectionView()
-        addConfirmButton()
         addPageControl()
     }
     
@@ -83,33 +67,22 @@ final class OnboardingViewController: UIPageViewController {
         ])
     }
     
-    private func addConfirmButton() {
-        view.addSubview(confirmButton)
-        
-        NSLayoutConstraint.activate([
-            confirmButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            confirmButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            confirmButton.heightAnchor.constraint(equalToConstant: 60),
-            confirmButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -64)
-        ])
-    }
-    
     private func addPageControl() {
         pageControl.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(pageControl)
         
         NSLayoutConstraint.activate([
             pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            pageControl.bottomAnchor.constraint(equalTo: confirmButton.topAnchor, constant: -20)
+            pageControl.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -123)
         ])
     }
 
-    // MARK: - Action
-    @objc
-    private func didTapConfirmButton() {
-        UserDefaults.standard.isOnboardingCompleted = true
-        dismiss(animated: true)
-    }
+//    // MARK: - Action
+//    @objc
+//    internal func didTapConfirmButton() {
+//        UserDefaults.standard.isOnboardingCompleted = true
+//        dismiss(animated: true)
+//    }
 }
 
 // MARK: - UICollectionViewDataSource
@@ -122,6 +95,7 @@ extension OnboardingViewController: UICollectionViewDataSource {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: OnboardingCell.reuseIdentifier, for: indexPath) as? OnboardingCell else {
             return UICollectionViewCell()
         }
+        cell.delegate = self
         cell.prepareForReuse()
         cell.configure(with: pages[indexPath.row])
         
@@ -138,6 +112,14 @@ extension OnboardingViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         pageControl.currentPage = indexPath.row
+    }
+}
+
+// MARK: - OnboardingCellDelegate
+extension OnboardingViewController: OnboardingCellDelegate {
+    func didTapConfirmButton() {
+        UserDefaults.standard.isOnboardingCompleted = true
+        dismiss(animated: true)
     }
 }
 
