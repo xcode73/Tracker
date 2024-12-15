@@ -113,20 +113,15 @@ final class SettingsCell: UITableViewCell {
         }
         
         if indexPath.row == 1 {
-            var schedule = ""
             if let selectedWeekDays {
-                for day in selectedWeekDays {
-                    schedule += day.localizedShortName
-                    if day != selectedWeekDays.last {
-                        schedule += ", "
-                    }
-                }
+                var orderedWeekDays = WeekDay.ordered()
+                orderedWeekDays = orderedWeekDays.filter { selectedWeekDays.contains($0) }
+                let schedule = orderedWeekDays.map { $0.localizedShortName }
+                    .joined(separator: ", ")
                 descriptionLabel.text = schedule
             }
-            
             addSeparatorView()
         }
-        
         cellStyle(cellPosition: cellPosition)
     }
     

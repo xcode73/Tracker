@@ -195,13 +195,21 @@ extension TrackerStore: NSFetchedResultsControllerDelegate {
         
         switch type {
         case .insert:
-            inProgressChanges.append(.object(.inserted(at: newIndexPath!)))
+            if let newIndexPath {
+                inProgressChanges.append(.object(.inserted(at: newIndexPath)))
+            }
         case .delete:
-            inProgressChanges.append(.object(.deleted(from: indexPath!)))
+            if let indexPath {
+                inProgressChanges.append(.object(.deleted(from: indexPath)))
+            }
         case .move:
-            inProgressChanges.append(.object(.moved(from: indexPath!, to: newIndexPath!)))
+            if let indexPath, let newIndexPath {
+                inProgressChanges.append(.object(.moved(from: indexPath, to: newIndexPath)))
+            }
         case .update:
-            inProgressChanges.append(.object(.updated(at: indexPath!)))
+            if let indexPath {
+                inProgressChanges.append(.object(.updated(at: indexPath)))
+            }
         default:
             break
         }

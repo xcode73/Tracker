@@ -125,7 +125,7 @@ extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
                 }
             }
         case .delete:
-            if let indexPath = indexPath {
+            if let indexPath {
                 inProgressChanges.append(.deleted(from: indexPath))
                 if itemsCount > 1 {
                     let updatedIndexPath: IndexPath = IndexPath(item: indexPath.item - 1, section: 0)

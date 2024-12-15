@@ -16,7 +16,7 @@ protocol TrackerDataStore {
     func deleteItem(_ item: NSManagedObject) throws
 }
 
-class DataStore {
+final class DataStore {
     private let modelName = "Tracker"
     private let storeURL = NSPersistentContainer
                                 .defaultDirectoryURL()
