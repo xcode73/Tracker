@@ -40,13 +40,14 @@ final class CategoriesViewController: UIViewController {
     
     // MARK: - UI Components
     private lazy var tableView: UITableView = {
-        let view = UITableView()
+        let view = UITableView(frame: view.bounds, style: .insetGrouped)
+        view.backgroundColor = .ypWhite
         view.register(CategoryCell.self, forCellReuseIdentifier: CategoryCell.reuseIdentifier)
         view.separatorStyle = .singleLine
         view.separatorColor = .ypBlack
+        view.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         view.estimatedRowHeight = 75
         view.rowHeight = 75
-        view.layer.cornerRadius = 16
         view.delegate = self
         view.dataSource = self
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -210,8 +211,8 @@ final class CategoriesViewController: UIViewController {
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             tableView.bottomAnchor.constraint(equalTo: createCategoryButton.topAnchor, constant: -16),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0)
         ])
     }
     
@@ -249,30 +250,13 @@ extension CategoriesViewController: UITableViewDataSource {
                    cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard
             let cell = tableView.dequeueReusableCell(withIdentifier: CategoryCell.reuseIdentifier, for: indexPath) as? CategoryCell,
-            let categoryTitle = trackerCategoryStore?.categoryTitle(at: indexPath),
-            let cellCount = trackerCategoryStore?.numberOfRowsInSection(indexPath.section)
+            let categoryTitle = trackerCategoryStore?.categoryTitle(at: indexPath)
         else {
             return UITableViewCell()
         }
-        cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        var isRegular: Bool = true
-        
-        switch indexPath.row {
-        case 0:
-            if cellCount == 1  {
-                cell.separatorInset = UIEdgeInsets(top: 0, left: UIScreen.main.bounds.width, bottom: 0, right: 0)
-                isRegular = false
-            }
-        case cellCount - 1:
-            cell.separatorInset = UIEdgeInsets(top: 0, left: UIScreen.main.bounds.width, bottom: 0, right: 0)
-            isRegular = false
-        default:
-            isRegular = true
-        }
         
         cell.configure(
-            with: categoryTitle,
-            cellType: isRegular
+            with: categoryTitle
         )
         
         return cell

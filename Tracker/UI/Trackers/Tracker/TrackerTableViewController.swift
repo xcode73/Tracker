@@ -111,7 +111,6 @@ final class TrackerTableViewController: UITableViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.separatorStyle = .none
-        registerCells()
         tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
 
@@ -209,23 +208,13 @@ final class TrackerTableViewController: UITableViewController {
         isDoneButtonEnabled = false
     }
     
-    // MARK: - Register cells
-    private func registerCells() {
-        tableView.register(SectionHeaderTableViewCell.self, forCellReuseIdentifier: SectionHeaderTableViewCell.reuseIdentifier)
-        tableView.register(TitleCell.self, forCellReuseIdentifier: TitleCell.reuseIdentifier)
-        tableView.register(SettingsCell.self, forCellReuseIdentifier: SettingsCell.reuseIdentifier)
-        tableView.register(ButtonsCell.self, forCellReuseIdentifier: ButtonsCell.reuseIdentifier)
-        tableView.register(EmojisCell.self, forCellReuseIdentifier: EmojisCell.reuseIdentifier)
-        tableView.register(ColorsCell.self, forCellReuseIdentifier: ColorsCell.reuseIdentifier)
-    }
-    
     // MARK: - Actions
     @objc
     private func hideKeyboard() {
         view.endEditing(true)
     }
 
-    // MARK: - Table view data source
+    // MARK: - Data source
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 5
     }

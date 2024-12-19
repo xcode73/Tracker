@@ -28,5 +28,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func sceneWillEnterForeground(_ scene: UIScene) { }
 
-    func sceneDidEnterBackground(_ scene: UIScene) { }
+    func sceneDidEnterBackground(_ scene: UIScene) {
+        try? (UIApplication.shared.delegate as! AppDelegate).trackerDataStore.saveContext()
+    }
 }

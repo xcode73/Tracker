@@ -59,16 +59,13 @@ final class CategoryCell: UITableViewCell {
         disclosureIndicatorImageView.isHidden = !selected
     }
     
+    override class var layerClass: AnyClass {
+        InsetsGroupedLayer.self
+    }
+    
     // MARK: - Config
-    func configure(with categoryTitle: String, cellType: Bool) {
+    func configure(with categoryTitle: String /*cellType: Bool*/) {
         titleLabel.text = categoryTitle
-        
-        if cellType {
-            contentView.layer.cornerRadius = 0
-        } else {
-            contentView.layer.cornerRadius = 16
-            contentView.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-        }
     }
     
     func configureSelectedView() -> UIView {
@@ -79,7 +76,6 @@ final class CategoryCell: UITableViewCell {
     private func setupViews() {
         selectionStyle = .none
         contentView.backgroundColor = .ypBackground
-        contentView.layer.masksToBounds = true
         contentView.addSubview(horizontalStackView)
         horizontalStackView.addArrangedSubview(titleLabel)
         addImageViewDisclosureIndicator()
