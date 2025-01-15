@@ -7,6 +7,13 @@
 
 import UIKit
 
+final class InsetsGroupedLayer: CALayer {
+    override var cornerRadius: CGFloat {
+        get { 16 }
+        set {}
+    }
+}
+
 final class CategoryCell: UITableViewCell {
     // MARK: - UI Components
     private lazy var horizontalStackView: UIStackView = {
