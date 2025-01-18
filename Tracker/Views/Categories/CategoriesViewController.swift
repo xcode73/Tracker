@@ -14,21 +14,10 @@ protocol CategoriesViewControllerDelegate: AnyObject {
 final class CategoriesViewController: UIViewController {
     // MARK: - Properties
     weak var delegate: CategoriesViewControllerDelegate?
-    private var selectedCategoryTitle: String?
-    private let trackerDataStore: TrackerDataStore
     
-    private lazy var trackerCategoryStore: TrackerCategoryStoreProtocol? = {
-        do {
-            try trackerCategoryStore = TrackerCategoryStore(
-                trackerDataStore,
-                delegate: self
-            )
-            return trackerCategoryStore
-        } catch {
-            showError(message: "Данные недоступны.")
-            return nil
-        }
-    }()
+    private var viewModel: CategoriesViewModel?
+    
+    private var selectedCategoryTitle: String?
     
     private enum LocalConst {
         static let vcTitle = "Категории"
@@ -102,11 +91,9 @@ final class CategoriesViewController: UIViewController {
     
     // MARK: - Init
     init(
-        selectedCategoryTitle: String?,
-        trackerDataStore: TrackerDataStore
+        selectedCategoryTitle: String?
     ) {
         self.selectedCategoryTitle = selectedCategoryTitle
-        self.trackerDataStore = trackerDataStore
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -120,20 +107,61 @@ final class CategoriesViewController: UIViewController {
         super.viewDidLoad()
 
         setupUI()
+        setupLayout()
+    }
+    
+    func initialize(viewModel: CategoriesViewModel) {
+        self.viewModel = viewModel
+        bind()
+    }
+    
+    private func bind() {
+        guard let viewModel = viewModel else { return }
+        
+        viewModel.onChange = { [weak self] updates in
+            self?.update(updates)
+        }
+        
+        viewModel.onErrorStateChange = { [weak self] message in
+            self?.showError(message: message ?? "")
+        }
+    }
+    
+    private func update(_ updates: [TrackerCategoryStoreUpdate]) {
+        var movedToIndexPaths = [IndexPath]()
+        var lastIndexPaths = [IndexPath]()
+        
+        tableView.performBatchUpdates({
+            for update in updates {
+                switch update {
+                case let .inserted(at: indexPath):
+                    tableView.insertRows(at: [indexPath], with: .automatic)
+                case let .deleted(from: indexPath):
+                    tableView.deleteRows(at: [indexPath], with: .automatic)
+                case let .updated(at: indexPath):
+                    tableView.reloadRows(at: [indexPath], with: .automatic)
+                case let .moved(from: source, to: target):
+                    tableView.moveRow(at: source, to: target)
+                    movedToIndexPaths.append(target)
+                    lastIndexPaths.append(source)
+                }
+                
+            }
+        }, completion: { done in
+            self.tableView.reloadRows(at: movedToIndexPaths, with: .automatic)
+            self.tableView.reloadRows(at: lastIndexPaths, with: .automatic)
+        })
     }
     
     private func setupUI() {
         title = LocalConst.vcTitle
         view.backgroundColor = .ypWhite
-        addCreateCategoryButton()
-        addTableView()
-        addPlaceholderView()
     }
     
     // MARK: - Context Menu
     private func showCategoryDetail(indexPath: IndexPath) {
         let vc = CategoryViewController(
-            categoryTitle: trackerCategoryStore?.categoryTitle(at: indexPath),
+            categoryTitle: viewModel?.getCategoryTitle(at: indexPath),
             indexPath: indexPath
         )
         vc.delegate = self
@@ -147,7 +175,7 @@ final class CategoriesViewController: UIViewController {
     
     // MARK: - Delete
     private func deleteCategory(at indexPath: IndexPath) {
-        try? trackerCategoryStore?.deleteCategory(at: indexPath)
+        viewModel?.deleteCategory(at: indexPath)
     }
     
     // MARK: - Delete Alert
@@ -194,6 +222,12 @@ final class CategoriesViewController: UIViewController {
     }
     
     // MARK: - Constraints
+    private func setupLayout() {
+        addCreateCategoryButton()
+        addTableView()
+        addPlaceholderView()
+    }
+    
     private func addCreateCategoryButton() {
         view.addSubview(createCategoryButton)
         
@@ -233,9 +267,8 @@ final class CategoriesViewController: UIViewController {
 
 // MARK: - UITableViewDataSource
 extension CategoriesViewController: UITableViewDataSource {
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let categoriesCount = trackerCategoryStore?.numberOfRowsInSection(section)
+        let categoriesCount = viewModel?.numberOfRowsInSection(section: section)
         
         if categoriesCount == nil || categoriesCount == 0 {
             placeholderStackView.isHidden = false
@@ -250,7 +283,7 @@ extension CategoriesViewController: UITableViewDataSource {
                    cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard
             let cell = tableView.dequeueReusableCell(withIdentifier: CategoryCell.reuseIdentifier, for: indexPath) as? CategoryCell,
-            let categoryTitle = trackerCategoryStore?.categoryTitle(at: indexPath)
+            let categoryTitle = viewModel?.getCategoryTitle(at: indexPath)
         else {
             return UITableViewCell()
         }
@@ -273,7 +306,7 @@ extension CategoriesViewController: UITableViewDelegate {
                    willDisplay cell: UITableViewCell,
                    forRowAt indexPath: IndexPath) {
         guard
-            let categoryTitle = trackerCategoryStore?.categoryTitle(at: indexPath),
+            let categoryTitle = viewModel?.getCategoryTitle(at: indexPath),
             let selectedCategoryTitle
         else {
             return
@@ -287,7 +320,7 @@ extension CategoriesViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView,
                    didSelectRowAt indexPath: IndexPath) {
         guard
-            let categoryTitle = trackerCategoryStore?.categoryTitle(at: indexPath)
+            let categoryTitle = viewModel?.getCategoryTitle(at: indexPath)
         else {
             return
         }
@@ -337,43 +370,13 @@ extension CategoriesViewController: CategoryViewControllerDelegate {
     func createCategory(categoryTitle: String) {
         let category = TrackerCategory(title: categoryTitle, trackers: nil)
         
-        try? trackerCategoryStore?.addCategory(category: category)
+        viewModel?.addCategory(category: category)
         dismiss(animated: true)
     }
     
     func editCategory(categoryTitle: String, at indexPath: IndexPath) {
-        try? trackerCategoryStore?.updateCategory(categoryTitle: categoryTitle, at: indexPath)
+        viewModel?.updateCategory(categoryTitle: categoryTitle, at: indexPath)
         dismiss(animated: true)
-    }
-}
-
-// MARK: - TrackerCategoryStoreDelegate
-extension CategoriesViewController: TrackerCategoryStoreDelegate {
-    
-    func didUpdate(_ updates: [TrackerCategoryStoreUpdate]) {
-        var movedToIndexPaths = [IndexPath]()
-        var lastIndexPaths = [IndexPath]()
-        
-        tableView.performBatchUpdates({
-            for update in updates {
-                switch update {
-                case let .inserted(at: indexPath):
-                    tableView.insertRows(at: [indexPath], with: .automatic)
-                case let .deleted(from: indexPath):
-                    tableView.deleteRows(at: [indexPath], with: .automatic)
-                case let .updated(at: indexPath):
-                    tableView.reloadRows(at: [indexPath], with: .automatic)
-                case let .moved(from: source, to: target):
-                    tableView.moveRow(at: source, to: target)
-                    movedToIndexPaths.append(target)
-                    lastIndexPaths.append(source)
-                }
-                
-            }
-        }, completion: { done in
-            self.tableView.reloadRows(at: movedToIndexPaths, with: .automatic)
-            self.tableView.reloadRows(at: lastIndexPaths, with: .automatic)
-        })
     }
 }
 
@@ -382,9 +385,13 @@ extension CategoriesViewController: TrackerCategoryStoreDelegate {
 @available(iOS 17, *)
 #Preview("Categories") {
     let trackerDataStore = (UIApplication.shared.delegate as! AppDelegate).trackerDataStore
+    
+    let viewModel = CategoriesViewModel(trackerDataStore: trackerDataStore)
+    let vc = CategoriesViewController(selectedCategoryTitle: nil)
+    vc.initialize(viewModel: viewModel)
+    
     let navigationController = UINavigationController(
-        rootViewController: CategoriesViewController(selectedCategoryTitle: nil,
-                                                     trackerDataStore: trackerDataStore)
+        rootViewController: vc
     )
     navigationController.modalPresentationStyle = .pageSheet
     

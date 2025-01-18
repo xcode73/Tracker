@@ -108,10 +108,15 @@ final class CategoryCell: UITableViewCell {
 #if DEBUG
 @available(iOS 17, *)
 #Preview("Categories") {
+    
     let trackerDataStore = (UIApplication.shared.delegate as! AppDelegate).trackerDataStore
+    
+    let viewModel = CategoriesViewModel(trackerDataStore: trackerDataStore)
+    let vc = CategoriesViewController(selectedCategoryTitle: nil)
+    vc.initialize(viewModel: viewModel)
+    
     let navigationController = UINavigationController(
-        rootViewController: CategoriesViewController(selectedCategoryTitle: nil,
-                                                     trackerDataStore: trackerDataStore)
+        rootViewController: vc
     )
     navigationController.modalPresentationStyle = .pageSheet
     

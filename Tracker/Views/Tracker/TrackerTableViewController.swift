@@ -328,8 +328,9 @@ final class TrackerTableViewController: UITableViewController {
         if indexPath.section == 1 {
             switch indexPath.row {
             case 0:
-                let vc = CategoriesViewController(selectedCategoryTitle: newTracker.categoryTitle,
-                                                  trackerDataStore: trackerDataStore)
+                let vc = CategoriesViewController(selectedCategoryTitle: newTracker.categoryTitle)
+                let viewModel = CategoriesViewModel(trackerDataStore: trackerDataStore)
+                vc.initialize(viewModel: viewModel)
                 vc.delegate = self
                 let navigationController = UINavigationController(
                     rootViewController: vc
