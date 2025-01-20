@@ -7,68 +7,83 @@
 
 import UIKit
 
+protocol OnboardingViewControllerDelegate: AnyObject {
+    func onboardingCompleted()
+}
+
 final class OnboardingViewController: UIPageViewController {
     // MARK: - Properties
-    private var pages: [OnboardingPage] = [
-        OnboardingPage(image: .imgOnboardingBlue, title: "Отслеживайте только \nто, что хотите"),
-        OnboardingPage(image: .imgOnboardingRed, title: "Даже если это \nне литры воды и йога")
+    weak var onboardingDelegate: OnboardingViewControllerDelegate?
+    private var currentIndex = 0
+    
+    private let onboardingItems = [
+        OnboardingItem(image: .imgOnboardingBlue,
+                       description: Constants.Onboarding.blueTitle,
+                       buttonTitle: Constants.Onboarding.buttonTitle),
+        OnboardingItem(image: .imgOnboardingRed,
+                       description: Constants.Onboarding.redTitle,
+                       buttonTitle: Constants.Onboarding.buttonTitle)
     ]
-    private let initialPage: Int = 0
     
     // MARK: - UI Components
-    private lazy var onboardingCollectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        layout.minimumLineSpacing = 0
-        layout.scrollDirection = .horizontal
-        
-        let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        view.isPagingEnabled = true
-        view.showsHorizontalScrollIndicator = false
-        view.dataSource = self
+    private lazy var pageControl: CustomPageControl = {
+        let view = CustomPageControl()
+        view.numberOfPages = onboardingItems.count
+        view.currentPage = currentIndex
+        view.currentPageIndicatorTintColor = .ypBlack
+        view.pageIndicatorTintColor = .ypGray
         view.delegate = self
-        view.register(OnboardingCell.self, forCellWithReuseIdentifier: OnboardingCell.reuseIdentifier)
-
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
         return view
     }()
     
-    private lazy var pageControl: UIPageControl = {
-        let view = UIPageControl()
-        view.numberOfPages = pages.count
-        view.currentPage = initialPage
-        view.currentPageIndicatorTintColor = .ypBlack
-        view.pageIndicatorTintColor = .ypGray
-        
-        return view
-    }()
+    // MARK: - Init
+    init() {
+        super.init(transitionStyle: .scroll,
+                   navigationOrientation: .horizontal,
+                   options: nil)
+    }
+
+    required init(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        overrideUserInterfaceStyle = .light
         setupUI()
     }
     
     private func setupUI() {
-        addOnboardingCollectionView()
+        dataSource = self
+        delegate = self
+        setViewControllers(currentIndex, direction: .forward)
+        overrideUserInterfaceStyle = .light
         addPageControl()
     }
     
-    // MARK: - Constraints
-    private func addOnboardingCollectionView() {
-        onboardingCollectionView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(onboardingCollectionView)
+    private func contentViewController(at index: Int) -> OnboardingContentViewController? {
+        let vc = OnboardingContentViewController(onboardingItem: onboardingItems[index])
+        vc.delegate = self
         
-        NSLayoutConstraint.activate([
-            onboardingCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            onboardingCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            onboardingCollectionView.topAnchor.constraint(equalTo: view.topAnchor),
-            onboardingCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
+        return vc
     }
     
+    private func setViewControllers(_ index: Int, direction: UIPageViewController.NavigationDirection) {
+        guard let contentViewController = contentViewController(at: index) else { return }
+        
+        setViewControllers(
+            [contentViewController],
+            direction: direction,
+            animated: true,
+            completion: nil
+        )
+    }
+    
+    // MARK: - Constraints
     private func addPageControl() {
-        pageControl.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(pageControl)
         
         NSLayoutConstraint.activate([
@@ -76,57 +91,81 @@ final class OnboardingViewController: UIPageViewController {
             pageControl.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -123)
         ])
     }
-
-//    // MARK: - Action
-//    @objc
-//    internal func didTapConfirmButton() {
-//        UserDefaults.standard.isOnboardingCompleted = true
-//        dismiss(animated: true)
-//    }
 }
 
-// MARK: - UICollectionViewDataSource
-extension OnboardingViewController: UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        pages.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: OnboardingCell.reuseIdentifier, for: indexPath) as? OnboardingCell else {
-            return UICollectionViewCell()
+// MARK: - UIPageViewControllerDataSource
+extension OnboardingViewController: UIPageViewControllerDataSource {
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        viewControllerBefore viewController: UIViewController
+    ) -> UIViewController? {
+        let previousIndex = currentIndex - 1
+        guard previousIndex >= 0 else {
+            return contentViewController(at: onboardingItems.count - 1)
         }
-        cell.delegate = self
-        cell.prepareForReuse()
-        cell.configure(with: pages[indexPath.row])
         
-        return cell
+        return contentViewController(at: previousIndex)
+    }
+    
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        viewControllerAfter viewController: UIViewController
+    ) -> UIViewController? {
+        let nextIndex = currentIndex + 1
+        guard nextIndex < onboardingItems.count else {
+            return contentViewController(at: 0)
+        }
+        
+        return contentViewController(at: nextIndex)
     }
 }
 
-// MARK: - UICollectionViewDelegate
-extension OnboardingViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        CGSize(width: collectionView.frame.width, height: collectionView.frame.height)
-    }
-    
-    
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        pageControl.currentPage = indexPath.row
+// MARK: - UIPageViewControllerDelegate
+extension OnboardingViewController: UIPageViewControllerDelegate {
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        didFinishAnimating finished: Bool,
+        previousViewControllers: [UIViewController],
+        transitionCompleted completed: Bool
+    ) {
+        guard
+            let onboardingVCs = pageViewController.viewControllers as? [OnboardingContentViewController],
+            let currentIndex = onboardingItems.firstIndex(of: onboardingVCs[0].onboardingItem)
+        else { return }
+
+        self.currentIndex = currentIndex
+        pageControl.currentPage = currentIndex
     }
 }
 
-// MARK: - OnboardingCellDelegate
-extension OnboardingViewController: OnboardingCellDelegate {
+// MARK: - CustomPageControlDelegate
+extension OnboardingViewController: CustomPageControlDelegate {
+    func customPageControl(_ pageControl: UIPageControl,
+                           didTapIndicatorAtIndex index: Int
+    ) {
+        var direction: UIPageViewController.NavigationDirection = .forward
+        
+        if index < currentIndex {
+            direction = .reverse
+        }
+        
+        setViewControllers(index, direction: direction)
+        currentIndex = index
+    }
+}
+
+// MARK: - OnboardingContentViewControllerDelegate
+extension OnboardingViewController: OnboardingContentViewControllerDelegate {
     func didTapConfirmButton() {
         UserDefaults.standard.isOnboardingCompleted = true
-        dismiss(animated: true)
+        onboardingDelegate?.onboardingCompleted()
     }
 }
 
 // MARK: - Preview
 #if DEBUG
 @available(iOS 17, *)
-#Preview() {
+#Preview("Onboarding") {
     OnboardingViewController()
 }
 #endif

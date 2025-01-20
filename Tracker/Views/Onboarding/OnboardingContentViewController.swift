@@ -1,20 +1,19 @@
 //
-//  OnboardingCell.swift
+//  OnboardingContentViewController.swift
 //  Tracker
 //
-//  Created by Nikolai Eremenko on 30.09.2024.
+//  Created by Nikolai Eremenko on 20.01.2025.
 //
 
 import UIKit
 
-protocol OnboardingCellDelegate: AnyObject {
+protocol OnboardingContentViewControllerDelegate: AnyObject {
     func didTapConfirmButton()
 }
 
-final class OnboardingCell: UICollectionViewCell {
-    static let reuseIdentifier = "OnboardingCell"
-    
-    weak var delegate: OnboardingCellDelegate?
+class OnboardingContentViewController: UIViewController {
+    weak var delegate: OnboardingContentViewControllerDelegate?
+    var onboardingItem: OnboardingItem
     
     // MARK: - UI Components
     private lazy var featureLabel: UILabel = {
@@ -23,6 +22,8 @@ final class OnboardingCell: UICollectionViewCell {
         view.textAlignment = .center
         view.numberOfLines = 3
         view.textColor = .black
+        view.text = onboardingItem.description
+        view.translatesAutoresizingMaskIntoConstraints = false
         
         return view
     }()
@@ -30,6 +31,8 @@ final class OnboardingCell: UICollectionViewCell {
     private lazy var backgroundImageView: UIImageView = {
         let view = UIImageView()
         view.contentMode = .scaleToFill
+        view.image = onboardingItem.image
+        view.translatesAutoresizingMaskIntoConstraints = false
         
         return view
     }()
@@ -41,29 +44,28 @@ final class OnboardingCell: UICollectionViewCell {
         view.backgroundColor = .black
         view.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         view.setTitleColor(.white, for: .normal)
-        view.setTitle("Вот это технологии!", for: .normal)
         view.addTarget(self, action: #selector(didTapConfirmButton), for: .touchUpInside)
-        view.accessibilityIdentifier = "Switch To TabBar Button"
+        view.setTitle(onboardingItem.buttonTitle, for: .normal)
         view.translatesAutoresizingMaskIntoConstraints = false
         
         return view
     }()
-    
-    //MARK: - Init
-    override init(frame: CGRect) {
-        super.init(frame: .zero)
-        
-        setupUI()
+
+    // MARK: - Init
+    init(onboardingItem: OnboardingItem) {
+        self.onboardingItem = onboardingItem
+        super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    //MARK: - Configuration
-    func configure(with model: OnboardingPage) {
-        backgroundImageView.image = model.image
-        featureLabel.text = model.title
+    // MARK: - Lifecycle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        setupUI()
     }
     
     private func setupUI() {
@@ -80,19 +82,17 @@ final class OnboardingCell: UICollectionViewCell {
     
     //MARK: - Constraints
     private func addBackgroundImageView() {
-        backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(backgroundImageView)
+        view.addSubview(backgroundImageView)
         
         NSLayoutConstraint.activate([
-            backgroundImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-            backgroundImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            backgroundImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            backgroundImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+            backgroundImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            backgroundImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            backgroundImageView.topAnchor.constraint(equalTo: view.topAnchor),
+            backgroundImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
     
     private func addFeatureLabel() {
-        featureLabel.translatesAutoresizingMaskIntoConstraints = false
         backgroundImageView.addSubview(featureLabel)
         
         NSLayoutConstraint.activate([
@@ -103,21 +103,13 @@ final class OnboardingCell: UICollectionViewCell {
     }
     
     private func addConfirmButton() {
-        contentView.addSubview(confirmButton)
+        view.addSubview(confirmButton)
         
         NSLayoutConstraint.activate([
-            confirmButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            confirmButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            confirmButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            confirmButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             confirmButton.heightAnchor.constraint(equalToConstant: 60),
-            confirmButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -50)
+            confirmButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50)
         ])
     }
 }
-
-// MARK: - Preview
-#if DEBUG
-@available(iOS 17, *)
-#Preview() {
-    OnboardingViewController()
-}
-#endif

@@ -14,6 +14,12 @@ enum Constants {
         static let delete = "Удалить"
     }
     
+    enum Onboarding {
+        static let blueTitle = "Отслеживайте только \nто, что хотите"
+        static let redTitle = "Даже если это \nне литры воды и йога"
+        static let buttonTitle = "Вот это технологии!"
+    }
+    
     static let weekDays: [WeekDay] = WeekDay.ordered()
     
     static let emojis: [String] = [
