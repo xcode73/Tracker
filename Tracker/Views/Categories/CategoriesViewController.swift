@@ -147,7 +147,9 @@ final class CategoriesViewController: UIViewController {
                 }
                 
             }
-        }, completion: { done in
+        }, completion: { [weak self] _ in
+            guard let self else { return }
+            
             self.tableView.reloadRows(at: movedToIndexPaths, with: .automatic)
             self.tableView.reloadRows(at: lastIndexPaths, with: .automatic)
         })
@@ -243,7 +245,7 @@ final class CategoriesViewController: UIViewController {
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
+            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             tableView.bottomAnchor.constraint(equalTo: createCategoryButton.topAnchor, constant: -16),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0)
