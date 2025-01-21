@@ -113,24 +113,14 @@ extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
                     for type: NSFetchedResultsChangeType,
                     newIndexPath: IndexPath?) {
         
-        let itemsCount = fetchedResultsController.fetchedObjects?.count ?? 0
-        
         switch type {
         case .insert:
             if let newIndexPath {
                 inProgressChanges.append(.inserted(at: newIndexPath))
-                if itemsCount > 1 {
-                    let updatedIndexPath: IndexPath = IndexPath(item: newIndexPath.item - 1, section: 0)
-                    inProgressChanges.append(.updated(at: updatedIndexPath))
-                }
             }
         case .delete:
             if let indexPath {
                 inProgressChanges.append(.deleted(from: indexPath))
-                if itemsCount > 1 {
-                    let updatedIndexPath: IndexPath = IndexPath(item: indexPath.item - 1, section: 0)
-                    inProgressChanges.append(.updated(at: updatedIndexPath))
-                }
             }
         case .move:
             if let indexPath, let newIndexPath {

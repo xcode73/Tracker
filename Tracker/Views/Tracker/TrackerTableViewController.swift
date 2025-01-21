@@ -111,7 +111,6 @@ final class TrackerTableViewController: UITableViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.separatorStyle = .none
-        registerCells()
         tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
 
@@ -209,23 +208,13 @@ final class TrackerTableViewController: UITableViewController {
         isDoneButtonEnabled = false
     }
     
-    // MARK: - Register cells
-    private func registerCells() {
-        tableView.register(SectionHeaderTableViewCell.self, forCellReuseIdentifier: SectionHeaderTableViewCell.reuseIdentifier)
-        tableView.register(TitleCell.self, forCellReuseIdentifier: TitleCell.reuseIdentifier)
-        tableView.register(SettingsCell.self, forCellReuseIdentifier: SettingsCell.reuseIdentifier)
-        tableView.register(ButtonsCell.self, forCellReuseIdentifier: ButtonsCell.reuseIdentifier)
-        tableView.register(EmojisCell.self, forCellReuseIdentifier: EmojisCell.reuseIdentifier)
-        tableView.register(ColorsCell.self, forCellReuseIdentifier: ColorsCell.reuseIdentifier)
-    }
-    
     // MARK: - Actions
     @objc
     private func hideKeyboard() {
         view.endEditing(true)
     }
 
-    // MARK: - Table view data source
+    // MARK: - Data source
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 5
     }
@@ -339,8 +328,9 @@ final class TrackerTableViewController: UITableViewController {
         if indexPath.section == 1 {
             switch indexPath.row {
             case 0:
-                let vc = CategoriesViewController(selectedCategoryTitle: newTracker.categoryTitle,
-                                                  trackerDataStore: trackerDataStore)
+                let vc = CategoriesViewController(selectedCategoryTitle: newTracker.categoryTitle)
+                let viewModel = CategoriesViewModel(trackerDataStore: trackerDataStore)
+                vc.initialize(viewModel: viewModel)
                 vc.delegate = self
                 let navigationController = UINavigationController(
                     rootViewController: vc

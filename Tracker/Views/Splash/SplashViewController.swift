@@ -12,7 +12,7 @@ final class SplashViewController: UIViewController {
     // MARK: - UI Components
     private lazy var logoImageView: UIImageView = {
         let view = UIImageView()
-        view.image = UIImage(named: "ic.logo")
+        view.image = .icLogo
         view.tintColor = .white
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -34,17 +34,16 @@ final class SplashViewController: UIViewController {
             switchToOnboardingViewController()
         }
     }
-}
-
-private extension SplashViewController {
+    
     // MARK: - Navigation
-    func switchToOnboardingViewController() {
+    private func switchToOnboardingViewController() {
         let viewController = OnboardingViewController()
+        viewController.onboardingDelegate = self
         viewController.modalPresentationStyle = .fullScreen
         present(viewController, animated: false)
     }
     
-    func switchToTabBarController() {
+    private func switchToTabBarController() {
         let tabBarController = TabBarController()
         
         guard let window = UIApplication.shared.windows.first else {
@@ -56,7 +55,7 @@ private extension SplashViewController {
     }
     
     // MARK: - Constraints
-    func setupViews() {
+    private func setupViews() {
         view.backgroundColor = .ypBlue
         view.addSubview(logoImageView)
         
@@ -67,9 +66,15 @@ private extension SplashViewController {
     }
 }
 
+// MARK: - OnboardingViewControllerDelegate
+extension SplashViewController: OnboardingViewControllerDelegate {
+    func onboardingCompleted() {
+        dismiss(animated: true)
+    }
+}
+
 // MARK: - Preview
 @available(iOS 17, *)
 #Preview() {
     SplashViewController()
 }
-

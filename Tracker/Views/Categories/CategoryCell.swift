@@ -7,6 +7,13 @@
 
 import UIKit
 
+final class InsetsGroupedLayer: CALayer {
+    override var cornerRadius: CGFloat {
+        get { 16 }
+        set {}
+    }
+}
+
 final class CategoryCell: UITableViewCell {
     // MARK: - UI Components
     private lazy var horizontalStackView: UIStackView = {
@@ -59,16 +66,13 @@ final class CategoryCell: UITableViewCell {
         disclosureIndicatorImageView.isHidden = !selected
     }
     
+    override class var layerClass: AnyClass {
+        InsetsGroupedLayer.self
+    }
+    
     // MARK: - Config
-    func configure(with categoryTitle: String, cellType: Bool) {
+    func configure(with categoryTitle: String /*cellType: Bool*/) {
         titleLabel.text = categoryTitle
-        
-        if cellType {
-            contentView.layer.cornerRadius = 0
-        } else {
-            contentView.layer.cornerRadius = 16
-            contentView.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-        }
     }
     
     func configureSelectedView() -> UIView {
@@ -79,7 +83,6 @@ final class CategoryCell: UITableViewCell {
     private func setupViews() {
         selectionStyle = .none
         contentView.backgroundColor = .ypBackground
-        contentView.layer.masksToBounds = true
         contentView.addSubview(horizontalStackView)
         horizontalStackView.addArrangedSubview(titleLabel)
         addImageViewDisclosureIndicator()
@@ -105,10 +108,15 @@ final class CategoryCell: UITableViewCell {
 #if DEBUG
 @available(iOS 17, *)
 #Preview("Categories") {
+    
     let trackerDataStore = (UIApplication.shared.delegate as! AppDelegate).trackerDataStore
+    
+    let viewModel = CategoriesViewModel(trackerDataStore: trackerDataStore)
+    let vc = CategoriesViewController(selectedCategoryTitle: nil)
+    vc.initialize(viewModel: viewModel)
+    
     let navigationController = UINavigationController(
-        rootViewController: CategoriesViewController(selectedCategoryTitle: nil,
-                                                     trackerDataStore: trackerDataStore)
+        rootViewController: vc
     )
     navigationController.modalPresentationStyle = .pageSheet
     

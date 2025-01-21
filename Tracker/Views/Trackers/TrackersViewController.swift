@@ -160,7 +160,6 @@ final class TrackersViewController: UIViewController {
     }
     
     private func updateCounterTitle(for trackerId: UUID) -> String {
-//        let completedCount = completedTrackers.filter { $0.trackerId == tracker.id }.count
         let completedCount = recordStore?.recordsCount(for: trackerId) ?? 0
         
         var title: String
@@ -480,15 +479,6 @@ extension TrackersViewController: TrackerCellDelegate {
         }
     }
 }
-
-//extension String {
-//    func heightWithConstrainedWidth(font: UIFont) -> CGFloat {
-//        let constraintRect = CGSize(width: UIScreen.main.bounds.width, height: CGFloat.greatestFiniteMagnitude)
-//        let boundingBox = self.boundingRect(with: constraintRect, options: NSStringDrawingOptions.usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font: font], context: nil)
-//
-//        return boundingBox.height
-//    }
-//}
 
 // MARK: - UISearchBarDelegate
 extension TrackersViewController: UISearchBarDelegate {
