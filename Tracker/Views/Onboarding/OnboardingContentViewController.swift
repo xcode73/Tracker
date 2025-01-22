@@ -18,7 +18,7 @@ class OnboardingContentViewController: UIViewController {
     // MARK: - UI Components
     private lazy var featureLabel: UILabel = {
         let view = UILabel()
-        view.font = .systemFont(ofSize: 31, weight: .bold)
+        view.font = Constants.Fonts.ypBold32
         view.textAlignment = .center
         view.numberOfLines = 3
         view.textColor = .black
@@ -42,7 +42,7 @@ class OnboardingContentViewController: UIViewController {
         view.layer.masksToBounds = true
         view.layer.cornerRadius = 16
         view.backgroundColor = .black
-        view.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        view.titleLabel?.font = Constants.Fonts.ypMedium16
         view.setTitleColor(.white, for: .normal)
         view.addTarget(self, action: #selector(didTapConfirmButton), for: .touchUpInside)
         view.setTitle(onboardingItem.buttonTitle, for: .normal)
@@ -93,12 +93,12 @@ class OnboardingContentViewController: UIViewController {
     }
     
     private func addFeatureLabel() {
-        backgroundImageView.addSubview(featureLabel)
+        view.addSubview(featureLabel)
         
         NSLayoutConstraint.activate([
-            featureLabel.leadingAnchor.constraint(equalTo: backgroundImageView.leadingAnchor, constant: 16),
-            featureLabel.trailingAnchor.constraint(equalTo: backgroundImageView.trailingAnchor, constant: -16),
-            featureLabel.centerYAnchor.constraint(equalTo: backgroundImageView.centerYAnchor)
+            featureLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            featureLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            featureLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 478)
         ])
     }
     
@@ -109,7 +109,15 @@ class OnboardingContentViewController: UIViewController {
             confirmButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             confirmButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             confirmButton.heightAnchor.constraint(equalToConstant: 60),
-            confirmButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50)
+            confirmButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -93)
         ])
     }
 }
+
+// MARK: - Preview
+#if DEBUG
+@available(iOS 17, *)
+#Preview("Onboarding") {
+    OnboardingViewController()
+}
+#endif

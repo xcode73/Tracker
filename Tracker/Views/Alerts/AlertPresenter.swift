@@ -8,15 +8,25 @@
 import UIKit
 
 enum AlertButton: String {
-    case deleteButton = "Удалить"
-    case cancelButton = "Отменить"
+    case deleteButton
+    case cancelButton
     
     var accessibilityIdentifier: String {
-        return self.rawValue
+        switch self {
+        case .deleteButton:
+            return "Delete Button"
+        case .cancelButton:
+            return "Cancel Button"
+        }
     }
     
     var title: String {
-        return self.rawValue
+        switch self {
+        case .deleteButton:
+            return NSLocalizedString("buttons.delete", comment: "")
+        case .cancelButton:
+            return NSLocalizedString("buttons.cancel", comment: "")
+        }
     }
 }
 

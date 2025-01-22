@@ -29,7 +29,7 @@ final class TrackerTypeViewController: UIViewController {
     
     private lazy var regularEventButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Привычка", for: .normal)
+        button.setTitle(NSLocalizedString("buttons.regularTracker", comment: ""), for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
         button.backgroundColor = .ypBlack
         button.layer.cornerRadius = 16
@@ -40,7 +40,7 @@ final class TrackerTypeViewController: UIViewController {
     
     private lazy var nonRegularEventButton: UIButton = {
         let button = UIButton()
-        button.setTitle("Нерегулярные событие", for: .normal)
+        button.setTitle(NSLocalizedString("buttons.specialTracker", comment: ""), for: .normal)
         button.setTitleColor(.ypWhite, for: .normal)
         button.backgroundColor = .ypBlack
         button.layer.cornerRadius = 16
@@ -102,7 +102,7 @@ final class TrackerTypeViewController: UIViewController {
     
     // MARK: - Constraints
     private func setupUI() {
-        title = "Создание трекера"
+        title = NSLocalizedString("trackerType.title", comment: "")
         view.backgroundColor = .ypWhite
         view.addSubview(buttonsStackView)
         buttonsStackView.addArrangedSubview(regularEventButton)

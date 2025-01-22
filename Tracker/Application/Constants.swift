@@ -9,15 +9,21 @@ import UIKit
 
 enum Constants {
     enum ButtonTitles {
-        static let pin = "Закрепить"
-        static let edit = "Редактировать"
-        static let delete = "Удалить"
+        static let pin = NSLocalizedString("buttons.pin", comment: "")
+        static let edit = NSLocalizedString("buttons.edit", comment: "")
+        static let delete = NSLocalizedString("buttons.delete", comment: "")
     }
     
     enum Onboarding {
-        static let blueTitle = "Отслеживайте только \nто, что хотите"
-        static let redTitle = "Даже если это \nне литры воды и йога"
-        static let buttonTitle = "Вот это технологии!"
+        static let blueTitle = NSLocalizedString("onboarding.feature.blue", comment: "")
+        static let redTitle = NSLocalizedString("onboarding.feature.red", comment: "")
+        static let buttonTitle = NSLocalizedString("buttons.completeOnboarding", comment: "")
+    }
+    
+    enum Icons {
+        static let plus = UIImage(systemName: "plus")
+        static let checkmark = UIImage(systemName: "checkmark")
+        static let chevronRight = UIImage(systemName: "chevron.right")
     }
     
     static let weekDays: [WeekDay] = WeekDay.ordered()

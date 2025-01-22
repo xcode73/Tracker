@@ -11,9 +11,8 @@ class ErrorCell: UITableViewCell {
     
     private lazy var errorLabel: UILabel = {
         let view = UILabel()
-        view.font = .systemFont(ofSize: 17, weight: .regular)
+        view.font = Constants.Fonts.ypRegular17
         view.textAlignment = .center
-        view.text = "Ограничение 38 символов"
         view.textColor = .ypRed
         view.translatesAutoresizingMaskIntoConstraints = false
         
@@ -34,5 +33,8 @@ class ErrorCell: UITableViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
+    func configure(with message: String) {
+        errorLabel.text = message
+    }
 }

@@ -30,8 +30,6 @@ final class ButtonsCell: UITableViewCell {
         let view = UIButton()
         view.layer.masksToBounds = true
         view.layer.cornerRadius = 16
-        
-        view.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         view.setTitleColor(.ypRed, for: .normal)
         view.backgroundColor = .ypWhite
         view.layer.borderColor = UIColor.ypRed.cgColor

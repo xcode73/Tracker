@@ -49,20 +49,27 @@ final class TrackerTableViewController: UITableViewController {
     
     private enum LocalConst {
         enum Edit {
-            static let specialTableTitle = "Редактирование нерегулярного события"
-            static let regularTableTitle = "Редактирование привычки"
-            static let doneButtonTitle = "Сохранить"
-        }
-        enum Add {
-            static let specialTableTitle = "Новое нерегулярное событие"
-            static let regularTableTitle = "Новая привычка"
-            static let doneButtonTitle = "Создать"
+            static let specialTableTitle = NSLocalizedString("tracker.edit.special.title", comment: "")
+            static let regularTableTitle = NSLocalizedString("tracker.edit.regular.title", comment: "")
+            static let doneButtonTitle = NSLocalizedString("buttons.save", comment: "")
         }
         
-        static let cancelButtonTitle = "Отменить"
-        static let sectionHeaders = ["Emoji", "Цвет"]
-        static let titleCellPlaceholder = "Введите название трекера"
-        static let errorCellTitle = "Ограничение 38 символов"
+        enum Add {
+            static let specialTableTitle = NSLocalizedString("tracker.add.special.title", comment: "")
+            static let regularTableTitle = NSLocalizedString("tracker.add.regular.title", comment: "")
+            static let doneButtonTitle = NSLocalizedString("buttons.add", comment: "")
+        }
+        
+        enum SectionHeader {
+            static let emoji = NSLocalizedString("tracker.section.emoji.header", comment: "")
+            static let color = NSLocalizedString("tracker.section.color.header", comment: "")
+        }
+        
+        static let cancelButtonTitle = NSLocalizedString("buttons.cancel", comment: "")
+        static let titleCellPlaceholder = NSLocalizedString("tracker.placeholder.message", comment: "")
+        static let errorCellTitle = NSLocalizedString("tracker.section.title.error.message", comment: "")
+        static let settingsSectionCategoryTitle = NSLocalizedString("tracker.section.settings.category", comment: "")
+        static let settingsSectionScheduleTitle = NSLocalizedString("tracker.section.settings.schedule", comment: "")
     }
     
     // MARK: - UI Components
@@ -118,11 +125,11 @@ final class TrackerTableViewController: UITableViewController {
         case .special(let date):
             title = LocalConst.Add.specialTableTitle
             newTracker.date = date
-            tableSectionItems = ["Категория"]
+            tableSectionItems = [LocalConst.settingsSectionCategoryTitle]
             daysCompletedLabel.frame.size.height = 0
         case .regular:
             title = LocalConst.Add.regularTableTitle
-            tableSectionItems = ["Категория", "Расписание"]
+            tableSectionItems = [LocalConst.settingsSectionCategoryTitle, LocalConst.settingsSectionScheduleTitle]
             daysCompletedLabel.frame.size.height = 0
         case .edit(let tracker, let daysCompleted):
             tableView.tableHeaderView = daysCompletedLabel
@@ -134,12 +141,12 @@ final class TrackerTableViewController: UITableViewController {
             
             if tracker.schedule != nil {
                 title = LocalConst.Edit.regularTableTitle
-                tableSectionItems = ["Категория", "Расписание"]
+                tableSectionItems = [LocalConst.settingsSectionCategoryTitle, LocalConst.settingsSectionScheduleTitle]
             }
             
             if tracker.date != nil {
                 title = LocalConst.Edit.specialTableTitle
-                tableSectionItems = ["Категория"]
+                tableSectionItems = [LocalConst.settingsSectionCategoryTitle]
             }
         }
     }
@@ -250,6 +257,7 @@ final class TrackerTableViewController: UITableViewController {
                 return cell
             case 1:
                 let cell = ErrorCell()
+                cell.configure(with: LocalConst.errorCellTitle)
                 return cell
             default:
                 return UITableViewCell()
@@ -315,8 +323,10 @@ final class TrackerTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
-        case 2, 3:
-            return LocalConst.sectionHeaders[section]
+        case 2:
+            return LocalConst.SectionHeader.emoji
+        case 3:
+            return LocalConst.SectionHeader.color
         default:
             return nil
         }
@@ -385,9 +395,13 @@ final class TrackerTableViewController: UITableViewController {
         viewForHeaderInSection section: Int
     ) -> UIView? {
         switch section {
-        case 2, 3:
+        case 2:
             let cell = SectionHeaderTableViewCell()
-            cell.configure(with: LocalConst.sectionHeaders[section - 2])
+            cell.configure(with: LocalConst.SectionHeader.emoji)
+            return cell
+        case 3:
+            let cell = SectionHeaderTableViewCell()
+            cell.configure(with: LocalConst.SectionHeader.color)
             return cell
         default:
             return nil

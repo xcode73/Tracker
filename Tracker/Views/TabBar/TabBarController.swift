@@ -9,8 +9,8 @@ import UIKit
 
 final class TabBarController: UITabBarController {
     private enum LocalConst {
-        static let trackers = "Трекеры"
-        static let statistic = "Статистика"
+        static let trackers = NSLocalizedString("tabBar.trackers", comment: "")
+        static let statistic = NSLocalizedString("tabBar.statistics", comment: "")
     }
 
     // MARK: - UI Components

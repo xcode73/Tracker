@@ -67,7 +67,7 @@ final class SettingsCell: UITableViewCell {
         let view = UIImageView()
         view.tintColor = .ypGray
         view.contentMode = .center
-        view.image = UIImage(systemName: "chevron.right")
+        view.image = Constants.Icons.chevronRight
         view.translatesAutoresizingMaskIntoConstraints = false
         
         return view

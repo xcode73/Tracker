@@ -18,7 +18,7 @@ final class TrackersViewController: UIViewController {
             try scheduleStore = ScheduleStore(dataStore: trackerDataStore)
             return scheduleStore
         } catch {
-            showError(message: "Данные недоступны.")
+            showStoreErrorAlert()
             return nil
         }
     }()
@@ -28,7 +28,7 @@ final class TrackersViewController: UIViewController {
             try recordStore = TrackerRecordStore(dataStore: trackerDataStore)
             return recordStore
         } catch {
-            showError(message: "Данные недоступны.")
+            showStoreErrorAlert()
             return nil
         }
     }()
@@ -51,16 +51,10 @@ final class TrackersViewController: UIViewController {
         headerHeight: 18
     )
     
-    private enum LocalConst {
-        static let placeholderTitle = "Что будем отслеживать?"
-        static let deleteTrackerAlertMessage = "Уверены что хотите удалить трекер?"
-        static let deleteTrackerAlertIdentifier = "Delete Tracker Alert"
-    }
-    
     // MARK: - UI Components
     private lazy var addButton: UIBarButtonItem = {
         let view = UIBarButtonItem()
-        view.image = UIImage(systemName: "plus")
+        view.image = Constants.Icons.plus
         view.tintColor = .ypBlack
         view.target = self
         view.action = #selector(didTapAddButton)
@@ -97,7 +91,7 @@ final class TrackersViewController: UIViewController {
     
     private lazy var placeholderLabel: UILabel = {
         let view = UILabel()
-        view.text = LocalConst.placeholderTitle
+        view.text = NSLocalizedString("trackers.placeholder", comment: "")
         view.font = Constants.Fonts.ypMedium12
         
         return view
@@ -137,7 +131,7 @@ final class TrackersViewController: UIViewController {
             )
             return trackersStore
         } catch {
-            showError(message: "Данные недоступны.")
+            showStoreErrorAlert()
             return nil
         }
     }
@@ -161,39 +155,9 @@ final class TrackersViewController: UIViewController {
     
     private func updateCounterTitle(for trackerId: UUID) -> String {
         let completedCount = recordStore?.recordsCount(for: trackerId) ?? 0
+        let localizedFormatString = NSLocalizedString("trackers.daysCompleted", comment: "")
         
-        var title: String
-        let lastDigit = completedCount % 10
-        
-        switch lastDigit {
-        case 1:
-            title = "день"
-        case 2, 3, 4:
-            title = "дня"
-        case 5, 6, 7, 8, 9, 0:
-            title = "дней"
-        default:
-            title = "дней"
-        }
-        
-        return "\(completedCount) " + title
-    }
-    
-    // MARK: - Delete Alert
-    func showDeleteTrackerAlert(for indexPaths: [IndexPath]) {
-        let model = AlertModel(
-            title: nil,
-            message: LocalConst.deleteTrackerAlertMessage,
-            buttons: [.deleteButton, .cancelButton],
-            identifier: LocalConst.deleteTrackerAlertIdentifier,
-            completion: { [weak self] in
-                guard let self else { return }
-                
-                self.deleteTracker(at: indexPaths)
-            }
-        )
-        
-        AlertPresenter.showAlert(on: self, model: model)
+        return String(format: localizedFormatString, completedCount)
     }
     
     // MARK: - Show Tracker Detail
@@ -228,11 +192,27 @@ final class TrackersViewController: UIViewController {
         try? trackersStore?.deleteTracker(at: indexPath)
     }
     
-    // MARK: Data Provider alert
-    func showError(message: String) {
+    // MARK: - Alerts
+    func showDeleteTrackerAlert(for indexPaths: [IndexPath]) {
         let model = AlertModel(
-            title: "Ошибка!",
-            message: message,
+            title: nil,
+            message: NSLocalizedString("alert.message.deleteTracker", comment: ""),
+            buttons: [.deleteButton, .cancelButton],
+            identifier: "Delete Tracker Alert",
+            completion: { [weak self] in
+                guard let self else { return }
+                
+                self.deleteTracker(at: indexPaths)
+            }
+        )
+        
+        AlertPresenter.showAlert(on: self, model: model)
+    }
+    
+    func showStoreErrorAlert() {
+        let model = AlertModel(
+            title: NSLocalizedString("alert.store.title", comment: ""),
+            message: NSLocalizedString("alert.store.message", comment: ""),
             buttons: [.cancelButton],
             identifier: "Tracker Store Error Alert",
             completion: nil
@@ -401,12 +381,6 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         referenceSizeForHeaderInSection section: Int)  -> CGSize {
-        
-        // ofSize should be the same size of the headerView's label size:
-//        return CGSize(width: collectionView.frame.size.width, height:
-//        categories[section].title.heightWithConstrainedWidth(font: UIFont.systemFont(ofSize: 19, weight: .bold)))
-        
-        //
         let headerView = TrackerHeaderReusableView(frame: .zero)
         guard let categoryTitle = trackersStore?.sectionTitle(at: section) else { return .zero }
         
@@ -483,7 +457,7 @@ extension TrackersViewController: TrackerCellDelegate {
 // MARK: - UISearchBarDelegate
 extension TrackersViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-//        updateTrackersForCurrentDate(searchedText: searchBar.text)
+        // TODO: implement
     }
 }
 

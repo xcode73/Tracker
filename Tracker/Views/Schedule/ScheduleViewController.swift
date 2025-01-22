@@ -18,8 +18,8 @@ final class ScheduleViewController: UIViewController {
     private let weekDays = Constants.weekDays
     
     private enum LocalConst {
-        static let vcTitle = "Расписание"
-        static let createScheduleButtonTitle = "Готово"
+        static let title = NSLocalizedString("schedule.title", comment: "")
+        static let createScheduleButtonTitle = NSLocalizedString("buttons.done", comment: "")
     }
 
     // MARK: - UI Components
@@ -72,7 +72,7 @@ final class ScheduleViewController: UIViewController {
     }
     
     private func setupUI() {
-        title = LocalConst.vcTitle
+        title = LocalConst.title
         view.backgroundColor = .ypWhite
         addCreateCategoryButton()
         addTableView()

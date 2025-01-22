@@ -20,11 +20,11 @@ final class CategoryViewController: UIViewController {
     private var indexPath: IndexPath?
     
     private enum LocalConst {
-        static let createCategoryViewTitle = "Новая категория"
-        static let editCategoryViewTitle = "Редактирование категории"
-        static let createButtonTitle = "Готово"
-        static let titleCellPlaceholder = "Введите название категории"
-        static let errorCellTitle = "Ограничение 38 символов"
+        static let createCategoryViewTitle = NSLocalizedString("category.add.title", comment: "")
+        static let editCategoryViewTitle = NSLocalizedString("category.edit.title", comment: "")
+        static let createButtonTitle = NSLocalizedString("buttons.done", comment: "")
+        static let titleCellPlaceholder = NSLocalizedString("category.placeholder.message", comment: "")
+        static let errorCellTitle = NSLocalizedString("category.name.error.message", comment: "")
     }
     
     // MARK: - UI Components

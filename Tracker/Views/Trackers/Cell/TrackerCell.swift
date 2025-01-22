@@ -16,7 +16,6 @@ final class TrackerCell: UICollectionViewCell {
     static let reuseIdentifier = "TrackerCell"
     private var tracker: Tracker?
     private var record: TrackerRecord?
-//    private var indexPath: IndexPath?
     
     // MARK: - UI Components
     private lazy var verticalStackView: UIStackView = {
@@ -108,11 +107,9 @@ final class TrackerCell: UICollectionViewCell {
         tracker: Tracker,
         record: TrackerRecord?,
         completedTitle: String
-//        indexPath: IndexPath?
     ) {
         self.tracker = tracker
         self.record = record
-//        self.indexPath = indexPath
         
         colorView.backgroundColor = UIColor(named: tracker.color)
         checkButton.backgroundColor = UIColor(named: tracker.color)
@@ -122,10 +119,10 @@ final class TrackerCell: UICollectionViewCell {
         
         if record == nil {
             checkButton.layer.opacity = 1
-            checkButton.setImage(UIImage(systemName: "plus"), for: .normal)
+            checkButton.setImage(Constants.Icons.plus, for: .normal)
         } else {
             checkButton.layer.opacity = 0.3
-            checkButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+            checkButton.setImage(Constants.Icons.checkmark, for: .normal)
         }
     }
     

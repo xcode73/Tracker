@@ -20,11 +20,10 @@ final class CategoriesViewController: UIViewController {
     private var selectedCategoryTitle: String?
     
     private enum LocalConst {
-        static let vcTitle = "Категории"
-        static let placeholderTitle = "Привычки и события можно \n объединить по смыслу"
-        static let createButtonTitle = "Добавить категорию"
-        static let deleteCategoryAlertMessage = "Эта категория точно не нужна?"
-        static let deleteCategoryAlertIdentifier = "Delete Category Alert"
+        static let title = NSLocalizedString("categories.title", comment: "")
+        static let placeholderTitle = NSLocalizedString("categories.placeholder.message", comment: "")
+        static let createButtonTitle = NSLocalizedString("buttons.addCategory", comment: "")
+        static let deleteCategoryAlertMessage = NSLocalizedString("alert.message.deleteCategory", comment: "")
     }
     
     // MARK: - UI Components
@@ -123,7 +122,7 @@ final class CategoriesViewController: UIViewController {
         }
         
         viewModel.onErrorStateChange = { [weak self] message in
-            self?.showError(message: message ?? "")
+            self?.showStoreErrorAlert()
         }
     }
     
@@ -156,7 +155,7 @@ final class CategoriesViewController: UIViewController {
     }
     
     private func setupUI() {
-        title = LocalConst.vcTitle
+        title = LocalConst.title
         view.backgroundColor = .ypWhite
     }
     
@@ -175,18 +174,18 @@ final class CategoriesViewController: UIViewController {
         present(navigationController, animated: true)
     }
     
-    // MARK: - Delete
+    // MARK: - Delete Category
     private func deleteCategory(at indexPath: IndexPath) {
         viewModel?.deleteCategory(at: indexPath)
     }
     
-    // MARK: - Delete Alert
+    // MARK: - Alerts
     func showDeleteCategoryAlert(for indexPath: IndexPath) {
         let model = AlertModel(
             title: nil,
             message: LocalConst.deleteCategoryAlertMessage,
             buttons: [.deleteButton, .cancelButton],
-            identifier: LocalConst.deleteCategoryAlertIdentifier,
+            identifier: "Delete Category Alert",
             completion: { [weak self] in
                 guard let self else { return }
                 
@@ -196,12 +195,11 @@ final class CategoriesViewController: UIViewController {
         
         AlertPresenter.showAlert(on: self, model: model)
     }
-    
-    // MARK: - Store alert
-    func showError(message: String) {
+
+    func showStoreErrorAlert() {
         let model = AlertModel(
-            title: "Ошибка!",
-            message: message,
+            title: NSLocalizedString("alert.store.title", comment: ""),
+            message: NSLocalizedString("alert.store.message", comment: ""),
             buttons: [.cancelButton],
             identifier: "Category Store Error Alert",
             completion: nil

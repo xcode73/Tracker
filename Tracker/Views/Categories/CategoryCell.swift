@@ -40,7 +40,7 @@ final class CategoryCell: UITableViewCell {
         let view = UIImageView()
         view.tintColor = .ypGray
         view.contentMode = .center
-        view.image = UIImage(systemName: "checkmark")
+        view.image = Constants.Icons.checkmark
         view.tintColor = .ypBlue
         view.isHidden = true
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -108,7 +108,6 @@ final class CategoryCell: UITableViewCell {
 #if DEBUG
 @available(iOS 17, *)
 #Preview("Categories") {
-    
     let trackerDataStore = (UIApplication.shared.delegate as! AppDelegate).trackerDataStore
     
     let viewModel = CategoriesViewModel(trackerDataStore: trackerDataStore)
