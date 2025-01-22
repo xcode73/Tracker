@@ -29,66 +29,64 @@ protocol TrackerTableViewControllerDelegate: AnyObject {
 final class TrackerTableViewController: UITableViewController {
     // MARK: - Properties
     weak var delegate: TrackerTableViewControllerDelegate?
-    
+
     private var tableType: TrackerTableType
     private var indexPath: IndexPath?
     private var trackerDataStore: TrackerDataStore
-    
+
     private var titleSectionItems = [""]
     private var tableSectionItems = [String]()
-    
+
     private var tracker: Tracker?
     private var newTracker = NewTracker()
     private var updatedTracker: Tracker?
-    
+
     private let weekDays = Constants.weekDays
     private let emojis = Constants.emojis
     private let colors = Constants.selectionColors
-    
+
     private var isDoneButtonEnabled: Bool = false
-    
+
     private enum LocalConst {
         enum Edit {
             static let specialTableTitle = NSLocalizedString("tracker.edit.special.title", comment: "")
             static let regularTableTitle = NSLocalizedString("tracker.edit.regular.title", comment: "")
             static let doneButtonTitle = NSLocalizedString("buttons.save", comment: "")
         }
-        
+
         enum Add {
             static let specialTableTitle = NSLocalizedString("tracker.add.special.title", comment: "")
             static let regularTableTitle = NSLocalizedString("tracker.add.regular.title", comment: "")
             static let doneButtonTitle = NSLocalizedString("buttons.add", comment: "")
         }
-        
+
         enum SectionHeader {
             static let emoji = NSLocalizedString("tracker.section.emoji.header", comment: "")
             static let color = NSLocalizedString("tracker.section.color.header", comment: "")
         }
-        
+
         static let cancelButtonTitle = NSLocalizedString("buttons.cancel", comment: "")
         static let titleCellPlaceholder = NSLocalizedString("tracker.placeholder.message", comment: "")
         static let errorCellTitle = NSLocalizedString("tracker.section.title.error.message", comment: "")
         static let settingsSectionCategoryTitle = NSLocalizedString("tracker.section.settings.category", comment: "")
         static let settingsSectionScheduleTitle = NSLocalizedString("tracker.section.settings.schedule", comment: "")
     }
-    
+
     // MARK: - UI Components
     private lazy var daysCompletedLabel: UILabel = {
         let view = UILabel()
         view.font = Constants.Fonts.ypBold32
         view.textColor = .ypBlack
         view.textAlignment = .center
-        
         return view
     }()
-    
+
     private lazy var tap: UITapGestureRecognizer = {
         let view = UITapGestureRecognizer()
         view.addTarget(self, action: #selector(hideKeyboard))
-        
         return view
     }()
-    
+
     // MARK: - Init
     init(
         tableType: TrackerTableType,
@@ -98,21 +96,21 @@ final class TrackerTableViewController: UITableViewController {
         self.tableType = tableType
         self.trackerDataStore = trackerDataStore
         self.indexPath = indexPath
-        
+
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         setupTableView()
     }
-    
+
     // MARK: - Setup
     private func setupTableView() {
         tableView.delegate = self
@@ -135,22 +133,22 @@ final class TrackerTableViewController: UITableViewController {
             tableView.tableHeaderView = daysCompletedLabel
             daysCompletedLabel.frame.size.height = 70
             daysCompletedLabel.text = daysCompleted
-            
+
             self.tracker = tracker
             newTracker = NewTracker(from: tracker)
-            
+
             if tracker.schedule != nil {
                 title = LocalConst.Edit.regularTableTitle
                 tableSectionItems = [LocalConst.settingsSectionCategoryTitle, LocalConst.settingsSectionScheduleTitle]
             }
-            
+
             if tracker.date != nil {
                 title = LocalConst.Edit.specialTableTitle
                 tableSectionItems = [LocalConst.settingsSectionCategoryTitle]
             }
         }
     }
-    
+
     private func updateDoneButtonState() {
         if let tracker {
             if let newTrackerTitle = newTracker.title,
@@ -158,7 +156,7 @@ final class TrackerTableViewController: UITableViewController {
                let newTrackerColor = newTracker.color,
                let newTrackerEmoji = newTracker.emoji,
                newTracker.schedule != nil || newTracker.date != nil {
-                
+
                 if let schedule = newTracker.schedule {
                     updatedTracker = Tracker(with: schedule,
                                              id: tracker.id,
@@ -167,7 +165,7 @@ final class TrackerTableViewController: UITableViewController {
                                              color: newTrackerColor,
                                              emoji: newTrackerEmoji)
                 }
-                
+
                 if let date = newTracker.date?.truncated {
                     updatedTracker = Tracker(with: date,
                                              id: tracker.id,
@@ -176,7 +174,7 @@ final class TrackerTableViewController: UITableViewController {
                                              color: newTrackerColor,
                                              emoji: newTrackerEmoji)
                 }
-                
+
                 if updatedTracker != tracker {
                     isDoneButtonEnabled = true
                     return
@@ -188,7 +186,7 @@ final class TrackerTableViewController: UITableViewController {
                let newTrackerColor = newTracker.color,
                let newTrackerEmoji = newTracker.emoji,
                newTracker.schedule != nil || newTracker.date != nil {
-                
+
                 if let schedule = newTracker.schedule {
                     updatedTracker = Tracker(with: schedule,
                                              id: UUID(),
@@ -197,7 +195,7 @@ final class TrackerTableViewController: UITableViewController {
                                              color: newTrackerColor,
                                              emoji: newTrackerEmoji)
                 }
-                
+
                 if let date = newTracker.date?.truncated {
                     updatedTracker = Tracker(with: date,
                                              id: UUID(),
@@ -206,15 +204,15 @@ final class TrackerTableViewController: UITableViewController {
                                              color: newTrackerColor,
                                              emoji: newTrackerEmoji)
                 }
-                
+
                 isDoneButtonEnabled = true
                 return
             }
         }
-        
+
         isDoneButtonEnabled = false
     }
-    
+
     // MARK: - Actions
     @objc
     private func hideKeyboard() {
@@ -239,11 +237,11 @@ final class TrackerTableViewController: UITableViewController {
             }
         }
     }
-    
+
     // MARK: - CellForRow
     override func tableView(_ tableView: UITableView,
                             cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
+
         switch indexPath.section {
         case 0:
             switch indexPath.row {
@@ -265,7 +263,7 @@ final class TrackerTableViewController: UITableViewController {
         case 1:
             let cell = SettingsCell()
             let cellPosition: CellPosition
-            
+
             switch indexPath.row {
             case 0:
                 if tableSectionItems.count == 1 {
@@ -278,7 +276,7 @@ final class TrackerTableViewController: UITableViewController {
             default:
                 cellPosition = .regular
             }
-            
+
             cell.configure(
                 itemTitle: tableSectionItems[indexPath.row],
                 cellPosition: cellPosition,
@@ -303,7 +301,7 @@ final class TrackerTableViewController: UITableViewController {
             let cell = ButtonsCell()
             cell.selectionStyle = .none
             cell.delegate = self
-            
+
             var doneButtonTitle: String
 
             switch tableType {
@@ -312,15 +310,17 @@ final class TrackerTableViewController: UITableViewController {
             case .edit:
                 doneButtonTitle = LocalConst.Edit.doneButtonTitle
             }
-            
-            cell.configure(with: doneButtonTitle, cancelButtonTitle: LocalConst.cancelButtonTitle, isDoneButtonEnabled: isDoneButtonEnabled)
-            
+
+            cell.configure(with: doneButtonTitle,
+                           cancelButtonTitle: LocalConst.cancelButtonTitle,
+                           isDoneButtonEnabled: isDoneButtonEnabled)
+
             return cell
         default:
             return UITableViewCell()
         }
     }
-    
+
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
         case 2:
@@ -331,27 +331,27 @@ final class TrackerTableViewController: UITableViewController {
             return nil
         }
     }
-    
+
     // MARK: - Table view delegate
     override func tableView(_ tableView: UITableView,
                             didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 1 {
             switch indexPath.row {
             case 0:
-                let vc = CategoriesViewController(selectedCategoryTitle: newTracker.categoryTitle)
+                let viewController = CategoriesViewController(selectedCategoryTitle: newTracker.categoryTitle)
                 let viewModel = CategoriesViewModel(trackerDataStore: trackerDataStore)
-                vc.initialize(viewModel: viewModel)
-                vc.delegate = self
+                viewController.initialize(viewModel: viewModel)
+                viewController.delegate = self
                 let navigationController = UINavigationController(
-                    rootViewController: vc
+                    rootViewController: viewController
                 )
                 navigationController.modalPresentationStyle = .pageSheet
                 present(navigationController, animated: true)
             case 1:
-                let vc = ScheduleViewController(schedule: newTracker.schedule)
-                vc.delegate = self
+                let viewController = ScheduleViewController(schedule: newTracker.schedule)
+                viewController.delegate = self
                 let navigationController = UINavigationController(
-                    rootViewController: vc
+                    rootViewController: viewController
                 )
                 navigationController.modalPresentationStyle = .pageSheet
                 present(navigationController, animated: true)
@@ -360,7 +360,7 @@ final class TrackerTableViewController: UITableViewController {
             }
         }
     }
-    
+
     override func tableView(_ tableView: UITableView,
                             heightForRowAt indexPath: IndexPath) -> CGFloat {
         switch indexPath.section {
@@ -377,7 +377,7 @@ final class TrackerTableViewController: UITableViewController {
             return 75
         }
     }
-    
+
     override func tableView(
         _ tableView: UITableView,
         heightForHeaderInSection section: Int
@@ -389,7 +389,7 @@ final class TrackerTableViewController: UITableViewController {
             return 0
         }
     }
-    
+
     override func tableView(
         _ tableView: UITableView,
         viewForHeaderInSection section: Int
@@ -413,14 +413,14 @@ final class TrackerTableViewController: UITableViewController {
 extension TrackerTableViewController: TitleCellDelegate {
     func didTapDoneButton(title: String) {
         newTracker.title = title
-        
+
         tableView.reloadData()
         updateDoneButtonState()
     }
-    
+
     func titleChanged(title: String) {
         let items = titleSectionItems.count
-        
+
         switch title.count {
         case 0...37:
             if items > 1 {
@@ -445,7 +445,7 @@ extension TrackerTableViewController: TitleCellDelegate {
 extension TrackerTableViewController: CategoriesViewControllerDelegate {
     func didSelectCategory(selectedCategoryTitle: String) {
         newTracker.categoryTitle = selectedCategoryTitle
-        
+
         tableView.reloadData()
         updateDoneButtonState()
         dismiss(animated: true)
@@ -456,7 +456,7 @@ extension TrackerTableViewController: CategoriesViewControllerDelegate {
 extension TrackerTableViewController: ScheduleViewControllerDelegate {
     func didChangeSchedule(schedule: [WeekDay]) {
         newTracker.schedule = schedule
-        
+
         tableView.reloadData()
         updateDoneButtonState()
         dismiss(animated: true)
@@ -467,7 +467,7 @@ extension TrackerTableViewController: ScheduleViewControllerDelegate {
 extension TrackerTableViewController: EmojisCellDelegate {
     func didSelectEmoji(emoji: String) {
         newTracker.emoji = emoji
-        
+
         tableView.reloadData()
         updateDoneButtonState()
     }
@@ -477,7 +477,7 @@ extension TrackerTableViewController: EmojisCellDelegate {
 extension TrackerTableViewController: ColorsCellDelegate {
     func didSelectColor(color: String) {
         newTracker.color = color
-        
+
         tableView.reloadData()
         updateDoneButtonState()
     }
@@ -488,10 +488,10 @@ extension TrackerTableViewController: ButtonsCellDelegate {
     func didTapCancelButton() {
         delegate?.cancelButtonTapped()
     }
-    
+
     func didTapDoneButton() {
         guard let updatedTracker else { return }
-        
+
         if let indexPath {
             delegate?.updateTracker(tracker: updatedTracker, at: indexPath)
         } else {
@@ -504,21 +504,29 @@ extension TrackerTableViewController: ButtonsCellDelegate {
 #if DEBUG
 @available(iOS 17, *)
 #Preview("Special") {
-    let trackerDataStore = (UIApplication.shared.delegate as! AppDelegate).trackerDataStore
-    let vc = TrackerTableViewController(tableType: .special(Date()), trackerDataStore: trackerDataStore, indexPath: nil)
-    let navigationController = UINavigationController(rootViewController: vc)
+    let trackerDataStore = Constants.appDelegate().trackerDataStore
+    let viewController = TrackerTableViewController(
+        tableType: .special(Date()),
+        trackerDataStore: trackerDataStore,
+        indexPath: nil
+    )
+    let navigationController = UINavigationController(rootViewController: viewController)
     navigationController.modalPresentationStyle = .pageSheet
-    
+
     return navigationController
 }
 
 @available(iOS 17, *)
 #Preview("Regular") {
-    let trackerDataStore = (UIApplication.shared.delegate as! AppDelegate).trackerDataStore
-    let vc = TrackerTableViewController(tableType: .regular, trackerDataStore: trackerDataStore, indexPath: nil)
-    let navigationController = UINavigationController(rootViewController: vc)
+    let trackerDataStore = Constants.appDelegate().trackerDataStore
+    let viewController = TrackerTableViewController(
+        tableType: .regular,
+        trackerDataStore: trackerDataStore,
+        indexPath: nil
+    )
+    let navigationController = UINavigationController(rootViewController: viewController)
     navigationController.modalPresentationStyle = .pageSheet
-    
+
     return navigationController
 }
 #endif

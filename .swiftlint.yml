@@ -1,0 +1,12 @@
+excluded:
+  - Carthage
+  - Pods
+
+identifier_name:
+  min_length:
+    error: 3
+  excluded:
+    - id
+    - at
+    - to
+reporter: "xcode"

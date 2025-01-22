@@ -46,19 +46,17 @@ final class TrackerStore: NSObject {
     enum TrackerDataProviderError: Error {
         case failedToInitializeContext
     }
-    
+
     weak var delegate: TrackerStoreDelegate?
-    
     var inProgressChanges: [TrackerStoreUpdate] = []
-    
+
     private let context: NSManagedObjectContext
     private let dataStore: TrackerDataStore
-    
     private var date: Date
-    
+
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
         guard let truncatedDate = date.truncated else { return NSFetchedResultsController() }
-        
+
         let weekday = WeekDay(date: date)
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
 
@@ -74,16 +72,18 @@ final class TrackerStore: NSObject {
             NSSortDescriptor(keyPath: \TrackerCoreData.category.title, ascending: true),
             NSSortDescriptor(keyPath: \TrackerCoreData.title, ascending: true)
         ]
-        
-        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
-                                                                  managedObjectContext: context,
-                                                                  sectionNameKeyPath: #keyPath(TrackerCoreData.category.title),
-                                                                  cacheName: nil)
+
+        let fetchedResultsController = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: context,
+            sectionNameKeyPath: #keyPath(TrackerCoreData.category.title),
+            cacheName: nil
+        )
         fetchedResultsController.delegate = self
         try? fetchedResultsController.performFetch()
         return fetchedResultsController
     }()
-    
+
     init(
         dataStore: TrackerDataStore,
         delegate: TrackerStoreDelegate,
@@ -106,22 +106,22 @@ extension TrackerStore: TrackerStoreProtocol {
     func setDate(_ date: Date) {
         self.date = date
     }
-    
+
     var numberOfSections: Int {
         fetchedResultsController.sections?.count ?? 0
     }
-    
+
     func numberOfItemsInSection(_ section: Int) -> Int {
         fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
-    
+
     func performFetch() throws {
         try fetchedResultsController.performFetch()
     }
-    
+
     func trackerObject(at indexPath: IndexPath) -> Tracker? {
         let storedTracker = fetchedResultsController.object(at: indexPath)
-        
+
         return Tracker(id: storedTracker.trackerId,
                        categoryTitle: storedTracker.category.title,
                        title: storedTracker.title,
@@ -130,30 +130,33 @@ extension TrackerStore: TrackerStoreProtocol {
                        schedule: nil,
                        date: storedTracker.date)
     }
-    
+
     func categoryTitle(at indexPath: IndexPath) -> String? {
         return fetchedResultsController.object(at: indexPath).category.title
     }
-    
+
     func sectionTitle(at section: Int) -> String? {
         fetchedResultsController.sections?[section].name
     }
-    
+
     func addTracker(_ tracker: Tracker) throws {
         let request = NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData")
-        request.predicate = NSPredicate(format: "%K == %@", #keyPath(TrackerCategoryCoreData.title), tracker.categoryTitle)
-        
+        request.predicate = NSPredicate(format: "%K == %@",
+                                        #keyPath(TrackerCategoryCoreData.title),
+                                        tracker.categoryTitle)
+
         guard let storedCategory = try? context.fetch(request).first else { return }
-        
+
         try? dataStore.addTracker(tracker: tracker, category: storedCategory)
     }
-    
+
     func updateTracker(tracker: Tracker, at indexPath: IndexPath) throws {
         let categoryRequest = NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData")
-        categoryRequest.predicate = NSPredicate(format: "%K == %@", #keyPath(TrackerCategoryCoreData.title), tracker.categoryTitle)
-
+        categoryRequest.predicate = NSPredicate(format: "%K == %@",
+                                                #keyPath(TrackerCategoryCoreData.title),
+                                                tracker.categoryTitle)
         guard let storedCategory = try? context.fetch(categoryRequest).first else { return }
-        
+
         let storedTracker = fetchedResultsController.object(at: indexPath)
         storedTracker.trackerId = tracker.id
         storedTracker.title = tracker.title
@@ -161,16 +164,16 @@ extension TrackerStore: TrackerStoreProtocol {
         storedTracker.emoji = tracker.emoji
         storedTracker.date = tracker.date
         storedTracker.category = storedCategory
-        
+
         try? dataStore.saveContext()
     }
-    
+
     func deleteTracker(at indexPath: IndexPath) throws {
         let tracker = fetchedResultsController.object(at: indexPath)
         try? dataStore.deleteItem(tracker)
         try? dataStore.saveContext()
     }
-    
+
     func refresh() throws {
         try? dataStore.refresh()
     }
@@ -181,18 +184,17 @@ extension TrackerStore: NSFetchedResultsControllerDelegate {
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         inProgressChanges.removeAll()
     }
-    
+
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         delegate?.didUpdate(inProgressChanges)
         inProgressChanges.removeAll()
     }
-    
+
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
                     didChange anObject: Any,
                     at indexPath: IndexPath?,
                     for type: NSFetchedResultsChangeType,
                     newIndexPath: IndexPath?) {
-        
         switch type {
         case .insert:
             if let newIndexPath {
@@ -214,12 +216,11 @@ extension TrackerStore: NSFetchedResultsControllerDelegate {
             break
         }
     }
-    
+
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>,
                     didChange sectionInfo: NSFetchedResultsSectionInfo,
                     atSectionIndex sectionIndex: Int,
                     for type: NSFetchedResultsChangeType) {
-        
         if type == .insert {
             inProgressChanges.append(.section(.inserted(sectionIndex)))
         } else if type == .delete {

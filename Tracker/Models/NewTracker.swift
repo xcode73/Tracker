@@ -15,7 +15,7 @@ struct NewTracker {
     var color: String?
     var schedule: [WeekDay]?
     var date: Date?
-    
+
     init(from tracker: Tracker) {
         id = tracker.id
         categoryTitle = tracker.categoryTitle
@@ -25,7 +25,7 @@ struct NewTracker {
         schedule = tracker.schedule
         date = tracker.date
     }
-    
+
     init(id: UUID? = nil,
          categoryTitle: String? = nil,
          title: String? = nil,

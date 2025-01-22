@@ -14,7 +14,7 @@ protocol ButtonsCellDelegate: AnyObject {
 
 final class ButtonsCell: UITableViewCell {
     weak var delegate: ButtonsCellDelegate?
-    
+
     // MARK: - UI Components
     private lazy var containerStackView: UIStackView = {
         let view = UIStackView()
@@ -22,10 +22,9 @@ final class ButtonsCell: UITableViewCell {
         view.distribution = .fillEqually
         view.spacing = 10
         view.translatesAutoresizingMaskIntoConstraints = false
-        
         return view
     }()
-    
+
     private lazy var cancelButton: UIButton = {
         let view = UIButton()
         view.layer.masksToBounds = true
@@ -38,7 +37,6 @@ final class ButtonsCell: UITableViewCell {
         view.setTitleColor(.ypRed, for: .normal)
         view.addTarget(self, action: #selector(didTapCancelButton), for: .touchUpInside)
         view.translatesAutoresizingMaskIntoConstraints = false
-
         return view
     }()
 
@@ -51,46 +49,45 @@ final class ButtonsCell: UITableViewCell {
         view.setTitleColor(.ypWhite, for: .normal)
         view.addTarget(self, action: #selector(didTapDoneButton), for: .touchUpInside)
         view.translatesAutoresizingMaskIntoConstraints = false
-        
         return view
     }()
 
-    //MARK: - Init
+    // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
+
         setupViews()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     func configure(with doneButtonTitle: String, cancelButtonTitle: String, isDoneButtonEnabled: Bool) {
         doneButton.setTitle(doneButtonTitle, for: .normal)
         cancelButton.setTitle(cancelButtonTitle, for: .normal)
         doneButton.isEnabled = isDoneButtonEnabled
         doneButton.backgroundColor = isDoneButtonEnabled ? .ypBlack : .ypGray
     }
-    
+
     // MARK: - Actions
     @objc
     private func didTapDoneButton() {
         delegate?.didTapDoneButton()
     }
-    
+
     @objc
     private func didTapCancelButton() {
         delegate?.didTapCancelButton()
     }
-    
+
     // MARK: - Constraints
     private func setupViews() {
         selectionStyle = .none
         contentView.addSubview(containerStackView)
         containerStackView.addArrangedSubview(cancelButton)
         containerStackView.addArrangedSubview(doneButton)
-        
+
         NSLayoutConstraint.activate([
             containerStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 24),
             containerStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -24),
@@ -104,21 +101,29 @@ final class ButtonsCell: UITableViewCell {
 #if DEBUG
 @available(iOS 17, *)
 #Preview("Special") {
-    let trackerDataStore = (UIApplication.shared.delegate as! AppDelegate).trackerDataStore
-    let vc = TrackerTableViewController(tableType: .special(Date()), trackerDataStore: trackerDataStore, indexPath: nil)
-    let navigationController = UINavigationController(rootViewController: vc)
+    let trackerDataStore = Constants.appDelegate().trackerDataStore
+    let viewController = TrackerTableViewController(
+        tableType: .special(Date()),
+        trackerDataStore: trackerDataStore,
+        indexPath: nil
+    )
+    let navigationController = UINavigationController(rootViewController: viewController)
     navigationController.modalPresentationStyle = .pageSheet
-    
+
     return navigationController
 }
 
 @available(iOS 17, *)
 #Preview("Regular") {
-    let trackerDataStore = (UIApplication.shared.delegate as! AppDelegate).trackerDataStore
-    let vc = TrackerTableViewController(tableType: .regular, trackerDataStore: trackerDataStore, indexPath: nil)
-    let navigationController = UINavigationController(rootViewController: vc)
+    let trackerDataStore = Constants.appDelegate().trackerDataStore
+    let viewController = TrackerTableViewController(
+        tableType: .regular,
+        trackerDataStore: trackerDataStore,
+        indexPath: nil
+    )
+    let navigationController = UINavigationController(rootViewController: viewController)
     navigationController.modalPresentationStyle = .pageSheet
-    
+
     return navigationController
 }
 #endif

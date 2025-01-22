@@ -16,7 +16,7 @@ public enum WeekDay: Int16, CaseIterable {
     case thursday = 5
     case friday = 6
     case saturday = 7
-    
+
     // MARK: - Init
     init(date: Date = Date()) {
         let cal = Calendar.current
@@ -24,7 +24,7 @@ public enum WeekDay: Int16, CaseIterable {
         guard let day = WeekDay(rawValue: Int16(weekDay)) else {
             fatalError("Unsupported Weekday")
         }
-        
+
         self = day
     }
 }
@@ -36,28 +36,28 @@ extension WeekDay: CustomStringConvertible {
         guard let date = cal.date(from: DateComponents(weekday: Int(self.rawValue))) else {
             return Date()
         }
-        
+
         return date
     }
-    
+
     var localizedName: String {
         let cal = Calendar.current
         guard cal.standaloneWeekdaySymbols.count == WeekDay.allCases.count else {
             return "Unsupported calendar"
         }
-        
+
         return cal.standaloneWeekdaySymbols[Int(self.rawValue) - 1].capitalized
     }
-    
+
     var localizedShortName: String {
         let cal = Calendar.current
         guard cal.shortStandaloneWeekdaySymbols.count == WeekDay.allCases.count else {
             return "Unsupported calendar"
         }
-        
+
         return cal.shortStandaloneWeekdaySymbols[Int(self.rawValue) - 1].capitalized
     }
-    
+
     public var description: String {
         return localizedName
     }
@@ -72,7 +72,7 @@ extension WeekDay {
         let firstIdx = all.firstIndex(of: firstDay) ?? all.startIndex
         return Array(all[firstIdx..<all.endIndex] + all[all.startIndex..<firstIdx])
     }
-    
+
     var next: WeekDay! {
         let all = WeekDay.allCases
         return all.firstIndex(of: self)

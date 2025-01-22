@@ -15,8 +15,16 @@ struct Tracker: Identifiable, Equatable {
     let emoji: String
     let schedule: [WeekDay]?
     let date: Date?
-    
-    init(id: UUID, categoryTitle: String, title: String, color: String, emoji: String, schedule: [WeekDay]?, date: Date?) {
+
+    init(
+        id: UUID,
+        categoryTitle: String,
+        title: String,
+        color: String,
+        emoji: String,
+        schedule: [WeekDay]?,
+        date: Date?
+    ) {
         self.id = id
         self.categoryTitle = categoryTitle
         self.title = title
@@ -25,7 +33,7 @@ struct Tracker: Identifiable, Equatable {
         self.schedule = schedule
         self.date = date
     }
-    
+
     init(with schedule: [WeekDay], id: UUID, categoryTitle: String, title: String, color: String, emoji: String) {
         self.id = id
         self.categoryTitle = categoryTitle
@@ -35,7 +43,7 @@ struct Tracker: Identifiable, Equatable {
         self.schedule = schedule
         self.date = nil
     }
-    
+
     init(with date: Date, id: UUID, categoryTitle: String, title: String, color: String, emoji: String) {
         self.id = id
         self.categoryTitle = categoryTitle
@@ -46,13 +54,3 @@ struct Tracker: Identifiable, Equatable {
         self.date = date
     }
 }
-
-//enum Schedule {
-//    case date(Date)
-//    case weekDays([WeekDay])
-//}
-
-//enum ScheduleType {
-//    case regular([WeekDay])
-//    case special(Date)
-//}

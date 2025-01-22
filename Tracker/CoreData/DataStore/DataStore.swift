@@ -21,22 +21,22 @@ final class DataStore {
     private let storeURL = NSPersistentContainer
                                 .defaultDirectoryURL()
                                 .appendingPathComponent("data-store.sqlite")
-    
+
     private let container: NSPersistentContainer
     private let context: NSManagedObjectContext
-    
+
     enum StoreError: Error {
         case modelNotFound
         case failedToLoadPersistentContainer(Error)
     }
-    
+
     init() throws {
         guard let modelUrl = Bundle(for: DataStore.self).url(forResource: modelName, withExtension: "momd"),
               let model = NSManagedObjectModel(contentsOf: modelUrl)
         else {
             throw StoreError.modelNotFound
         }
-        
+
         do {
             container = try NSPersistentContainer.load(name: modelName, model: model, url: storeURL)
             context = container.newBackgroundContext()
@@ -44,21 +44,21 @@ final class DataStore {
             throw StoreError.failedToLoadPersistentContainer(error)
         }
     }
-    
+
     func performSync<R>(_ action: (NSManagedObjectContext) -> Result<R, Error>) throws -> R {
         let context = self.context
         var result: Result<R, Error>!
         context.performAndWait { result = action(context) }
         return try result.get()
     }
-    
+
     private func cleanUpReferencesToPersistentStores() {
         context.performAndWait {
             let coordinator = self.container.persistentStoreCoordinator
             try? coordinator.persistentStores.forEach(coordinator.remove)
         }
     }
-    
+
     deinit {
         cleanUpReferencesToPersistentStores()
     }
@@ -69,7 +69,7 @@ extension DataStore: TrackerDataStore {
     var managedObjectContext: NSManagedObjectContext? {
         context
     }
-    
+
     func saveContext() throws {
         try performSync { context in
             Result {
@@ -77,7 +77,7 @@ extension DataStore: TrackerDataStore {
             }
         }
     }
-    
+
     func refresh() throws {
         try performSync { context in
             Result {
@@ -85,7 +85,7 @@ extension DataStore: TrackerDataStore {
             }
         }
     }
-    
+
     func deleteItem(_ item: NSManagedObject) throws {
         try performSync { context in
             Result {
@@ -98,7 +98,7 @@ extension DataStore: TrackerDataStore {
         try performSync { context in
             Result {
                 context.refreshAllObjects()
-                
+
                 let trackerCoreData = TrackerCoreData(context: context)
                 trackerCoreData.trackerId = tracker.id
                 trackerCoreData.title = tracker.title
@@ -106,7 +106,7 @@ extension DataStore: TrackerDataStore {
                 trackerCoreData.color = tracker.color
                 trackerCoreData.date = tracker.date
                 trackerCoreData.category = category
-                
+
                 try context.save()
             }
         }

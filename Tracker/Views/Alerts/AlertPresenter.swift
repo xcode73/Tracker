@@ -10,7 +10,7 @@ import UIKit
 enum AlertButton: String {
     case deleteButton
     case cancelButton
-    
+
     var accessibilityIdentifier: String {
         switch self {
         case .deleteButton:
@@ -19,7 +19,7 @@ enum AlertButton: String {
             return "Cancel Button"
         }
     }
-    
+
     var title: String {
         switch self {
         case .deleteButton:
@@ -31,9 +31,10 @@ enum AlertButton: String {
 }
 
 struct AlertPresenter {
-    static func showAlert(on vc: UIViewController, model: AlertModel) {
+    static func showAlert(on viewController: UIViewController,
+                          model: AlertModel) {
         showBasicAlert(
-            on: vc,
+            on: viewController,
             title: model.title,
             message: model.message,
             buttons: model.buttons,
@@ -41,24 +42,21 @@ struct AlertPresenter {
             completion: model.completion ?? {}
         )
     }
-    
+
     private static func showBasicAlert(
-        on vc: UIViewController,
+        on viewController: UIViewController,
         title: String?,
         message: String?,
         buttons: [AlertButton],
         identifier: String,
         completion: @escaping () -> Void
     ) {
-        
         let alert = UIAlertController(title: title,
                                       message: message,
                                       preferredStyle: .actionSheet)
-        
         alert.view.subviews.first?.subviews.first?.subviews.first?.backgroundColor = .systemBackground
-        
         alert.view.accessibilityIdentifier = identifier
-        
+
         for button in buttons {
             switch button {
             case .deleteButton:
@@ -75,10 +73,9 @@ struct AlertPresenter {
                 alert.addAction(action)
             }
         }
-        
+
         DispatchQueue.main.async {
-            vc.present(alert, animated: true)
+            viewController.present(alert, animated: true)
         }
     }
 }
-

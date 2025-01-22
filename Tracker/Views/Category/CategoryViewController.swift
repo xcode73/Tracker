@@ -18,7 +18,7 @@ final class CategoryViewController: UIViewController {
     private var sectionItems = [""]
     private var categoryTitle: String?
     private var indexPath: IndexPath?
-    
+
     private enum LocalConst {
         static let createCategoryViewTitle = NSLocalizedString("category.add.title", comment: "")
         static let editCategoryViewTitle = NSLocalizedString("category.edit.title", comment: "")
@@ -26,20 +26,18 @@ final class CategoryViewController: UIViewController {
         static let titleCellPlaceholder = NSLocalizedString("category.placeholder.message", comment: "")
         static let errorCellTitle = NSLocalizedString("category.name.error.message", comment: "")
     }
-    
+
     // MARK: - UI Components
     private lazy var tableView: UITableView = {
         let view = UITableView()
         view.register(TitleCell.self, forCellReuseIdentifier: CategoryTitleCell.reuseIdentifier)
-        
         view.separatorStyle = .none
         view.delegate = self
         view.dataSource = self
         view.translatesAutoresizingMaskIntoConstraints = false
-        
         return view
     }()
-    
+
     private lazy var saveCategoryButton: UIButton = {
         let view = UIButton()
         view.layer.masksToBounds = true
@@ -49,17 +47,16 @@ final class CategoryViewController: UIViewController {
         view.addTarget(self, action: #selector(didTapSaveCategoryButton), for: .touchUpInside)
         view.setTitle(LocalConst.createButtonTitle, for: .normal)
         view.translatesAutoresizingMaskIntoConstraints = false
-        
+
         return view
     }()
-    
+
     private lazy var tap: UITapGestureRecognizer = {
         let view = UITapGestureRecognizer()
         view.addTarget(self, action: #selector(hideKeyboard))
-        
         return view
     }()
-    
+
     // MARK: - Init
     init(
         categoryTitle: String?,
@@ -67,10 +64,10 @@ final class CategoryViewController: UIViewController {
     ) {
         self.categoryTitle = categoryTitle
         self.indexPath = indexPath
-        
+
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -81,7 +78,7 @@ final class CategoryViewController: UIViewController {
 
         setupUI()
     }
-    
+
     private func setupUI() {
         view.backgroundColor = .ypWhite
         if categoryTitle != nil {
@@ -89,21 +86,20 @@ final class CategoryViewController: UIViewController {
         } else {
             title = LocalConst.createCategoryViewTitle
         }
-        
+
         addSaveCategoryButton()
         addTableView()
-        
         changeCreateCategoryButtonState()
         tap.cancelsTouchesInView = false
         view.addGestureRecognizer(tap)
     }
-    
+
     private func changeCreateCategoryButtonState() {
         if categoryTitle == nil {
             saveCategoryButton.isEnabled = false
             saveCategoryButton.backgroundColor = .ypGray
         }
-        
+
         if let categoryTitle, !categoryTitle.trimmingCharacters(in: .whitespaces).isEmpty {
             saveCategoryButton.isEnabled = true
             saveCategoryButton.backgroundColor = .ypBlack
@@ -112,39 +108,40 @@ final class CategoryViewController: UIViewController {
             saveCategoryButton.backgroundColor = .ypGray
         }
     }
-    
+
     // MARK: - Actions
     @objc
     private func didTapSaveCategoryButton() {
         guard let categoryTitle else { return }
-        
+
         if let indexPath {
             delegate?.editCategory(categoryTitle: categoryTitle, at: indexPath)
         } else {
             delegate?.createCategory(categoryTitle: categoryTitle)
         }
     }
-    
+
     @objc
     private func hideKeyboard() {
         view.endEditing(true)
     }
-    
+
     // MARK: - Constraints
     private func addSaveCategoryButton() {
         view.addSubview(saveCategoryButton)
-        
+
         NSLayoutConstraint.activate([
             saveCategoryButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            saveCategoryButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            saveCategoryButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor,
+                                                         constant: -20),
             saveCategoryButton.heightAnchor.constraint(equalToConstant: 60),
             saveCategoryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
         ])
     }
-    
+
     private func addTableView() {
         view.addSubview(tableView)
-        
+
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
             tableView.bottomAnchor.constraint(equalTo: saveCategoryButton.topAnchor, constant: -16),
@@ -159,7 +156,7 @@ extension CategoryViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return sectionItems.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch indexPath.row {
         case 0:
@@ -197,7 +194,7 @@ extension CategoryViewController: CategoryTitleCellDelegate {
         let items = sectionItems.count
         categoryTitle = title
         changeCreateCategoryButtonState()
-        
+
         switch title.count {
         case 0...37:
             if items > 1 {
@@ -207,7 +204,7 @@ extension CategoryViewController: CategoryTitleCellDelegate {
                 } completion: { _ in }
             }
             sectionItems = [title]
-            
+
         case 38:
             sectionItems.append(LocalConst.errorCellTitle)
             tableView.performBatchUpdates {
@@ -227,7 +224,7 @@ extension CategoryViewController: CategoryTitleCellDelegate {
         rootViewController: CategoryViewController(categoryTitle: nil, indexPath: nil)
     )
     navigationController.modalPresentationStyle = .pageSheet
-    
+
     return navigationController
 }
 
@@ -239,7 +236,7 @@ extension CategoryViewController: CategoryTitleCellDelegate {
         rootViewController: CategoryViewController(categoryTitle: categoryTitle, indexPath: indexPath)
     )
     navigationController.modalPresentationStyle = .pageSheet
-    
+
     return navigationController
 }
 #endif

@@ -14,26 +14,23 @@ protocol CategoryTitleCellDelegate: AnyObject {
 final class CategoryTitleCell: UITableViewCell {
     // MARK: - Properties
     weak var delegate: CategoryTitleCellDelegate?
-    
+
     private let maxTitleLength = 38
-    
     // MARK: - UI Components
     private lazy var containerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        
         return view
     }()
-    
+
     private lazy var titleView: UIView = {
         let view = UIView()
         view.backgroundColor = .ypBackground
         view.layer.cornerRadius = 16
         view.translatesAutoresizingMaskIntoConstraints = false
-        
         return view
     }()
-    
+
     private lazy var titleTextField: UITextField = {
         let view = UITextField()
         view.font = Constants.Fonts.ypRegular17
@@ -43,53 +40,52 @@ final class CategoryTitleCell: UITableViewCell {
 
         view.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         view.translatesAutoresizingMaskIntoConstraints = false
-        
         return view
     }()
-    
-    //MARK: - Init
+
+    // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
+
         setupUI()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     // MARK: - Configuration
     func configure(with title: String?, placeholder: String) {
         titleTextField.placeholder = placeholder
-        
+
         guard let title else { return }
         titleTextField.text = title
     }
-    
+
     // MARK: - Setup UI
     private func setupUI() {
         selectionStyle = .none
         addViews()
     }
-    
+
     // MARK: - Actions
     @objc
     private func textFieldDidChange(_ textField: UITextField) {
         guard let text = textField.text else { return }
         delegate?.titleChanged(title: text)
     }
-    
+
     // MARK: - Constraints
     func addViews() {
         contentView.addSubview(titleView)
         titleView.addSubview(titleTextField)
-        
+
         NSLayoutConstraint.activate([
             titleView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             titleView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             titleView.topAnchor.constraint(equalTo: contentView.topAnchor),
             titleView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            
+
             titleTextField.leadingAnchor.constraint(equalTo: titleView.leadingAnchor, constant: 16),
             titleTextField.trailingAnchor.constraint(equalTo: titleView.trailingAnchor, constant: -16),
             titleTextField.topAnchor.constraint(equalTo: titleView.topAnchor),
@@ -104,17 +100,19 @@ extension CategoryTitleCell: UITextFieldDelegate {
         textField.resignFirstResponder()
         return true
     }
-    
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+
+    func textField(_ textField: UITextField,
+                   shouldChangeCharactersIn range: NSRange,
+                   replacementString string: String) -> Bool {
         guard
             let currentText =  textField.text,
             let stringRange = Range(range, in: currentText)
         else {
             return false
         }
-        
+
         let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
-        
+
         return updatedText.count <= maxTitleLength
     }
 }
@@ -127,7 +125,7 @@ extension CategoryTitleCell: UITextFieldDelegate {
         rootViewController: CategoryViewController(categoryTitle: nil, indexPath: nil)
     )
     navigationController.modalPresentationStyle = .pageSheet
-    
+
     return navigationController
 }
 
@@ -139,7 +137,7 @@ extension CategoryTitleCell: UITextFieldDelegate {
         rootViewController: CategoryViewController(categoryTitle: categoryTitle, indexPath: indexPath)
     )
     navigationController.modalPresentationStyle = .pageSheet
-    
+
     return navigationController
 }
 #endif

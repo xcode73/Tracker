@@ -14,7 +14,7 @@ protocol OnboardingContentViewControllerDelegate: AnyObject {
 class OnboardingContentViewController: UIViewController {
     weak var delegate: OnboardingContentViewControllerDelegate?
     var onboardingItem: OnboardingItem
-    
+
     // MARK: - UI Components
     private lazy var featureLabel: UILabel = {
         let view = UILabel()
@@ -24,19 +24,17 @@ class OnboardingContentViewController: UIViewController {
         view.textColor = .black
         view.text = onboardingItem.description
         view.translatesAutoresizingMaskIntoConstraints = false
-        
         return view
     }()
-    
+
     private lazy var backgroundImageView: UIImageView = {
         let view = UIImageView()
         view.contentMode = .scaleToFill
         view.image = onboardingItem.image
         view.translatesAutoresizingMaskIntoConstraints = false
-        
         return view
     }()
-    
+
     private lazy var confirmButton: UIButton = {
         let view = UIButton()
         view.layer.masksToBounds = true
@@ -47,7 +45,6 @@ class OnboardingContentViewController: UIViewController {
         view.addTarget(self, action: #selector(didTapConfirmButton), for: .touchUpInside)
         view.setTitle(onboardingItem.buttonTitle, for: .normal)
         view.translatesAutoresizingMaskIntoConstraints = false
-        
         return view
     }()
 
@@ -56,34 +53,34 @@ class OnboardingContentViewController: UIViewController {
         self.onboardingItem = onboardingItem
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
 
         setupUI()
     }
-    
+
     private func setupUI() {
         addBackgroundImageView()
         addFeatureLabel()
         addConfirmButton()
     }
-    
+
     // MARK: - Action
     @objc
     private func didTapConfirmButton() {
         delegate?.didTapConfirmButton()
     }
-    
-    //MARK: - Constraints
+
+    // MARK: - Constraints
     private func addBackgroundImageView() {
         view.addSubview(backgroundImageView)
-        
+
         NSLayoutConstraint.activate([
             backgroundImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             backgroundImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -91,20 +88,20 @@ class OnboardingContentViewController: UIViewController {
             backgroundImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-    
+
     private func addFeatureLabel() {
         view.addSubview(featureLabel)
-        
+
         NSLayoutConstraint.activate([
             featureLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             featureLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             featureLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 478)
         ])
     }
-    
+
     private func addConfirmButton() {
         view.addSubview(confirmButton)
-        
+
         NSLayoutConstraint.activate([
             confirmButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             confirmButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),

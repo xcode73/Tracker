@@ -10,9 +10,9 @@ import Foundation
 final class CategoriesViewModel {
     var onChange: Binding<[TrackerCategoryStoreUpdate]>?
     var onErrorStateChange: Binding<String?>?
-    
+
     private let trackerDataStore: TrackerDataStore
-    
+
     private lazy var trackerCategoryStore: TrackerCategoryStoreProtocol? = {
         do {
             try trackerCategoryStore = TrackerCategoryStore(
@@ -25,27 +25,27 @@ final class CategoriesViewModel {
             return nil
         }
     }()
-    
+
     init(trackerDataStore: TrackerDataStore) {
         self.trackerDataStore = trackerDataStore
     }
-    
+
     func numberOfRowsInSection(section: Int) -> Int? {
         trackerCategoryStore?.numberOfRowsInSection(section)
     }
-    
+
     func getCategoryTitle(at indexPath: IndexPath) -> String? {
         trackerCategoryStore?.categoryTitle(at: indexPath)
     }
-    
+
     func addCategory(category: TrackerCategory) {
         try? trackerCategoryStore?.addCategory(category: category)
     }
-    
+
     func updateCategory(categoryTitle: String, at indexPath: IndexPath) {
         try? trackerCategoryStore?.updateCategory(categoryTitle: categoryTitle, at: indexPath)
     }
-    
+
     func deleteCategory(at indexPath: IndexPath) {
         try? trackerCategoryStore?.deleteCategory(at: indexPath)
     }

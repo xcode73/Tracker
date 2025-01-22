@@ -15,7 +15,7 @@ final class OnboardingViewController: UIPageViewController {
     // MARK: - Properties
     weak var onboardingDelegate: OnboardingViewControllerDelegate?
     private var currentIndex = 0
-    
+
     private let onboardingItems = [
         OnboardingItem(image: .imgOnboardingBlue,
                        description: Constants.Onboarding.blueTitle,
@@ -24,7 +24,7 @@ final class OnboardingViewController: UIPageViewController {
                        description: Constants.Onboarding.redTitle,
                        buttonTitle: Constants.Onboarding.buttonTitle)
     ]
-    
+
     // MARK: - UI Components
     private lazy var pageControl: CustomPageControl = {
         let view = CustomPageControl()
@@ -34,10 +34,9 @@ final class OnboardingViewController: UIPageViewController {
         view.pageIndicatorTintColor = .ypGray
         view.delegate = self
         view.translatesAutoresizingMaskIntoConstraints = false
-        
         return view
     }()
-    
+
     // MARK: - Init
     init() {
         super.init(transitionStyle: .scroll,
@@ -48,14 +47,14 @@ final class OnboardingViewController: UIPageViewController {
     required init(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         setupUI()
     }
-    
+
     private func setupUI() {
         dataSource = self
         delegate = self
@@ -63,17 +62,17 @@ final class OnboardingViewController: UIPageViewController {
         overrideUserInterfaceStyle = .light
         addPageControl()
     }
-    
+
     private func contentViewController(at index: Int) -> OnboardingContentViewController? {
-        let vc = OnboardingContentViewController(onboardingItem: onboardingItems[index])
-        vc.delegate = self
-        
-        return vc
+        let viewController = OnboardingContentViewController(onboardingItem: onboardingItems[index])
+        viewController.delegate = self
+
+        return viewController
     }
-    
+
     private func setViewControllers(_ index: Int, direction: UIPageViewController.NavigationDirection) {
         guard let contentViewController = contentViewController(at: index) else { return }
-        
+
         setViewControllers(
             [contentViewController],
             direction: direction,
@@ -81,11 +80,11 @@ final class OnboardingViewController: UIPageViewController {
             completion: nil
         )
     }
-    
+
     // MARK: - Constraints
     private func addPageControl() {
         view.addSubview(pageControl)
-        
+
         NSLayoutConstraint.activate([
             pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             pageControl.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -175)
@@ -103,10 +102,10 @@ extension OnboardingViewController: UIPageViewControllerDataSource {
         guard previousIndex >= 0 else {
             return contentViewController(at: onboardingItems.count - 1)
         }
-        
+
         return contentViewController(at: previousIndex)
     }
-    
+
     func pageViewController(
         _ pageViewController: UIPageViewController,
         viewControllerAfter viewController: UIViewController
@@ -115,7 +114,7 @@ extension OnboardingViewController: UIPageViewControllerDataSource {
         guard nextIndex < onboardingItems.count else {
             return contentViewController(at: 0)
         }
-        
+
         return contentViewController(at: nextIndex)
     }
 }
@@ -144,11 +143,11 @@ extension OnboardingViewController: CustomPageControlDelegate {
                            didTapIndicatorAtIndex index: Int
     ) {
         var direction: UIPageViewController.NavigationDirection = .forward
-        
+
         if index < currentIndex {
             direction = .reverse
         }
-        
+
         setViewControllers(index, direction: direction)
         currentIndex = index
     }

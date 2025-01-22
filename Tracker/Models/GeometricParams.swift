@@ -18,7 +18,7 @@ struct GeometricParams {
     let paddingWidth: CGFloat
     let lineSpacing: CGFloat
     let headerHeight: CGFloat
-    
+
     init(
         cellCount: CGFloat,
         topInset: CGFloat,

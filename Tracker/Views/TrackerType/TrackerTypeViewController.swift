@@ -17,7 +17,7 @@ final class TrackerTypeViewController: UIViewController {
     weak var delegate: TrackerTypeViewControllerDelegate?
     private var currentDate: Date
     private let trackerDataStore: TrackerDataStore
-    
+
     // MARK: - UI Components
     private lazy var buttonsStackView: UIStackView = {
         let view = UIStackView()
@@ -26,7 +26,7 @@ final class TrackerTypeViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-    
+
     private lazy var regularEventButton: UIButton = {
         let button = UIButton()
         button.setTitle(NSLocalizedString("buttons.regularTracker", comment: ""), for: .normal)
@@ -37,7 +37,7 @@ final class TrackerTypeViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-    
+
     private lazy var nonRegularEventButton: UIButton = {
         let button = UIButton()
         button.setTitle(NSLocalizedString("buttons.specialTracker", comment: ""), for: .normal)
@@ -48,7 +48,7 @@ final class TrackerTypeViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-    
+
     // MARK: - Init
     init(
         trackerDataStore: TrackerDataStore,
@@ -56,50 +56,49 @@ final class TrackerTypeViewController: UIViewController {
     ) {
         self.currentDate = currentDate
         self.trackerDataStore = trackerDataStore
-        
+
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
 
         setupUI()
     }
-    
-    
+
     // MARK: - Actions
     @objc
     private func didTapRegularButton() {
-        let vc = TrackerTableViewController(tableType: .regular,
+        let viewController = TrackerTableViewController(tableType: .regular,
                                             trackerDataStore: trackerDataStore,
                                             indexPath: nil)
-        vc.delegate = self
+        viewController.delegate = self
         let navigationController = UINavigationController(
-            rootViewController: vc
+            rootViewController: viewController
         )
         navigationController.modalPresentationStyle = .pageSheet
         present(navigationController, animated: true)
     }
-    
+
     @objc
     private func didTapNonRegularButton() {
-        let vc = TrackerTableViewController(tableType: .special(currentDate),
+        let viewController = TrackerTableViewController(tableType: .special(currentDate),
                                             trackerDataStore: trackerDataStore,
                                             indexPath: nil)
-        vc.delegate = self
+        viewController.delegate = self
         let navigationController = UINavigationController(
-            rootViewController: vc
+            rootViewController: viewController
         )
         navigationController.modalPresentationStyle = .pageSheet
-        
+
         present(navigationController, animated: true)
     }
-    
+
     // MARK: - Constraints
     private func setupUI() {
         title = NSLocalizedString("trackerType.title", comment: "")
@@ -107,7 +106,7 @@ final class TrackerTypeViewController: UIViewController {
         view.addSubview(buttonsStackView)
         buttonsStackView.addArrangedSubview(regularEventButton)
         buttonsStackView.addArrangedSubview(nonRegularEventButton)
-        
+
         NSLayoutConstraint.activate([
             buttonsStackView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.88),
             buttonsStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -123,12 +122,12 @@ extension TrackerTypeViewController: TrackerTableViewControllerDelegate {
         delegate?.cancelButtonTapped()
         dismiss(animated: true)
     }
-    
+
     func createTracker(tracker: Tracker) {
         delegate?.createTracker(tracker: tracker)
         dismiss(animated: true)
     }
-    
+
     func updateTracker(tracker: Tracker, at indexPath: IndexPath) {
         delegate?.updateTracker(tracker: tracker, at: indexPath)
         dismiss(animated: true)
@@ -139,11 +138,11 @@ extension TrackerTypeViewController: TrackerTableViewControllerDelegate {
 #if DEBUG
 @available(iOS 17, *)
 #Preview() {
-    let trackerDataStore = (UIApplication.shared.delegate as! AppDelegate).trackerDataStore
+    let trackerDataStore = Constants.appDelegate().trackerDataStore
     let viewController = TrackerTypeViewController(trackerDataStore: trackerDataStore, currentDate: Date())
     let navigationController = UINavigationController(rootViewController: viewController)
     navigationController.modalPresentationStyle = .pageSheet
-    
+
     return navigationController
 }
 #endif

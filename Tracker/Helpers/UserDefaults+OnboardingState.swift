@@ -11,12 +11,11 @@ extension UserDefaults {
     private enum UserDefaultsKeys: String {
         case isOnboardingCompleted
     }
-    
+
     var isOnboardingCompleted: Bool {
         get {
             bool(forKey: UserDefaultsKeys.isOnboardingCompleted.rawValue)
         }
-        
         set {
             setValue(newValue, forKey: UserDefaultsKeys.isOnboardingCompleted.rawValue)
         }

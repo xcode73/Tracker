@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class InsetsGroupedLayer: CALayer {
+class InsetsGroupedLayer: CALayer {
     override var cornerRadius: CGFloat {
         get { 16 }
         set {}
@@ -23,19 +23,17 @@ final class CategoryCell: UITableViewCell {
         view.alignment = .center
         view.spacing = 16
         view.translatesAutoresizingMaskIntoConstraints = false
-        
         return view
     }()
-    
+
     private lazy var titleLabel: UILabel = {
         let view = UILabel()
         view.font = Constants.Fonts.ypRegular17
         view.textColor = .ypBlack
         view.translatesAutoresizingMaskIntoConstraints = false
-        
         return view
     }()
-    
+
     private lazy var disclosureIndicatorImageView: UIImageView = {
         let view = UIImageView()
         view.tintColor = .ypGray
@@ -44,17 +42,16 @@ final class CategoryCell: UITableViewCell {
         view.tintColor = .ypBlue
         view.isHidden = true
         view.translatesAutoresizingMaskIntoConstraints = false
-        
         return view
     }()
-    
-    //MARK: - Init
+
+    // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        
+
         setupViews()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -65,20 +62,20 @@ final class CategoryCell: UITableViewCell {
         /// Configure the view for the selected state
         disclosureIndicatorImageView.isHidden = !selected
     }
-    
-    override class var layerClass: AnyClass {
+
+    override static var layerClass: AnyClass {
         InsetsGroupedLayer.self
     }
-    
+
     // MARK: - Config
     func configure(with categoryTitle: String /*cellType: Bool*/) {
         titleLabel.text = categoryTitle
     }
-    
+
     func configureSelectedView() -> UIView {
         return contentView
     }
-    
+
     // MARK: - Constraints
     private func setupViews() {
         selectionStyle = .none
@@ -86,17 +83,17 @@ final class CategoryCell: UITableViewCell {
         contentView.addSubview(horizontalStackView)
         horizontalStackView.addArrangedSubview(titleLabel)
         addImageViewDisclosureIndicator()
-        
+
         NSLayoutConstraint.activate([
             horizontalStackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             horizontalStackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             horizontalStackView.heightAnchor.constraint(equalTo: contentView.heightAnchor)
         ])
     }
-    
+
     private func addImageViewDisclosureIndicator() {
         horizontalStackView.addArrangedSubview(disclosureIndicatorImageView)
-        
+
         NSLayoutConstraint.activate([
             disclosureIndicatorImageView.widthAnchor.constraint(equalToConstant: 24),
             disclosureIndicatorImageView.heightAnchor.constraint(equalToConstant: 24)
@@ -108,17 +105,17 @@ final class CategoryCell: UITableViewCell {
 #if DEBUG
 @available(iOS 17, *)
 #Preview("Categories") {
-    let trackerDataStore = (UIApplication.shared.delegate as! AppDelegate).trackerDataStore
-    
+    let trackerDataStore = Constants.appDelegate().trackerDataStore
+
     let viewModel = CategoriesViewModel(trackerDataStore: trackerDataStore)
-    let vc = CategoriesViewController(selectedCategoryTitle: nil)
-    vc.initialize(viewModel: viewModel)
-    
+    let viewController = CategoriesViewController(selectedCategoryTitle: nil)
+    viewController.initialize(viewModel: viewModel)
+
     let navigationController = UINavigationController(
-        rootViewController: vc
+        rootViewController: viewController
     )
     navigationController.modalPresentationStyle = .pageSheet
-    
+
     return navigationController
 }
 #endif
