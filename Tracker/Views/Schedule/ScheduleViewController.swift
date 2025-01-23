@@ -17,11 +17,6 @@ final class ScheduleViewController: UIViewController {
     private var schedule: [WeekDay]?
     private let weekDays = Constants.weekDays
 
-    private enum LocalConst {
-        static let title = NSLocalizedString("schedule.title", comment: "")
-        static let createScheduleButtonTitle = NSLocalizedString("buttons.done", comment: "")
-    }
-
     // MARK: - UI Components
     private lazy var tableView: UITableView = {
         let view = UITableView()
@@ -44,7 +39,7 @@ final class ScheduleViewController: UIViewController {
         view.titleLabel?.font = Constants.Fonts.ypMedium16
         view.setTitleColor(.white, for: .normal)
         view.addTarget(self, action: #selector(didTapCreateScheduleButton), for: .touchUpInside)
-        view.setTitle(LocalConst.createScheduleButtonTitle, for: .normal)
+        view.setTitle(NSLocalizedString("buttonDone", comment: ""), for: .normal)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -70,7 +65,7 @@ final class ScheduleViewController: UIViewController {
     }
 
     private func setupUI() {
-        title = LocalConst.title
+        title = NSLocalizedString("vcTitleSchedule", comment: "")
         view.backgroundColor = .ypWhite
         addCreateCategoryButton()
         addTableView()

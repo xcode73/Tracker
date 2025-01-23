@@ -8,18 +8,6 @@
 import UIKit
 
 enum Constants {
-    enum ButtonTitles {
-        static let pin = NSLocalizedString("buttons.pin", comment: "")
-        static let edit = NSLocalizedString("buttons.edit", comment: "")
-        static let delete = NSLocalizedString("buttons.delete", comment: "")
-    }
-
-    enum Onboarding {
-        static let blueTitle = NSLocalizedString("onboarding.feature.blue", comment: "")
-        static let redTitle = NSLocalizedString("onboarding.feature.red", comment: "")
-        static let buttonTitle = NSLocalizedString("buttons.completeOnboarding", comment: "")
-    }
-
     enum Icons {
         static let plus = UIImage(systemName: "plus")
         static let checkmark = UIImage(systemName: "checkmark")

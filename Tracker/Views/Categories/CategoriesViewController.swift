@@ -18,13 +18,6 @@ final class CategoriesViewController: UIViewController {
     private var viewModel: CategoriesViewModel?
     private var selectedCategoryTitle: String?
 
-    private enum LocalConst {
-        static let title = NSLocalizedString("categories.title", comment: "")
-        static let placeholderTitle = NSLocalizedString("categories.placeholder.message", comment: "")
-        static let createButtonTitle = NSLocalizedString("buttons.addCategory", comment: "")
-        static let deleteCategoryAlertMessage = NSLocalizedString("alert.message.deleteCategory", comment: "")
-    }
-
     // MARK: - UI Components
     private lazy var tableView: UITableView = {
         let view = UITableView(frame: view.bounds, style: .insetGrouped)
@@ -64,7 +57,7 @@ final class CategoriesViewController: UIViewController {
         view.font = Constants.Fonts.ypMedium12
         view.textAlignment = .center
         view.textColor = .ypBlack
-        view.text = LocalConst.placeholderTitle
+        view.text = NSLocalizedString("placeholderCategories", comment: "")
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -77,7 +70,7 @@ final class CategoriesViewController: UIViewController {
         view.titleLabel?.font = Constants.Fonts.ypMedium16
         view.setTitleColor(.white, for: .normal)
         view.addTarget(self, action: #selector(showCategoryViewController), for: .touchUpInside)
-        view.setTitle(LocalConst.createButtonTitle, for: .normal)
+        view.setTitle(NSLocalizedString("buttonAddCategory", comment: ""), for: .normal)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -149,7 +142,7 @@ final class CategoriesViewController: UIViewController {
     }
 
     private func setupUI() {
-        title = LocalConst.title
+        title = NSLocalizedString("vcTitleCategories", comment: "")
         view.backgroundColor = .ypWhite
     }
 
@@ -177,7 +170,7 @@ final class CategoriesViewController: UIViewController {
     func showDeleteCategoryAlert(for indexPath: IndexPath) {
         let model = AlertModel(
             title: nil,
-            message: LocalConst.deleteCategoryAlertMessage,
+            message: NSLocalizedString("alertMessageDeleteCategory", comment: ""),
             buttons: [.deleteButton, .cancelButton],
             identifier: "Delete Category Alert",
             completion: { [weak self] in
@@ -192,8 +185,8 @@ final class CategoriesViewController: UIViewController {
 
     func showStoreErrorAlert() {
         let model = AlertModel(
-            title: NSLocalizedString("alert.store.title", comment: ""),
-            message: NSLocalizedString("alert.store.message", comment: ""),
+            title: NSLocalizedString("alertTitleStoreError", comment: ""),
+            message: NSLocalizedString("alertMessageStoreError", comment: ""),
             buttons: [.cancelButton],
             identifier: "Category Store Error Alert",
             completion: nil
@@ -337,10 +330,10 @@ extension CategoriesViewController: UITableViewDelegate {
                                           previewProvider: nil,
                                           actionProvider: { _ in
             return UIMenu(children: [
-                UIAction(title: Constants.ButtonTitles.edit) { [weak self] _ in
+                UIAction(title: NSLocalizedString("buttonEdit", comment: "")) { [weak self] _ in
                     self?.showCategoryDetail(indexPath: indexPath)
                 },
-                UIAction(title: Constants.ButtonTitles.delete, attributes: .destructive) { [weak self] _ in
+                UIAction(title: NSLocalizedString("buttonDelete", comment: ""), attributes: .destructive) { [weak self] _ in
                     self?.showDeleteCategoryAlert(for: indexPath)
                 }
             ])

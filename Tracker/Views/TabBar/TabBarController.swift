@@ -8,15 +8,10 @@
 import UIKit
 
 final class TabBarController: UITabBarController {
-    private enum LocalConst {
-        static let trackers = NSLocalizedString("tabBar.trackers", comment: "")
-        static let statistic = NSLocalizedString("tabBar.statistics", comment: "")
-    }
-
     // MARK: - UI Components
     private lazy var trackersTabBarItem: UITabBarItem = {
         let view = UITabBarItem()
-        view.title = LocalConst.trackers
+        view.title = NSLocalizedString("vcTitleTrackers", comment: "")
         view.image = .icTrackers
         view.selectedImage = nil
         return view
@@ -24,7 +19,7 @@ final class TabBarController: UITabBarController {
 
     private lazy var statisticsTabBarItem: UITabBarItem = {
         let view = UITabBarItem()
-        view.title = LocalConst.statistic
+        view.title = NSLocalizedString("vcTitleStatistics", comment: "")
         view.image = .icStats
         view.selectedImage = nil
         return view
@@ -58,7 +53,7 @@ final class TabBarController: UITabBarController {
     private func setupTabs() {
         // Trackers Tab
         let trackersViewController = TrackersViewController()
-        trackersViewController.title = LocalConst.trackers
+        trackersViewController.title = NSLocalizedString("vcTitleTrackers", comment: "")
         let trackerNavigationController = UINavigationController(rootViewController: trackersViewController)
 
         trackerNavigationController.navigationBar.prefersLargeTitles = true
@@ -68,7 +63,7 @@ final class TabBarController: UITabBarController {
 
         // Statistic Tab
         let statisticViewController = StatisticViewController()
-        statisticViewController.title = LocalConst.statistic
+        statisticViewController.title = NSLocalizedString("vcTitleStatistics", comment: "")
         let statNavigationController = UINavigationController(rootViewController: statisticViewController)
         statNavigationController.navigationBar.prefersLargeTitles = true
         statNavigationController.tabBarItem = statisticsTabBarItem

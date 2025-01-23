@@ -191,7 +191,7 @@ final class TrackersViewController: UIViewController {
     func showDeleteTrackerAlert(for indexPaths: [IndexPath]) {
         let model = AlertModel(
             title: nil,
-            message: NSLocalizedString("alert.message.deleteTracker", comment: ""),
+            message: NSLocalizedString("alertMessageDeleteTracker", comment: ""),
             buttons: [.deleteButton, .cancelButton],
             identifier: "Delete Tracker Alert",
             completion: { [weak self] in
@@ -206,8 +206,8 @@ final class TrackersViewController: UIViewController {
 
     func showStoreErrorAlert() {
         let model = AlertModel(
-            title: NSLocalizedString("alert.store.title", comment: ""),
-            message: NSLocalizedString("alert.store.message", comment: ""),
+            title: NSLocalizedString("alertTitleStoreError", comment: ""),
+            message: NSLocalizedString("alertMessageStoreError", comment: ""),
             buttons: [.cancelButton],
             identifier: "Tracker Store Error Alert",
             completion: nil
@@ -402,13 +402,14 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 
         return UIContextMenuConfiguration(actionProvider: { _ in
             return UIMenu(children: [
-                UIAction(title: Constants.ButtonTitles.pin) { /*[weak self]*/ _ in
+                UIAction(title: NSLocalizedString("buttonPin", comment: "")) { /*[weak self]*/ _ in
                     // TODO: implement
                 },
-                UIAction(title: Constants.ButtonTitles.edit) { [weak self] _ in
+                UIAction(title: NSLocalizedString("buttonEdit", comment: "")) { [weak self] _ in
                     self?.showTrackerDetail(indexPath: indexPath)
                 },
-                UIAction(title: Constants.ButtonTitles.delete, attributes: .destructive) { [weak self] _ in
+                UIAction(title: NSLocalizedString("buttonDelete", comment: ""),
+                         attributes: .destructive) { [weak self] _ in
                     self?.showDeleteTrackerAlert(for: indexPaths)
                 }
             ])

@@ -47,31 +47,6 @@ final class TrackerTableViewController: UITableViewController {
 
     private var isDoneButtonEnabled: Bool = false
 
-    private enum LocalConst {
-        enum Edit {
-            static let specialTableTitle = NSLocalizedString("tracker.edit.special.title", comment: "")
-            static let regularTableTitle = NSLocalizedString("tracker.edit.regular.title", comment: "")
-            static let doneButtonTitle = NSLocalizedString("buttons.save", comment: "")
-        }
-
-        enum Add {
-            static let specialTableTitle = NSLocalizedString("tracker.add.special.title", comment: "")
-            static let regularTableTitle = NSLocalizedString("tracker.add.regular.title", comment: "")
-            static let doneButtonTitle = NSLocalizedString("buttons.add", comment: "")
-        }
-
-        enum SectionHeader {
-            static let emoji = NSLocalizedString("tracker.section.emoji.header", comment: "")
-            static let color = NSLocalizedString("tracker.section.color.header", comment: "")
-        }
-
-        static let cancelButtonTitle = NSLocalizedString("buttons.cancel", comment: "")
-        static let titleCellPlaceholder = NSLocalizedString("tracker.placeholder.message", comment: "")
-        static let errorCellTitle = NSLocalizedString("tracker.section.title.error.message", comment: "")
-        static let settingsSectionCategoryTitle = NSLocalizedString("tracker.section.settings.category", comment: "")
-        static let settingsSectionScheduleTitle = NSLocalizedString("tracker.section.settings.schedule", comment: "")
-    }
-
     // MARK: - UI Components
     private lazy var daysCompletedLabel: UILabel = {
         let view = UILabel()
@@ -121,13 +96,14 @@ final class TrackerTableViewController: UITableViewController {
 
         switch tableType {
         case .special(let date):
-            title = LocalConst.Add.specialTableTitle
+            title = NSLocalizedString("vcTitleAddSpecialTracker", comment: "")
             newTracker.date = date
-            tableSectionItems = [LocalConst.settingsSectionCategoryTitle]
+            tableSectionItems = [NSLocalizedString("rowTitleCategory", comment: "")]
             daysCompletedLabel.frame.size.height = 0
         case .regular:
-            title = LocalConst.Add.regularTableTitle
-            tableSectionItems = [LocalConst.settingsSectionCategoryTitle, LocalConst.settingsSectionScheduleTitle]
+            title = NSLocalizedString("vcTitleAddRegularTracker", comment: "")
+            tableSectionItems = [NSLocalizedString("rowTitleCategory", comment: ""),
+                                 NSLocalizedString("rowTitleSchedule", comment: "")]
             daysCompletedLabel.frame.size.height = 0
         case .edit(let tracker, let daysCompleted):
             tableView.tableHeaderView = daysCompletedLabel
@@ -138,13 +114,14 @@ final class TrackerTableViewController: UITableViewController {
             newTracker = NewTracker(from: tracker)
 
             if tracker.schedule != nil {
-                title = LocalConst.Edit.regularTableTitle
-                tableSectionItems = [LocalConst.settingsSectionCategoryTitle, LocalConst.settingsSectionScheduleTitle]
+                title = NSLocalizedString("vcTitleEditRegularTracker", comment: "")
+                tableSectionItems = [NSLocalizedString("rowTitleCategory", comment: ""),
+                                     NSLocalizedString("rowTitleSchedule", comment: "")]
             }
 
             if tracker.date != nil {
-                title = LocalConst.Edit.specialTableTitle
-                tableSectionItems = [LocalConst.settingsSectionCategoryTitle]
+                title = NSLocalizedString("vcTitleEditSpecialTracker", comment: "")
+                tableSectionItems = [NSLocalizedString("rowTitleCategory", comment: "")]
             }
         }
     }
@@ -249,13 +226,13 @@ final class TrackerTableViewController: UITableViewController {
                 let cell = TitleCell()
                 cell.configure(
                     with: newTracker.title,
-                    placeholder: LocalConst.titleCellPlaceholder
+                    placeholder: NSLocalizedString("placeholderTracker", comment: "")
                 )
                 cell.delegate = self
                 return cell
             case 1:
                 let cell = ErrorCell()
-                cell.configure(with: LocalConst.errorCellTitle)
+                cell.configure(with: NSLocalizedString("errorMessageCharacterLimit", comment: ""))
                 return cell
             default:
                 return UITableViewCell()
@@ -306,13 +283,13 @@ final class TrackerTableViewController: UITableViewController {
 
             switch tableType {
             case .regular, .special:
-                doneButtonTitle = LocalConst.Add.doneButtonTitle
+                doneButtonTitle = NSLocalizedString("buttonAdd", comment: "")
             case .edit:
-                doneButtonTitle = LocalConst.Edit.doneButtonTitle
+                doneButtonTitle = NSLocalizedString("buttonSave", comment: "")
             }
 
             cell.configure(with: doneButtonTitle,
-                           cancelButtonTitle: LocalConst.cancelButtonTitle,
+                           cancelButtonTitle: NSLocalizedString("buttonCancel", comment: ""),
                            isDoneButtonEnabled: isDoneButtonEnabled)
 
             return cell
@@ -324,9 +301,9 @@ final class TrackerTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
         case 2:
-            return LocalConst.SectionHeader.emoji
+            return NSLocalizedString("sectionHeaderEmoji", comment: "")
         case 3:
-            return LocalConst.SectionHeader.color
+            return NSLocalizedString("sectionHeaderColor", comment: "")
         default:
             return nil
         }
@@ -397,11 +374,11 @@ final class TrackerTableViewController: UITableViewController {
         switch section {
         case 2:
             let cell = SectionHeaderTableViewCell()
-            cell.configure(with: LocalConst.SectionHeader.emoji)
+            cell.configure(with: NSLocalizedString("sectionHeaderEmoji", comment: ""))
             return cell
         case 3:
             let cell = SectionHeaderTableViewCell()
-            cell.configure(with: LocalConst.SectionHeader.color)
+            cell.configure(with: NSLocalizedString("sectionHeaderColor", comment: ""))
             return cell
         default:
             return nil
@@ -431,7 +408,7 @@ extension TrackerTableViewController: TitleCellDelegate {
             }
             titleSectionItems = [title]
         case 38:
-            titleSectionItems.append(LocalConst.errorCellTitle)
+            titleSectionItems.append(NSLocalizedString("errorMessageCharacterLimit", comment: ""))
             tableView.performBatchUpdates {
                 tableView.insertRows(at: [IndexPath(row: 1, section: 0)], with: .automatic)
             } completion: { _ in }

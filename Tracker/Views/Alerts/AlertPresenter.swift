@@ -23,9 +23,9 @@ enum AlertButton: String {
     var title: String {
         switch self {
         case .deleteButton:
-            return NSLocalizedString("buttons.delete", comment: "")
+            return NSLocalizedString("buttonDelete", comment: "")
         case .cancelButton:
-            return NSLocalizedString("buttons.cancel", comment: "")
+            return NSLocalizedString("buttonCancel", comment: "")
         }
     }
 }

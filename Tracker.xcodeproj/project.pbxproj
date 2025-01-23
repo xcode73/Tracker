@@ -68,11 +68,11 @@
 				9193AC592C9DFB9B0087FC89 /* Sources */,
 				9193AC5A2C9DFB9B0087FC89 /* Frameworks */,
 				9193AC5B2C9DFB9B0087FC89 /* Resources */,
-				9170BE962D411AFA00639011 /* SwiftLint */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				914242C32D421465008711D4 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				9193AC5F2C9DFB9B0087FC89 /* Tracker */,
@@ -109,6 +109,9 @@
 			);
 			mainGroup = 9193AC542C9DFB9B0087FC89;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				914242C12D4211D6008711D4 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9193AC5E2C9DFB9B0087FC89 /* Products */;
 			projectDirPath = "";
@@ -129,28 +132,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		9170BE962D411AFA00639011 /* SwiftLint */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = SwiftLint;
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [[ \"$(uname -m)\" == arm64 ]]\nthen\n    export PATH=\"/opt/homebrew/bin:$PATH\"\nfi\n\nif command -v swiftlint >/dev/null 2>&1\nthen\n    swiftlint\nelse\n    echo \"warning: `swiftlint` command not found - See https://github.com/realm/SwiftLint#installation for installation instructions.\"\nfi\n";
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		9193AC592C9DFB9B0087FC89 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -160,6 +141,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		914242C32D421465008711D4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 914242C22D421465008711D4 /* SwiftLintBuildToolPlugin */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		9193AC712C9DFB9C0087FC89 /* Debug */ = {
@@ -375,6 +363,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		914242C12D4211D6008711D4 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SimplyDanny/SwiftLintPlugins";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.58.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		914242C22D421465008711D4 /* SwiftLintBuildToolPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 914242C12D4211D6008711D4 /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
+			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 9193AC552C9DFB9B0087FC89 /* Project object */;
 }

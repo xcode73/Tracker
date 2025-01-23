@@ -18,11 +18,11 @@ final class OnboardingViewController: UIPageViewController {
 
     private let onboardingItems = [
         OnboardingItem(image: .imgOnboardingBlue,
-                       description: Constants.Onboarding.blueTitle,
-                       buttonTitle: Constants.Onboarding.buttonTitle),
+                       description: NSLocalizedString("featureMessageBlue", comment: ""),
+                       buttonTitle: NSLocalizedString("buttonCompleteOnboarding", comment: "")),
         OnboardingItem(image: .imgOnboardingRed,
-                       description: Constants.Onboarding.redTitle,
-                       buttonTitle: Constants.Onboarding.buttonTitle)
+                       description: NSLocalizedString("featureMessageRed", comment: ""),
+                       buttonTitle: NSLocalizedString("buttonCompleteOnboarding", comment: ""))
     ]
 
     // MARK: - UI Components

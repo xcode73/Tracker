@@ -1,7 +1,7 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "alert.message.deleteCategory" : {
+    "alertMessageDeleteCategory" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -18,7 +18,7 @@
         }
       }
     },
-    "alert.message.deleteTracker" : {
+    "alertMessageDeleteTracker" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -35,7 +35,7 @@
         }
       }
     },
-    "alert.store.message" : {
+    "alertMessageStoreError" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -52,7 +52,7 @@
         }
       }
     },
-    "alert.store.title" : {
+    "alertTitleStoreError" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -69,7 +69,7 @@
         }
       }
     },
-    "buttons.add" : {
+    "buttonAdd" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -86,7 +86,7 @@
         }
       }
     },
-    "buttons.addCategory" : {
+    "buttonAddCategory" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -103,7 +103,7 @@
         }
       }
     },
-    "buttons.cancel" : {
+    "buttonCancel" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -120,7 +120,7 @@
         }
       }
     },
-    "buttons.completeOnboarding" : {
+    "buttonCompleteOnboarding" : {
       "comment" : "Onboarding completion button",
       "extractionState" : "manual",
       "localizations" : {
@@ -138,7 +138,7 @@
         }
       }
     },
-    "buttons.delete" : {
+    "buttonDelete" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -155,7 +155,7 @@
         }
       }
     },
-    "buttons.done" : {
+    "buttonDone" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -172,7 +172,7 @@
         }
       }
     },
-    "buttons.edit" : {
+    "buttonEdit" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -189,7 +189,7 @@
         }
       }
     },
-    "buttons.pin" : {
+    "buttonPin" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -206,7 +206,7 @@
         }
       }
     },
-    "buttons.regularTracker" : {
+    "buttonRegularTracker" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -223,7 +223,7 @@
         }
       }
     },
-    "buttons.save" : {
+    "buttonSave" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -240,7 +240,7 @@
         }
       }
     },
-    "buttons.specialTracker" : {
+    "buttonSpecialTracker" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -257,75 +257,7 @@
         }
       }
     },
-    "categories.placeholder.message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Habits and events can be\ncombined by meaning"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Привычки и события можно\nобъединить по смыслу"
-          }
-        }
-      }
-    },
-    "categories.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Categories"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Категории"
-          }
-        }
-      }
-    },
-    "category.add.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New category"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Новая категория"
-          }
-        }
-      }
-    },
-    "category.edit.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Editing a category"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Редактирование категории"
-          }
-        }
-      }
-    },
-    "category.name.error.message" : {
+    "errorMessageCharacterLimit" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -342,24 +274,7 @@
         }
       }
     },
-    "category.placeholder.message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enter category name"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Введите название категории"
-          }
-        }
-      }
-    },
-    "onboarding.feature.blue" : {
+    "featureMessageBlue" : {
       "comment" : "Blue onboarding screen message",
       "extractionState" : "manual",
       "localizations" : {
@@ -377,7 +292,7 @@
         }
       }
     },
-    "onboarding.feature.red" : {
+    "featureMessageRed" : {
       "comment" : "Red onboarding screen message",
       "extractionState" : "manual",
       "localizations" : {
@@ -395,126 +310,41 @@
         }
       }
     },
-    "schedule.title" : {
+    "placeholderCategories" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Schedule"
+            "value" : "Habits and events can be\ncombined by meaning"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Расписание"
+            "value" : "Привычки и события можно\nобъединить по смыслу"
           }
         }
       }
     },
-    "tabBar.statistics" : {
+    "placeholderCategory" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Statistics"
+            "value" : "Enter category name"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Статистика"
+            "value" : "Введите название категории"
           }
         }
       }
     },
-    "tabBar.trackers" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trackers"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Трекеры"
-          }
-        }
-      }
-    },
-    "tracker.add.regular.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New habit"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Новая привычка"
-          }
-        }
-      }
-    },
-    "tracker.add.special.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New irregular event"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Новое нерегулярное событие"
-          }
-        }
-      }
-    },
-    "tracker.edit.regular.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Editing a Habit"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Редактирование привычки"
-          }
-        }
-      }
-    },
-    "tracker.edit.special.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Editing an irregular event"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Редактирование нерегулярного события"
-          }
-        }
-      }
-    },
-    "tracker.placeholder.message" : {
+    "placeholderTracker" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -531,41 +361,7 @@
         }
       }
     },
-    "tracker.section.color.header" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Color"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Цвет"
-          }
-        }
-      }
-    },
-    "tracker.section.emoji.header" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Emoji"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Emoji"
-          }
-        }
-      }
-    },
-    "tracker.section.settings.category" : {
+    "rowTitleCategory" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -582,7 +378,7 @@
         }
       }
     },
-    "tracker.section.settings.schedule" : {
+    "rowTitleSchedule" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
@@ -599,19 +395,36 @@
         }
       }
     },
-    "tracker.section.title.error.message" : {
+    "sectionHeaderColor" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "38 character limit"
+            "value" : "Color"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ограничение 38 символов"
+            "value" : "Цвет"
+          }
+        }
+      }
+    },
+    "sectionHeaderEmoji" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emoji"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emoji"
           }
         }
       }
@@ -699,6 +512,176 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Создание трекера"
+          }
+        }
+      }
+    },
+    "vcTitleAddRegularTracker" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New habit"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новая привычка"
+          }
+        }
+      }
+    },
+    "vcTitleAddSpecialTracker" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New irregular event"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новое нерегулярное событие"
+          }
+        }
+      }
+    },
+    "vcTitleCategories" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Categories"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Категории"
+          }
+        }
+      }
+    },
+    "vcTitleCategoryAdd" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New category"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новая категория"
+          }
+        }
+      }
+    },
+    "vcTitleCategoryEdit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editing a category"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Редактирование категории"
+          }
+        }
+      }
+    },
+    "vcTitleEditRegularTracker" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editing a Habit"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Редактирование привычки"
+          }
+        }
+      }
+    },
+    "vcTitleEditSpecialTracker" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editing an irregular event"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Редактирование нерегулярного события"
+          }
+        }
+      }
+    },
+    "vcTitleSchedule" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schedule"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Расписание"
+          }
+        }
+      }
+    },
+    "vcTitleStatistics" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statistics"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Статистика"
+          }
+        }
+      }
+    },
+    "vcTitleTrackers" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trackers"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Трекеры"
           }
         }
       }
