@@ -89,13 +89,11 @@ final class TrackersViewController: UIViewController {
 
     private lazy var placeholderImageView: UIImageView = {
         let view = UIImageView()
-        view.image = .icDizzy
         return view
     }()
 
     private lazy var placeholderLabel: UILabel = {
         let view = UILabel()
-        view.text = NSLocalizedString("trackers.placeholder", comment: "")
         view.font = Constants.Fonts.ypMedium12
         return view
     }()
@@ -146,6 +144,8 @@ final class TrackersViewController: UIViewController {
         setupNavigationBar()
         addCollectionView()
         addPlaceholder()
+        setupPlaceholder(image: .icDizzy,
+                         title: NSLocalizedString("trackers.placeholder", comment: ""))
     }
 
     private func setupNavigationBar() {
@@ -163,6 +163,11 @@ final class TrackersViewController: UIViewController {
         let localizedFormatString = NSLocalizedString("trackers.daysCompleted", comment: "")
 
         return String(format: localizedFormatString, completedCount)
+    }
+
+    private func setupPlaceholder(image: UIImage, title: String) {
+        placeholderImageView.image = image
+        placeholderLabel.text = title
     }
 
     // MARK: - Show Tracker Detail
@@ -468,6 +473,8 @@ extension TrackersViewController: UISearchResultsUpdating {
             return
         }
 
+        setupPlaceholder(image: .icSearch,
+                         title: NSLocalizedString("placeholderSearch", comment: ""))
         trackersStore = setupStore(date: currentDate, searchText: searchText)
         collectionView.reloadData()
     }
@@ -476,6 +483,8 @@ extension TrackersViewController: UISearchResultsUpdating {
 // MARK: - UISearchBarDelegate
 extension TrackersViewController: UISearchBarDelegate {
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        setupPlaceholder(image: .icDizzy,
+                         title: NSLocalizedString("trackers.placeholder", comment: ""))
         trackersStore = setupStore(date: currentDate)
         collectionView.reloadData()
     }
