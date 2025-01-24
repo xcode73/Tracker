@@ -53,6 +53,7 @@ final class TrackerStore: NSObject {
     private let context: NSManagedObjectContext
     private let dataStore: TrackerDataStore
     private var date: Date
+    private var searchText: String?
 
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
         guard let truncatedDate = date.truncated else { return NSFetchedResultsController() }
@@ -60,13 +61,18 @@ final class TrackerStore: NSObject {
         let weekday = WeekDay(date: date)
         let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
 
-        fetchRequest.predicate = NSPredicate(
-            format: "%K == %@ OR ANY %K.%K == %lld",
-            #keyPath(TrackerCoreData.date), truncatedDate as NSDate,
-            #keyPath(TrackerCoreData.schedule),
-            #keyPath(ScheduleCoreData.weekDay),
-            weekday.rawValue
-        )
+        if let searchText {
+            fetchRequest.predicate = NSPredicate(
+                format: "%K CONTAINS[n] %@",
+                #keyPath(TrackerCoreData.title), searchText
+            )
+        } else {
+            fetchRequest.predicate = NSPredicate(
+                format: "%K == %@ OR ANY %K.%K == %lld",
+                #keyPath(TrackerCoreData.date), truncatedDate as NSDate,
+                #keyPath(TrackerCoreData.schedule), #keyPath(ScheduleCoreData.weekDay), weekday.rawValue
+            )
+        }
 
         fetchRequest.sortDescriptors = [
             NSSortDescriptor(keyPath: \TrackerCoreData.category.title, ascending: true),
@@ -87,7 +93,8 @@ final class TrackerStore: NSObject {
     init(
         dataStore: TrackerDataStore,
         delegate: TrackerStoreDelegate,
-        date: Date
+        date: Date,
+        searchText: String?
     ) throws {
         guard
             let context = dataStore.managedObjectContext
@@ -98,6 +105,7 @@ final class TrackerStore: NSObject {
         self.delegate = delegate
         self.context = context
         self.dataStore = dataStore
+        self.searchText = searchText
     }
 }
 

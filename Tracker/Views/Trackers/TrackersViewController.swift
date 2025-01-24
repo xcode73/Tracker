@@ -70,6 +70,14 @@ final class TrackersViewController: UIViewController {
         return view
     }()
 
+    private lazy var searchController: UISearchController = {
+        let view = UISearchController(searchResultsController: nil)
+        view.obscuresBackgroundDuringPresentation = false
+        view.searchResultsUpdater = self
+        view.searchBar.delegate = self
+        return view
+    }()
+
     private lazy var placeholderStackView: UIStackView = {
         let view = UIStackView(arrangedSubviews: [placeholderImageView, placeholderLabel])
         view.axis = .vertical
@@ -117,12 +125,14 @@ final class TrackersViewController: UIViewController {
         trackersStore = setupStore(date: currentDate)
     }
 
-    func setupStore(date: Date) -> TrackerStoreProtocol? {
+    // MARK: - Setup Store
+    func setupStore(date: Date, searchText: String? = nil) -> TrackerStoreProtocol? {
         do {
             try trackersStore = TrackerStore(
                 dataStore: trackerDataStore,
                 delegate: self,
-                date: currentDate
+                date: currentDate,
+                searchText: searchText
             )
             return trackersStore
         } catch {
@@ -141,7 +151,7 @@ final class TrackersViewController: UIViewController {
     private func setupNavigationBar() {
         navigationItem.leftBarButtonItem = addButton
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
-        navigationItem.searchController = UISearchController()
+        navigationItem.searchController = searchController
 
         NSLayoutConstraint.activate([
             datePicker.widthAnchor.constraint(equalToConstant: 95)
@@ -449,10 +459,25 @@ extension TrackersViewController: TrackerCellDelegate {
     }
 }
 
+// MARK: - UISearchResultsUpdating
+extension TrackersViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        guard
+            let searchText = searchController.searchBar.text, !searchText.isEmpty
+        else {
+            return
+        }
+
+        trackersStore = setupStore(date: currentDate, searchText: searchText)
+        collectionView.reloadData()
+    }
+}
+
 // MARK: - UISearchBarDelegate
 extension TrackersViewController: UISearchBarDelegate {
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        // TODO: implement
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        trackersStore = setupStore(date: currentDate)
+        collectionView.reloadData()
     }
 }
 
