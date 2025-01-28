@@ -48,12 +48,13 @@ final class TrackerStore: NSObject {
     }
 
     weak var delegate: TrackerStoreDelegate?
-    var inProgressChanges: [TrackerStoreUpdate] = []
+    private var inProgressChanges: [TrackerStoreUpdate] = []
 
     private let context: NSManagedObjectContext
     private let dataStore: TrackerDataStore
     private var date: Date
     private var searchText: String?
+    private var selectedFilter: Filter
 
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
         guard let truncatedDate = date.truncated else { return NSFetchedResultsController() }
@@ -63,15 +64,63 @@ final class TrackerStore: NSObject {
 
         if let searchText {
             fetchRequest.predicate = NSPredicate(
-                format: "%K CONTAINS[n] %@",
+                format: "%K == %@ AND %K CONTAINS[cd] %@ OR ANY %K.%K == %lld AND %K CONTAINS[cd] %@",
+                #keyPath(TrackerCoreData.date), truncatedDate as NSDate,
+                #keyPath(TrackerCoreData.title), searchText,
+                #keyPath(TrackerCoreData.schedule), #keyPath(ScheduleCoreData.weekDay), weekday.rawValue,
                 #keyPath(TrackerCoreData.title), searchText
             )
         } else {
-            fetchRequest.predicate = NSPredicate(
-                format: "%K == %@ OR ANY %K.%K == %lld",
-                #keyPath(TrackerCoreData.date), truncatedDate as NSDate,
-                #keyPath(TrackerCoreData.schedule), #keyPath(ScheduleCoreData.weekDay), weekday.rawValue
-            )
+            switch selectedFilter {
+            case .completed:
+                fetchRequest.predicate = NSPredicate(
+                    format: "ANY %K.%K == %@",
+                    #keyPath(TrackerCoreData.records), #keyPath(TrackerRecordCoreData.date), truncatedDate as NSDate
+                )
+            case .notCompleted:
+//                let compound1 = NSCompoundPredicate(
+//                    type: .and,
+//                    subpredicates: [
+//                        NSPredicate(format: "%K == %@",
+//                                    #keyPath(TrackerCoreData.date),
+//                                    truncatedDate as NSDate),
+//                        NSPredicate(format: "ANY %K == NIL",
+//                                    #keyPath(TrackerCoreData.records))
+//                    ]
+//                )
+//
+//                let compound2 = NSCompoundPredicate(
+//                    type: .and,
+//                    subpredicates: [
+//                        NSPredicate(format: "ANY %K.%K == %lld",
+//                                    #keyPath(TrackerCoreData.schedule),
+//                                    #keyPath(ScheduleCoreData.weekDay),
+//                                    weekday.rawValue)
+//                        NSPredicate(format: "NONE %K.%K == %@",
+//                                    #keyPath(TrackerCoreData.records),
+//                                    #keyPath(TrackerRecordCoreData.date),
+//                                    truncatedDate as NSDate)
+//                    ]
+//                )
+
+//                let compound3 = NSCompoundPredicate(type: .or, subpredicates: [compound1, compound2])
+//
+//                fetchRequest.predicate = compound3
+
+                fetchRequest.predicate = NSPredicate(
+                    format: "(%K == %@) AND (ANY %K == NIL) OR (ANY %K.%K == %lld) AND (NONE %K.%K == %@)",
+                    #keyPath(TrackerCoreData.date), truncatedDate as NSDate,
+                    #keyPath(TrackerCoreData.records),
+                    #keyPath(TrackerCoreData.schedule), #keyPath(ScheduleCoreData.weekDay), weekday.rawValue,
+                    #keyPath(TrackerCoreData.records), #keyPath(TrackerRecordCoreData.date), truncatedDate as NSDate
+                )
+            default:
+                fetchRequest.predicate = NSPredicate(
+                    format: "%K == %@ OR ANY %K.%K == %lld",
+                    #keyPath(TrackerCoreData.date), truncatedDate as NSDate,
+                    #keyPath(TrackerCoreData.schedule), #keyPath(ScheduleCoreData.weekDay), weekday.rawValue
+                )
+            }
         }
 
         fetchRequest.sortDescriptors = [
@@ -94,6 +143,7 @@ final class TrackerStore: NSObject {
         dataStore: TrackerDataStore,
         delegate: TrackerStoreDelegate,
         date: Date,
+        selectedFilter: Filter,
         searchText: String?
     ) throws {
         guard
@@ -105,6 +155,7 @@ final class TrackerStore: NSObject {
         self.delegate = delegate
         self.context = context
         self.dataStore = dataStore
+        self.selectedFilter = selectedFilter
         self.searchText = searchText
     }
 }
@@ -135,7 +186,7 @@ extension TrackerStore: TrackerStoreProtocol {
                        title: storedTracker.title,
                        color: storedTracker.color,
                        emoji: storedTracker.emoji,
-                       schedule: nil,
+                       schedule: storedTracker.schedule?.allObjects.map { ($0 as AnyObject).weekDay },
                        date: storedTracker.date)
     }
 

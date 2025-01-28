@@ -333,7 +333,8 @@ extension CategoriesViewController: UITableViewDelegate {
                 UIAction(title: NSLocalizedString("buttonEdit", comment: "")) { [weak self] _ in
                     self?.showCategoryDetail(indexPath: indexPath)
                 },
-                UIAction(title: NSLocalizedString("buttonDelete", comment: ""), attributes: .destructive) { [weak self] _ in
+                UIAction(title: NSLocalizedString("buttonDelete", comment: ""),
+                         attributes: .destructive) { [weak self] _ in
                     self?.showDeleteCategoryAlert(for: indexPath)
                 }
             ])
