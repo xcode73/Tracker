@@ -9,7 +9,6 @@ import UIKit
 
 final class TrackersViewController: UIViewController {
     // MARK: - Properties
-    private var selectedFilter = Filter.all
     private var placeholderState: PlaceholderState = .trackers
     private let dataStore = Constants.appDelegate().trackerDataStore
 
@@ -147,7 +146,7 @@ final class TrackersViewController: UIViewController {
                 dataStore: dataStore,
                 delegate: self,
                 date: datePicker.date,
-                selectedFilter: selectedFilter,
+                selectedFilter: UserDefaults.standard.loadFilter(),
                 searchText: searchText
             )
         } catch {
@@ -278,7 +277,7 @@ final class TrackersViewController: UIViewController {
     @objc
     private func didTapFiltersButton() {
         let viewController = FiltersViewController()
-        let viewModel = FiltersViewModel(selectedFilter: selectedFilter)
+        let viewModel = FiltersViewModel(selectedFilter: UserDefaults.standard.loadFilter())
         viewController.initialize(viewModel: viewModel)
         viewController.delegate = self
         let navigationController = UINavigationController( rootViewController: viewController )
@@ -567,8 +566,7 @@ extension TrackersViewController: UISearchResultsUpdating {
 // MARK: - FiltersViewControllerDelegate
 extension TrackersViewController: FiltersViewControllerDelegate {
     func didSelectFilter(filter: Filter) {
-        // TODO: add persistent storage
-        selectedFilter = filter
+        UserDefaults.standard.saveFilter(filter)
 
         switch filter {
         case .all:
