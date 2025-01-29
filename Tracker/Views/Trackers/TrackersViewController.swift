@@ -156,8 +156,8 @@ final class TrackersViewController: UIViewController {
     }
 
     // MARK: - Update View
-    private func updateViewState(viewState: PlaceholderState) {
-        switch viewState {
+    private func updatePlaceholderState(placeholderState: PlaceholderState) {
+        switch placeholderState {
         case .search:
             placeholderImageView.image = .icSearch
             placeholderLabel.text = NSLocalizedString("placeholderSearch", comment: "")
@@ -327,7 +327,7 @@ extension TrackersViewController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         let numberOfSections = trackerStore?.numberOfSections ?? 0
 
-        updateViewState(viewState: placeholderState)
+        updatePlaceholderState(placeholderState: placeholderState)
 
         if numberOfSections == 0 {
             placeholderStackView.isHidden = false
