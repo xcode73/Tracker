@@ -95,7 +95,7 @@ final class TrackerStore: NSObject {
                                     #keyPath(TrackerCoreData.schedule),
                                     #keyPath(ScheduleCoreData.weekDay),
                                     weekday.rawValue),
-                        NSPredicate(format: "NOT ANY %K.%K == %@",
+                        NSPredicate(format: "SUBQUERY(%K, $record, $record.%K == %@).@count == 0",
                                     #keyPath(TrackerCoreData.records),
                                     #keyPath(TrackerRecordCoreData.date),
                                     truncatedDate as NSDate)
