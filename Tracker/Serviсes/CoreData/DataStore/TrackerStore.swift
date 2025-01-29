@@ -29,8 +29,7 @@ protocol TrackerStoreDelegate: AnyObject {
 }
 
 protocol TrackerStoreProtocol {
-    var numberOfSections: Int { get }
-    func setDate(_ date: Date)
+    var numberOfSections: Int? { get }
     func numberOfItemsInSection(_ section: Int) -> Int
     func trackerObject(at indexPath: IndexPath) -> Tracker?
     func addTracker(_ tracker: Tracker) throws
@@ -78,42 +77,34 @@ final class TrackerStore: NSObject {
                     #keyPath(TrackerCoreData.records), #keyPath(TrackerRecordCoreData.date), truncatedDate as NSDate
                 )
             case .notCompleted:
-//                let compound1 = NSCompoundPredicate(
-//                    type: .and,
-//                    subpredicates: [
-//                        NSPredicate(format: "%K == %@",
-//                                    #keyPath(TrackerCoreData.date),
-//                                    truncatedDate as NSDate),
-//                        NSPredicate(format: "ANY %K == NIL",
-//                                    #keyPath(TrackerCoreData.records))
-//                    ]
-//                )
-//
-//                let compound2 = NSCompoundPredicate(
-//                    type: .and,
-//                    subpredicates: [
-//                        NSPredicate(format: "ANY %K.%K == %lld",
-//                                    #keyPath(TrackerCoreData.schedule),
-//                                    #keyPath(ScheduleCoreData.weekDay),
-//                                    weekday.rawValue)
-//                        NSPredicate(format: "NONE %K.%K == %@",
-//                                    #keyPath(TrackerCoreData.records),
-//                                    #keyPath(TrackerRecordCoreData.date),
-//                                    truncatedDate as NSDate)
-//                    ]
-//                )
-
-//                let compound3 = NSCompoundPredicate(type: .or, subpredicates: [compound1, compound2])
-//
-//                fetchRequest.predicate = compound3
-
-                fetchRequest.predicate = NSPredicate(
-                    format: "(%K == %@) AND (ANY %K == NIL) OR (ANY %K.%K == %lld) AND (NONE %K.%K == %@)",
-                    #keyPath(TrackerCoreData.date), truncatedDate as NSDate,
-                    #keyPath(TrackerCoreData.records),
-                    #keyPath(TrackerCoreData.schedule), #keyPath(ScheduleCoreData.weekDay), weekday.rawValue,
-                    #keyPath(TrackerCoreData.records), #keyPath(TrackerRecordCoreData.date), truncatedDate as NSDate
+                let specialPredicate = NSCompoundPredicate(
+                    type: .and,
+                    subpredicates: [
+                        NSPredicate(format: "%K == %@",
+                                    #keyPath(TrackerCoreData.date),
+                                    truncatedDate as NSDate),
+                        NSPredicate(format: "ANY %K == NIL",
+                                    #keyPath(TrackerCoreData.records))
+                    ]
                 )
+
+                let regularPredicate = NSCompoundPredicate(
+                    type: .and,
+                    subpredicates: [
+                        NSPredicate(format: "ANY %K.%K == %lld",
+                                    #keyPath(TrackerCoreData.schedule),
+                                    #keyPath(ScheduleCoreData.weekDay),
+                                    weekday.rawValue),
+                        NSPredicate(format: "NOT ANY %K.%K == %@",
+                                    #keyPath(TrackerCoreData.records),
+                                    #keyPath(TrackerRecordCoreData.date),
+                                    truncatedDate as NSDate)
+                    ]
+                )
+
+                let predicate = NSCompoundPredicate(type: .or, subpredicates: [specialPredicate, regularPredicate])
+
+                fetchRequest.predicate = predicate
             default:
                 fetchRequest.predicate = NSPredicate(
                     format: "%K == %@ OR ANY %K.%K == %lld",
@@ -162,12 +153,8 @@ final class TrackerStore: NSObject {
 
 // MARK: - TrackerStoreProtocol
 extension TrackerStore: TrackerStoreProtocol {
-    func setDate(_ date: Date) {
-        self.date = date
-    }
-
-    var numberOfSections: Int {
-        fetchedResultsController.sections?.count ?? 0
+    var numberOfSections: Int? {
+        fetchedResultsController.sections?.count
     }
 
     func numberOfItemsInSection(_ section: Int) -> Int {

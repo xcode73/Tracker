@@ -10,6 +10,7 @@ import UIKit
 final class TrackersViewController: UIViewController {
     // MARK: - Properties
     private var selectedFilter = Filter.all
+    private var viewState: ViewState = .trackers
     private let dataStore = Constants.appDelegate().trackerDataStore
 
     private var trackerStore: TrackerStoreProtocol?
@@ -19,6 +20,7 @@ final class TrackersViewController: UIViewController {
             try scheduleStore = ScheduleStore(dataStore: dataStore)
             return scheduleStore
         } catch {
+            viewState = .search
             showStoreErrorAlert()
             return nil
         }
@@ -29,6 +31,7 @@ final class TrackersViewController: UIViewController {
             try recordStore = TrackerRecordStore(dataStore: dataStore)
             return recordStore
         } catch {
+            viewState = .search
             showStoreErrorAlert()
             return nil
         }
@@ -45,6 +48,12 @@ final class TrackersViewController: UIViewController {
         lineSpacing: 16,
         headerHeight: 18
     )
+
+    private enum ViewState {
+        case search
+        case filters
+        case trackers
+    }
 
     // MARK: - UI Components
     private lazy var addButton: UIBarButtonItem = {
@@ -69,7 +78,6 @@ final class TrackersViewController: UIViewController {
         let view = UISearchController(searchResultsController: nil)
         view.obscuresBackgroundDuringPresentation = false
         view.searchResultsUpdater = self
-        view.searchBar.delegate = self
         return view
     }()
 
@@ -128,14 +136,14 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
 
         setupUI()
-        trackerStore = setupStore(date: datePicker.date)
+        updateStore()
     }
 
     // MARK: - Setup Store
-    func setupStore(
-        date: Date,
-        searchText: String? = nil
-    ) -> TrackerStoreProtocol? {
+    func updateStore(
+        searchText: String? = nil,
+        selectedFilter: Filter = .all
+    ) {
         do {
             try trackerStore = TrackerStore(
                 dataStore: dataStore,
@@ -144,21 +152,44 @@ final class TrackersViewController: UIViewController {
                 selectedFilter: selectedFilter,
                 searchText: searchText
             )
-            return trackerStore
         } catch {
             showStoreErrorAlert()
-            return nil
+        }
+    }
+
+    // MARK: - Update View
+    private func updateViewState(viewState: ViewState, numberOfSections: Int) {
+
+        switch viewState {
+        case .search:
+            placeholderImageView.image = .icSearch
+            placeholderLabel.text = NSLocalizedString("placeholderSearch", comment: "")
+        case .filters:
+            placeholderImageView.image = .icSearch
+            placeholderLabel.text = NSLocalizedString("placeholderSearch", comment: "")
+        case .trackers:
+            placeholderImageView.image = .icDizzy
+            placeholderLabel.text = NSLocalizedString("placeholderTrackers", comment: "")
+        }
+
+        if numberOfSections == 0 {
+            placeholderStackView.isHidden = false
+            if viewState == .trackers {
+                filtersButton.isHidden = true
+            } else {
+                filtersButton.isHidden = false
+            }
+        } else {
+            placeholderStackView.isHidden = true
         }
     }
 
     // MARK: - UI Setup
-    func setupUI() {
+    private func setupUI() {
         setupNavigationBar()
         addCollectionView()
         addFiltersButton()
         addPlaceholder()
-        setupPlaceholder(image: .icDizzy,
-                         title: NSLocalizedString("trackers.placeholder", comment: ""))
     }
 
     private func setupNavigationBar() {
@@ -176,11 +207,6 @@ final class TrackersViewController: UIViewController {
         let localizedFormatString = NSLocalizedString("trackers.daysCompleted", comment: "")
 
         return String(format: localizedFormatString, completedCount)
-    }
-
-    private func setupPlaceholder(image: UIImage, title: String) {
-        placeholderImageView.image = image
-        placeholderLabel.text = title
     }
 
     // MARK: - Show Tracker Detail
@@ -213,6 +239,7 @@ final class TrackersViewController: UIViewController {
     private func deleteTracker(at indexPaths: [IndexPath]) {
         let indexPath = indexPaths[0]
         try? trackerStore?.deleteTracker(at: indexPath)
+        viewState = .trackers
     }
 
     // MARK: - Alerts
@@ -258,7 +285,8 @@ final class TrackersViewController: UIViewController {
 
     @objc
     private func didSelectDate(_ sender: UIDatePicker) {
-        trackerStore = setupStore(date: sender.date)
+        updateStore()
+        viewState = .trackers
         collectionView.reloadData()
 
         self.dismiss(animated: true)
@@ -314,17 +342,11 @@ final class TrackersViewController: UIViewController {
 // MARK: - UICollectionViewDataSource
 extension TrackersViewController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        let numberOfSections = trackerStore?.numberOfSections
+        let numberOfSections = trackerStore?.numberOfSections ?? 0
 
-        if numberOfSections == nil || numberOfSections == 0 {
-            placeholderStackView.isHidden = false
-            filtersButton.isHidden = true
-        } else {
-            placeholderStackView.isHidden = true
-            filtersButton.isHidden = false
-        }
+        updateViewState(viewState: viewState, numberOfSections: numberOfSections)
 
-        return numberOfSections ?? 0
+        return trackerStore?.numberOfSections ?? 0
      }
 
     func collectionView(_ collectionView: UICollectionView,
@@ -345,11 +367,7 @@ extension TrackersViewController: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
 
-        print(tracker)
-
         let trackerRecord = recordStore?.recordObject(for: tracker.id, date: truncatedDate)
-
-        print(trackerRecord ?? "nil")
 
         cell.delegate = self
         cell.configure(
@@ -506,33 +524,6 @@ extension TrackersViewController: TrackerCellDelegate {
     }
 }
 
-// MARK: - UISearchResultsUpdating
-extension TrackersViewController: UISearchResultsUpdating {
-    func updateSearchResults(for searchController: UISearchController) {
-        guard
-            let searchText = searchController.searchBar.text, !searchText.isEmpty
-        else {
-            return
-        }
-
-        setupPlaceholder(image: .icSearch,
-                         title: NSLocalizedString("placeholderSearch", comment: ""))
-
-        trackerStore = setupStore(date: datePicker.date, searchText: searchText)
-        collectionView.reloadData()
-    }
-}
-
-// MARK: - UISearchBarDelegate
-extension TrackersViewController: UISearchBarDelegate {
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        setupPlaceholder(image: .icDizzy,
-                         title: NSLocalizedString("trackers.placeholder", comment: ""))
-        trackerStore = setupStore(date: datePicker.date)
-        collectionView.reloadData()
-    }
-}
-
 // MARK: - TrackerTableViewControllerDelegate
 extension TrackersViewController: TrackerTableViewControllerDelegate, TrackerTypeViewControllerDelegate {
     func cancelButtonTapped() {
@@ -545,6 +536,7 @@ extension TrackersViewController: TrackerTableViewControllerDelegate, TrackerTyp
         if tracker.schedule != nil {
             try? scheduleStore?.addSchedule(to: tracker)
         }
+        viewState = .trackers
         dismiss(animated: true)
     }
 
@@ -561,16 +553,42 @@ extension TrackersViewController: TrackerTableViewControllerDelegate, TrackerTyp
     }
 }
 
+// MARK: - UISearchResultsUpdating
+extension TrackersViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        guard let searchText = searchController.searchBar.text else { return }
+
+        if searchText.isEmpty {
+            updateStore()
+            viewState = .trackers
+        } else {
+            updateStore(searchText: searchText)
+            viewState = .search
+        }
+
+        collectionView.reloadData()
+    }
+}
+
 // MARK: - FiltersViewControllerDelegate
 extension TrackersViewController: FiltersViewControllerDelegate {
     func didSelectFilter(filter: Filter) {
+        // TODO: add persistent storage
         selectedFilter = filter
 
-        if filter == .today {
+        switch selectedFilter {
+        case .all:
+            updateStore()
+            viewState = .trackers
+        case .today:
             datePicker.date = Date()
+            updateStore()
+            viewState = .filters
+        default:
+            updateStore()
+            viewState = .filters
         }
 
-        trackerStore = setupStore(date: datePicker.date)
         collectionView.reloadData()
         dismiss(animated: true)
     }

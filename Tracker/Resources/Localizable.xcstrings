@@ -463,6 +463,23 @@
         }
       }
     },
+    "placeholderTrackers" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What are we going to track?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что будем отслеживать?"
+          }
+        }
+      }
+    },
     "rowTitleCategory" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -580,23 +597,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "trackers.placeholder" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What are we going to track?"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Что будем отслеживать?"
           }
         }
       }

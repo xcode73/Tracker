@@ -38,7 +38,9 @@ final class DataStore {
         }
 
         do {
-            container = try NSPersistentContainer.load(name: modelName, model: model, url: storeURL)
+            container = try NSPersistentContainer.load(name: modelName,
+                                                       model: model,
+                                                       url: storeURL)
             context = container.newBackgroundContext()
         } catch {
             throw StoreError.failedToLoadPersistentContainer(error)
