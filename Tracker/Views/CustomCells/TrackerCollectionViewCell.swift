@@ -8,13 +8,13 @@
 import UIKit
 
 protocol TrackerCellDelegate: AnyObject {
-    func changeTrackerState(tracker: Tracker?, record: TrackerRecord?)
+    func changeTrackerState(tracker: TrackerUI?, record: TrackerRecord?)
 }
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
     weak var delegate: TrackerCellDelegate?
     static let reuseIdentifier = "TrackerCollectionViewCell"
-    private var tracker: Tracker?
+    private var tracker: TrackerUI?
     private var record: TrackerRecord?
 
     // MARK: - UI Components
@@ -104,7 +104,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
 
     // MARK: - Configuration
     func configure(
-        tracker: Tracker,
+        tracker: TrackerUI,
         record: TrackerRecord?,
         completedTitle: String
     ) {

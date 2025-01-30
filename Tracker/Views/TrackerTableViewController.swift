@@ -10,7 +10,7 @@ import UIKit
 enum TrackerTableType {
     case special(Date)
     case regular
-    case edit(Tracker, String)
+    case edit(TrackerUI, String)
 }
 
 enum CellPosition {
@@ -22,8 +22,8 @@ enum CellPosition {
 
 protocol TrackerTableViewControllerDelegate: AnyObject {
     func cancelButtonTapped()
-    func createTracker(tracker: Tracker)
-    func updateTracker(tracker: Tracker, at indexPath: IndexPath)
+    func createTracker(tracker: TrackerUI)
+    func updateTracker(tracker: TrackerUI, at indexPath: IndexPath)
 }
 
 final class TrackerTableViewController: UITableViewController {
@@ -37,9 +37,9 @@ final class TrackerTableViewController: UITableViewController {
     private var titleSectionItems = [""]
     private var tableSectionItems = [String]()
 
-    private var tracker: Tracker?
+    private var tracker: TrackerUI?
     private var newTracker = NewTracker()
-    private var updatedTracker: Tracker?
+    private var updatedTracker: TrackerUI?
 
     private let weekDays = Constants.weekDays
     private let emojis = Constants.emojis
@@ -135,7 +135,7 @@ final class TrackerTableViewController: UITableViewController {
                newTracker.schedule != nil || newTracker.date != nil {
 
                 if let schedule = newTracker.schedule {
-                    updatedTracker = Tracker(with: schedule,
+                    updatedTracker = TrackerUI(with: schedule,
                                              id: tracker.id,
                                              categoryTitle: newTrackerCategoryTitle,
                                              title: newTrackerTitle,
@@ -144,7 +144,7 @@ final class TrackerTableViewController: UITableViewController {
                 }
 
                 if let date = newTracker.date?.truncated {
-                    updatedTracker = Tracker(with: date,
+                    updatedTracker = TrackerUI(with: date,
                                              id: tracker.id,
                                              categoryTitle: newTrackerCategoryTitle,
                                              title: newTrackerTitle,
@@ -165,7 +165,7 @@ final class TrackerTableViewController: UITableViewController {
                newTracker.schedule != nil || newTracker.date != nil {
 
                 if let schedule = newTracker.schedule {
-                    updatedTracker = Tracker(with: schedule,
+                    updatedTracker = TrackerUI(with: schedule,
                                              id: UUID(),
                                              categoryTitle: newTrackerCategoryTitle,
                                              title: newTrackerTitle,
@@ -174,7 +174,7 @@ final class TrackerTableViewController: UITableViewController {
                 }
 
                 if let date = newTracker.date?.truncated {
-                    updatedTracker = Tracker(with: date,
+                    updatedTracker = TrackerUI(with: date,
                                              id: UUID(),
                                              categoryTitle: newTrackerCategoryTitle,
                                              title: newTrackerTitle,

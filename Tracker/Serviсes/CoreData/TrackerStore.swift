@@ -31,9 +31,9 @@ protocol TrackerStoreDelegate: AnyObject {
 protocol TrackerStoreProtocol {
     var numberOfSections: Int? { get }
     func numberOfItemsInSection(_ section: Int) -> Int
-    func trackerObject(at indexPath: IndexPath) -> Tracker?
-    func addTracker(_ tracker: Tracker) throws
-    func updateTracker(tracker: Tracker, at indexPath: IndexPath) throws
+    func trackerObject(at indexPath: IndexPath) -> TrackerUI?
+    func addTracker(_ tracker: TrackerUI) throws
+    func updateTracker(tracker: TrackerUI, at indexPath: IndexPath) throws
     func deleteTracker(at indexPath: IndexPath) throws
     func sectionTitle(at section: Int) -> String?
     func categoryTitle(at indexPath: IndexPath) -> String?
@@ -55,36 +55,36 @@ final class TrackerStore: NSObject {
     private var searchText: String?
     private var selectedFilter: Filter
 
-    private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCoreData> = {
+    private lazy var fetchedResultsController: NSFetchedResultsController<Tracker> = {
         guard let truncatedDate = date.truncated else { return NSFetchedResultsController() }
 
         let weekday = WeekDay(date: date)
-        let fetchRequest = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
+        let fetchRequest = NSFetchRequest<Tracker>(entityName: "Tracker")
 
         if let searchText {
             fetchRequest.predicate = NSPredicate(
                 format: "%K == %@ AND %K CONTAINS[cd] %@ OR ANY %K.%K == %lld AND %K CONTAINS[cd] %@",
-                #keyPath(TrackerCoreData.date), truncatedDate as NSDate,
-                #keyPath(TrackerCoreData.title), searchText,
-                #keyPath(TrackerCoreData.schedule), #keyPath(ScheduleCoreData.weekDay), weekday.rawValue,
-                #keyPath(TrackerCoreData.title), searchText
+                #keyPath(Tracker.date), truncatedDate as NSDate,
+                #keyPath(Tracker.title), searchText,
+                #keyPath(Tracker.schedule), #keyPath(ScheduleCoreData.weekDay), weekday.rawValue,
+                #keyPath(Tracker.title), searchText
             )
         } else {
             switch selectedFilter {
             case .completed:
                 fetchRequest.predicate = NSPredicate(
                     format: "ANY %K.%K == %@",
-                    #keyPath(TrackerCoreData.records), #keyPath(TrackerRecordCoreData.date), truncatedDate as NSDate
+                    #keyPath(Tracker.records), #keyPath(TrackerRecordCoreData.date), truncatedDate as NSDate
                 )
             case .notCompleted:
                 let specialPredicate = NSCompoundPredicate(
                     type: .and,
                     subpredicates: [
                         NSPredicate(format: "%K == %@",
-                                    #keyPath(TrackerCoreData.date),
+                                    #keyPath(Tracker.date),
                                     truncatedDate as NSDate),
                         NSPredicate(format: "ANY %K == NIL",
-                                    #keyPath(TrackerCoreData.records))
+                                    #keyPath(Tracker.records))
                     ]
                 )
 
@@ -92,11 +92,11 @@ final class TrackerStore: NSObject {
                     type: .and,
                     subpredicates: [
                         NSPredicate(format: "ANY %K.%K == %lld",
-                                    #keyPath(TrackerCoreData.schedule),
+                                    #keyPath(Tracker.schedule),
                                     #keyPath(ScheduleCoreData.weekDay),
                                     weekday.rawValue),
                         NSPredicate(format: "SUBQUERY(%K, $record, $record.%K == %@).@count == 0",
-                                    #keyPath(TrackerCoreData.records),
+                                    #keyPath(Tracker.records),
                                     #keyPath(TrackerRecordCoreData.date),
                                     truncatedDate as NSDate)
                     ]
@@ -108,21 +108,21 @@ final class TrackerStore: NSObject {
             default:
                 fetchRequest.predicate = NSPredicate(
                     format: "%K == %@ OR ANY %K.%K == %lld",
-                    #keyPath(TrackerCoreData.date), truncatedDate as NSDate,
-                    #keyPath(TrackerCoreData.schedule), #keyPath(ScheduleCoreData.weekDay), weekday.rawValue
+                    #keyPath(Tracker.date), truncatedDate as NSDate,
+                    #keyPath(Tracker.schedule), #keyPath(ScheduleCoreData.weekDay), weekday.rawValue
                 )
             }
         }
 
         fetchRequest.sortDescriptors = [
-            NSSortDescriptor(keyPath: \TrackerCoreData.category.title, ascending: true),
-            NSSortDescriptor(keyPath: \TrackerCoreData.title, ascending: true)
+            NSSortDescriptor(keyPath: \Tracker.category.title, ascending: true),
+            NSSortDescriptor(keyPath: \Tracker.title, ascending: true)
         ]
 
         let fetchedResultsController = NSFetchedResultsController(
             fetchRequest: fetchRequest,
             managedObjectContext: context,
-            sectionNameKeyPath: #keyPath(TrackerCoreData.category.title),
+            sectionNameKeyPath: #keyPath(Tracker.category.title),
             cacheName: nil
         )
         fetchedResultsController.delegate = self
@@ -165,10 +165,10 @@ extension TrackerStore: TrackerStoreProtocol {
         try fetchedResultsController.performFetch()
     }
 
-    func trackerObject(at indexPath: IndexPath) -> Tracker? {
+    func trackerObject(at indexPath: IndexPath) -> TrackerUI? {
         let storedTracker = fetchedResultsController.object(at: indexPath)
 
-        return Tracker(id: storedTracker.trackerId,
+        return TrackerUI(id: storedTracker.trackerId,
                        categoryTitle: storedTracker.category.title,
                        title: storedTracker.title,
                        color: storedTracker.color,
@@ -185,7 +185,7 @@ extension TrackerStore: TrackerStoreProtocol {
         fetchedResultsController.sections?[section].name
     }
 
-    func addTracker(_ tracker: Tracker) throws {
+    func addTracker(_ tracker: TrackerUI) throws {
         let request = NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData")
         request.predicate = NSPredicate(format: "%K == %@",
                                         #keyPath(TrackerCategoryCoreData.title),
@@ -196,7 +196,7 @@ extension TrackerStore: TrackerStoreProtocol {
         try? dataStore.addTracker(tracker: tracker, category: storedCategory)
     }
 
-    func updateTracker(tracker: Tracker, at indexPath: IndexPath) throws {
+    func updateTracker(tracker: TrackerUI, at indexPath: IndexPath) throws {
         let categoryRequest = NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData")
         categoryRequest.predicate = NSPredicate(format: "%K == %@",
                                                 #keyPath(TrackerCategoryCoreData.title),

@@ -12,5 +12,5 @@ import CoreData
 public class TrackerRecordCoreData: NSManagedObject, Identifiable {
     @NSManaged public var date: Date
     @NSManaged public var trackerId: UUID
-    @NSManaged public var tracker: TrackerCoreData
+    @NSManaged public var tracker: Tracker
 }

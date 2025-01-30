@@ -8,9 +8,9 @@
 import CoreData
 
 protocol ScheduleStoreProtocol {
-    func addSchedule(to tracker: Tracker) throws
-    func deleteSchedule(for tracker: Tracker) throws
-    func getSchedule(for tracker: Tracker) -> [WeekDay]?
+    func addSchedule(to tracker: TrackerUI) throws
+    func deleteSchedule(for tracker: TrackerUI) throws
+    func getSchedule(for tracker: TrackerUI) -> [WeekDay]?
 }
 
 final class ScheduleStore: NSObject {
@@ -34,9 +34,9 @@ final class ScheduleStore: NSObject {
 
 // MARK: - ScheduleStoreProtocol
 extension ScheduleStore: ScheduleStoreProtocol {
-    func addSchedule(to tracker: Tracker) throws {
-        let request = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
-        request.predicate = NSPredicate(format: "%K == %@", #keyPath(TrackerCoreData.trackerId), tracker.id as NSUUID)
+    func addSchedule(to tracker: TrackerUI) throws {
+        let request = NSFetchRequest<Tracker>(entityName: "Tracker")
+        request.predicate = NSPredicate(format: "%K == %@", #keyPath(Tracker.trackerId), tracker.id as NSUUID)
 
         guard
             let schedule = tracker.schedule,
@@ -55,9 +55,9 @@ extension ScheduleStore: ScheduleStoreProtocol {
         try? dataStore.saveContext()
     }
 
-    func deleteSchedule(for tracker: Tracker) throws {
-        let request = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
-        request.predicate = NSPredicate(format: "%K == %@", #keyPath(TrackerCoreData.trackerId), tracker.id as NSUUID)
+    func deleteSchedule(for tracker: TrackerUI) throws {
+        let request = NSFetchRequest<Tracker>(entityName: "Tracker")
+        request.predicate = NSPredicate(format: "%K == %@", #keyPath(Tracker.trackerId), tracker.id as NSUUID)
 
         guard let storedTracker = try? context.fetch(request).first else { return }
 
@@ -74,7 +74,7 @@ extension ScheduleStore: ScheduleStoreProtocol {
         try? dataStore.saveContext()
     }
 
-    func getSchedule(for tracker: Tracker) -> [WeekDay]? {
+    func getSchedule(for tracker: TrackerUI) -> [WeekDay]? {
         let request = NSFetchRequest<ScheduleCoreData>(entityName: "ScheduleCoreData")
         request.predicate = NSPredicate(format: "%K == %@",
                                         #keyPath(ScheduleCoreData.tracker.trackerId), tracker.id as NSUUID)

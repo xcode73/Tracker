@@ -9,7 +9,7 @@ import CoreData
 
 protocol TrackerDataStore {
     var managedObjectContext: NSManagedObjectContext? { get }
-    func addTracker(tracker: Tracker, category: TrackerCategoryCoreData) throws
+    func addTracker(tracker: TrackerUI, category: TrackerCategoryCoreData) throws
     func addCategory(category: TrackerCategory) throws
     func saveContext() throws
     func refresh() throws
@@ -96,12 +96,12 @@ extension DataStore: TrackerDataStore {
         }
     }
 
-    func addTracker(tracker: Tracker, category: TrackerCategoryCoreData) throws {
+    func addTracker(tracker: TrackerUI, category: TrackerCategoryCoreData) throws {
         try performSync { context in
             Result {
                 context.refreshAllObjects()
 
-                let trackerCoreData = TrackerCoreData(context: context)
+                let trackerCoreData = Tracker(context: context)
                 trackerCoreData.trackerId = tracker.id
                 trackerCoreData.title = tracker.title
                 trackerCoreData.emoji = tracker.emoji

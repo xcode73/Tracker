@@ -11,7 +11,7 @@ final class NullStore {}
 
 extension NullStore: TrackerDataStore {
     var managedObjectContext: NSManagedObjectContext? { nil }
-    func addTracker(tracker: Tracker, category: TrackerCategoryCoreData) throws {}
+    func addTracker(tracker: TrackerUI, category: TrackerCategoryCoreData) throws {}
     func addCategory(category: TrackerCategory) throws {}
     func saveContext() throws {}
     func refresh() throws {}

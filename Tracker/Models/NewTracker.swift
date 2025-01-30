@@ -16,7 +16,7 @@ struct NewTracker {
     var schedule: [WeekDay]?
     var date: Date?
 
-    init(from tracker: Tracker) {
+    init(from tracker: TrackerUI) {
         id = tracker.id
         categoryTitle = tracker.categoryTitle
         title = tracker.title

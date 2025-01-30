@@ -9,8 +9,8 @@ import UIKit
 
 protocol TrackerTypeViewControllerDelegate: AnyObject {
     func cancelButtonTapped()
-    func createTracker(tracker: Tracker)
-    func updateTracker(tracker: Tracker, at indexPath: IndexPath)
+    func createTracker(tracker: TrackerUI)
+    func updateTracker(tracker: TrackerUI, at indexPath: IndexPath)
 }
 
 final class TrackerTypeViewController: UIViewController {
@@ -123,12 +123,12 @@ extension TrackerTypeViewController: TrackerTableViewControllerDelegate {
         dismiss(animated: true)
     }
 
-    func createTracker(tracker: Tracker) {
+    func createTracker(tracker: TrackerUI) {
         delegate?.createTracker(tracker: tracker)
         dismiss(animated: true)
     }
 
-    func updateTracker(tracker: Tracker, at indexPath: IndexPath) {
+    func updateTracker(tracker: TrackerUI, at indexPath: IndexPath) {
         delegate?.updateTracker(tracker: tracker, at: indexPath)
         dismiss(animated: true)
     }

@@ -196,7 +196,7 @@ final class TrackersViewController: UIViewController {
         guard let trackerDetail = trackerStore?.trackerObject(at: indexPath) else { return }
 
         let schedule = scheduleStore?.getSchedule(for: trackerDetail)
-        let tracker = Tracker(id: trackerDetail.id,
+        let tracker = TrackerUI(id: trackerDetail.id,
                               categoryTitle: trackerDetail.categoryTitle,
                               title: trackerDetail.title,
                               color: trackerDetail.color,
@@ -497,7 +497,7 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 // MARK: - TrackerCellDelegate
 extension TrackersViewController: TrackerCellDelegate {
     func changeTrackerState(
-        tracker: Tracker?,
+        tracker: TrackerUI?,
         record: TrackerRecord?
     ) {
         guard
@@ -524,7 +524,7 @@ extension TrackersViewController: TrackerTableViewControllerDelegate, TrackerTyp
         dismiss(animated: true)
     }
 
-    func createTracker(tracker: Tracker) {
+    func createTracker(tracker: TrackerUI) {
         try? trackerStore?.addTracker(tracker)
         if tracker.schedule != nil {
             try? scheduleStore?.addSchedule(to: tracker)
@@ -533,7 +533,7 @@ extension TrackersViewController: TrackerTableViewControllerDelegate, TrackerTyp
         dismiss(animated: true)
     }
 
-    func updateTracker(tracker: Tracker, at indexPath: IndexPath) {
+    func updateTracker(tracker: TrackerUI, at indexPath: IndexPath) {
         try? trackerStore?.refresh()
         try? trackerStore?.updateTracker(tracker: tracker, at: indexPath)
         if tracker.schedule != nil {

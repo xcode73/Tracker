@@ -11,5 +11,5 @@ import CoreData
 @objc(ScheduleCoreData)
 public class ScheduleCoreData: NSManagedObject, Identifiable {
     @NSManaged public var weekDay: WeekDay
-    @NSManaged public var tracker: TrackerCoreData
+    @NSManaged public var tracker: Tracker
 }

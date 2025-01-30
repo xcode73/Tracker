@@ -56,9 +56,9 @@ extension TrackerRecordStore: TrackerRecordStoreProtocol {
     }
 
     func addRecord(_ record: TrackerRecord) throws {
-        let request = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
+        let request = NSFetchRequest<Tracker>(entityName: "Tracker")
         request.predicate = NSPredicate(format: "%K == %@",
-                                        #keyPath(TrackerCoreData.trackerId),
+                                        #keyPath(Tracker.trackerId),
                                         record.trackerId as NSUUID)
         guard let storedTracker = try? context.fetch(request).first else { return }
 
