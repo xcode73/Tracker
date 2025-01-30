@@ -223,7 +223,7 @@ final class TrackerTableViewController: UITableViewController {
         case 0:
             switch indexPath.row {
             case 0:
-                let cell = TitleCell()
+                let cell = TitleTableViewCell()
                 cell.configure(
                     with: newTracker.title,
                     placeholder: NSLocalizedString("placeholderTracker", comment: "")
@@ -231,14 +231,14 @@ final class TrackerTableViewController: UITableViewController {
                 cell.delegate = self
                 return cell
             case 1:
-                let cell = ErrorCell()
+                let cell = ErrorTableViewCell()
                 cell.configure(with: NSLocalizedString("errorMessageCharacterLimit", comment: ""))
                 return cell
             default:
                 return UITableViewCell()
             }
         case 1:
-            let cell = SettingsCell()
+            let cell = SettingsTableViewCell()
             let cellPosition: CellPosition
 
             switch indexPath.row {
@@ -263,19 +263,19 @@ final class TrackerTableViewController: UITableViewController {
             )
             return cell
         case 2:
-            let cell = EmojisCell()
+            let cell = EmojisTableViewCell()
             cell.selectionStyle = .none
             cell.delegate = self
             cell.configure(with: emojis, selectedEmoji: newTracker.emoji)
             return cell
         case 3:
-            let cell = ColorsCell()
+            let cell = ColorsTableViewCell()
             cell.selectionStyle = .none
             cell.delegate = self
             cell.configure(with: colors, selectedColor: newTracker.color)
             return cell
         case 4:
-            let cell = ButtonsCell()
+            let cell = ButtonsTableViewCell()
             cell.selectionStyle = .none
             cell.delegate = self
 

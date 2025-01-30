@@ -1,5 +1,5 @@
 //
-//  ColorsCell.swift
+//  ColorsTableViewCell.swift
 //  Tracker
 //
 //  Created by Nikolai Eremenko on 27.09.2024.
@@ -11,7 +11,7 @@ protocol ColorsCellDelegate: AnyObject {
     func didSelectColor(color: String)
 }
 
-final class ColorsCell: UITableViewCell {
+final class ColorsTableViewCell: UITableViewCell {
     weak var delegate: ColorsCellDelegate?
     private var colors = [String]()
     private var selectedColor: String?
@@ -21,8 +21,8 @@ final class ColorsCell: UITableViewCell {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        view.register(ColorCell.self,
-                      forCellWithReuseIdentifier: ColorCell.reuseIdentifier)
+        view.register(ColorCollectionViewCell.self,
+                      forCellWithReuseIdentifier: ColorCollectionViewCell.reuseIdentifier)
         view.allowsMultipleSelection = false
         view.dataSource = self
         view.delegate = self
@@ -60,7 +60,7 @@ final class ColorsCell: UITableViewCell {
 }
 
 // MARK: - UICollectionViewDataSource
-extension ColorsCell: UICollectionViewDataSource {
+extension ColorsTableViewCell: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         colors.count
     }
@@ -68,9 +68,9 @@ extension ColorsCell: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView,
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: ColorCell.reuseIdentifier,
+            withReuseIdentifier: ColorCollectionViewCell.reuseIdentifier,
             for: indexPath
-        ) as? ColorCell else {
+        ) as? ColorCollectionViewCell else {
             return UICollectionViewCell()
         }
 
@@ -87,7 +87,7 @@ extension ColorsCell: UICollectionViewDataSource {
 }
 
 // MARK: - UICollectionViewDelegate
-extension ColorsCell: UICollectionViewDelegateFlowLayout {
+extension ColorsTableViewCell: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {

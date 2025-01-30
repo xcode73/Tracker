@@ -8,10 +8,10 @@
 import UIKit
 
 protocol SettingsCellDelegate: AnyObject {
-    func trackerTypeCellDidTapped(_ cell: SettingsCell)
+    func trackerTypeCellDidTapped(_ cell: SettingsTableViewCell)
 }
 
-final class SettingsCell: UITableViewCell {
+final class SettingsTableViewCell: UITableViewCell {
     weak var delegate: SettingsCellDelegate?
 
     // MARK: - UI Components

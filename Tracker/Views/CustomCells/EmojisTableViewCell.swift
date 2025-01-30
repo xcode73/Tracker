@@ -1,5 +1,5 @@
 //
-//  EmojisCell.swift
+//  EmojisTableViewCell.swift
 //  Tracker
 //
 //  Created by Nikolai Eremenko on 27.09.2024.
@@ -11,7 +11,7 @@ protocol EmojisCellDelegate: AnyObject {
     func didSelectEmoji(emoji: String)
 }
 
-final class EmojisCell: UITableViewCell {
+final class EmojisTableViewCell: UITableViewCell {
     weak var delegate: EmojisCellDelegate?
     private var emojis = [String]()
     private var selectedEmoji: String?
@@ -21,8 +21,8 @@ final class EmojisCell: UITableViewCell {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        view.register(EmojiCell.self,
-                      forCellWithReuseIdentifier: EmojiCell.reuseIdentifier)
+        view.register(EmojiCollectionViewCell.self,
+                      forCellWithReuseIdentifier: EmojiCollectionViewCell.reuseIdentifier)
         view.allowsMultipleSelection = false
         view.dataSource = self
         view.delegate = self
@@ -60,7 +60,7 @@ final class EmojisCell: UITableViewCell {
 }
 
 // MARK: - UICollectionViewDataSource
-extension EmojisCell: UICollectionViewDataSource {
+extension EmojisTableViewCell: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView,
                         numberOfItemsInSection section: Int) -> Int {
         emojis.count
@@ -69,9 +69,9 @@ extension EmojisCell: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView,
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(
-            withReuseIdentifier: EmojiCell.reuseIdentifier,
+            withReuseIdentifier: EmojiCollectionViewCell.reuseIdentifier,
             for: indexPath
-        ) as? EmojiCell else {
+        ) as? EmojiCollectionViewCell else {
             return UICollectionViewCell()
         }
 
@@ -88,7 +88,7 @@ extension EmojisCell: UICollectionViewDataSource {
 }
 
 // MARK: - UICollectionViewDelegate
-extension EmojisCell: UICollectionViewDelegateFlowLayout {
+extension EmojisTableViewCell: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {

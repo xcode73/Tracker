@@ -12,7 +12,7 @@ protocol ButtonsCellDelegate: AnyObject {
     func didTapDoneButton()
 }
 
-final class ButtonsCell: UITableViewCell {
+final class ButtonsTableViewCell: UITableViewCell {
     weak var delegate: ButtonsCellDelegate?
 
     // MARK: - UI Components

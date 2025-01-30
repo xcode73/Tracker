@@ -1,5 +1,5 @@
 //
-//  TrackerCell.swift
+//  TrackerCollectionViewCell.swift
 //  Tracker
 //
 //  Created by Nikolai Eremenko on 30.09.2024.
@@ -11,9 +11,9 @@ protocol TrackerCellDelegate: AnyObject {
     func changeTrackerState(tracker: Tracker?, record: TrackerRecord?)
 }
 
-final class TrackerCell: UICollectionViewCell {
+final class TrackerCollectionViewCell: UICollectionViewCell {
     weak var delegate: TrackerCellDelegate?
-    static let reuseIdentifier = "TrackerCell"
+    static let reuseIdentifier = "TrackerCollectionViewCell"
     private var tracker: Tracker?
     private var record: TrackerRecord?
 

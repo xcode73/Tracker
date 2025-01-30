@@ -1,5 +1,5 @@
 //
-//  ScheduleCell.swift
+//  ScheduleTableViewCell.swift
 //  Tracker
 //
 //  Created by Nikolai Eremenko on 29.09.2024.
@@ -8,10 +8,10 @@
 import UIKit
 
 protocol ScheduleCellDelegate: AnyObject {
-    func scheduleCellSwitchDidTapped(_ cell: ScheduleCell)
+    func scheduleCellSwitchDidTapped(_ cell: ScheduleTableViewCell)
 }
 
-class ScheduleCell: UITableViewCell {
+class ScheduleTableViewCell: UITableViewCell {
     weak var delegate: ScheduleCellDelegate?
 
     // MARK: - UI Components

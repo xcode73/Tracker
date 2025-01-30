@@ -20,7 +20,7 @@ final class ScheduleViewController: UIViewController {
     // MARK: - UI Components
     private lazy var tableView: UITableView = {
         let view = UITableView()
-        view.register(ScheduleCell.self, forCellReuseIdentifier: ScheduleCell.reuseIdentifier)
+        view.register(ScheduleTableViewCell.self, forCellReuseIdentifier: ScheduleTableViewCell.reuseIdentifier)
         view.separatorStyle = .singleLine
         view.separatorColor = .ypBlack
         view.separatorInset = UIEdgeInsets(top: 0, left: 32, bottom: 0, right: 32)
@@ -118,7 +118,7 @@ extension ScheduleViewController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = ScheduleCell()
+        let cell = ScheduleTableViewCell()
         let cellPosition: CellPosition
 
         switch indexPath.row {
@@ -161,7 +161,7 @@ extension ScheduleViewController: UITableViewDelegate {
 
 // MARK: - ScheduleCellDelegate
 extension ScheduleViewController: ScheduleCellDelegate {
-    func scheduleCellSwitchDidTapped(_ cell: ScheduleCell) {
+    func scheduleCellSwitchDidTapped(_ cell: ScheduleTableViewCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
 
         let weekDay = weekDays[indexPath.row]

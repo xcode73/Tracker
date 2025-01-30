@@ -1,5 +1,5 @@
 //
-//  CategoryCell.swift
+//  CategoryTableViewCell.swift
 //  Tracker
 //
 //  Created by Nikolai Eremenko on 17.10.2024.
@@ -7,14 +7,7 @@
 
 import UIKit
 
-class InsetsGroupedLayer: CALayer {
-    override var cornerRadius: CGFloat {
-        get { 16 }
-        set {}
-    }
-}
-
-final class CategoryCell: UITableViewCell {
+final class CategoryTableViewCell: UITableViewCell {
     // MARK: - UI Components
     private lazy var horizontalStackView: UIStackView = {
         let view = UIStackView()

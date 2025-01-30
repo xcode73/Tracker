@@ -30,7 +30,7 @@ final class CategoryViewController: UIViewController {
     // MARK: - UI Components
     private lazy var tableView: UITableView = {
         let view = UITableView()
-        view.register(TitleCell.self, forCellReuseIdentifier: CategoryTitleCell.reuseIdentifier)
+        view.register(TitleTableViewCell.self, forCellReuseIdentifier: CategoryTitleTableViewCell.reuseIdentifier)
         view.separatorStyle = .none
         view.delegate = self
         view.dataSource = self
@@ -160,7 +160,7 @@ extension CategoryViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch indexPath.row {
         case 0:
-            let cell = CategoryTitleCell()
+            let cell = CategoryTitleTableViewCell()
             cell.configure(
                 with: categoryTitle,
                 placeholder: LocalConst.titleCellPlaceholder
@@ -168,7 +168,7 @@ extension CategoryViewController: UITableViewDataSource {
             cell.delegate = self
             return cell
         case 1:
-            let cell = ErrorCell()
+            let cell = ErrorTableViewCell()
             return cell
         default:
             return UITableViewCell()

@@ -1,27 +1,25 @@
 //
-//  ColorCell.swift
+//  EmojiCollectionViewCell.swift
 //  Tracker
 //
-//  Created by Nikolai Eremenko on 26.10.2024.
+//  Created by Nikolai Eremenko on 24.10.2024.
 //
 
 import UIKit
 
-final class ColorCell: UICollectionViewCell {
-    static let reuseIdentifier = "ColorCell"
-    private var selectedColor: UIColor?
+final class EmojiCollectionViewCell: UICollectionViewCell {
+    static let reuseIdentifier = "EmojiCollectionViewCell"
 
     override var isSelected: Bool {
         didSet {
-            contentView.layer.borderWidth = isSelected ? 3 : 0
-            contentView.layer.borderColor = isSelected ? selectedColor?
-                .withAlphaComponent(0.3).cgColor : UIColor.clear.cgColor
+            contentView.backgroundColor = isSelected ? .ypLightGray : .clear
         }
     }
 
-    private lazy var colorImageView: UIImageView = {
-        let view = UIImageView()
-        view.layer.cornerRadius = 8
+    private lazy var emojiLabel: UILabel = {
+        let view = UILabel()
+        view.font = Constants.Fonts.ypBold32
+        view.textAlignment = .center
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -37,22 +35,22 @@ final class ColorCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configure(with color: String) {
-        colorImageView.backgroundColor = UIColor(named: color)
-        selectedColor = UIColor(named: color)
+    func configure(with emoji: String) {
+        emojiLabel.text = emoji
     }
 
     // MARK: - Setup UI
     private func setupUI() {
-        contentView.addSubview(colorImageView)
-        contentView.layer.cornerRadius = 8
+        contentView.addSubview(emojiLabel)
+        contentView.layer.cornerRadius = 16
         contentView.layer.masksToBounds = true
 
         NSLayoutConstraint.activate([
-            colorImageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            colorImageView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            colorImageView.heightAnchor.constraint(equalToConstant: 40),
-            colorImageView.widthAnchor.constraint(equalToConstant: 40)
+            emojiLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            emojiLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            emojiLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
+            emojiLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            emojiLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
         ])
     }
 }

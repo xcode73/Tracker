@@ -1,5 +1,5 @@
 //
-//  ErrorCell.swift
+//  ErrorTableViewCell.swift
 //  Tracker
 //
 //  Created by Nikolai Eremenko on 04.10.2024.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ErrorCell: UITableViewCell {
+class ErrorTableViewCell: UITableViewCell {
     private lazy var errorLabel: UILabel = {
         let view = UILabel()
         view.font = Constants.Fonts.ypRegular17

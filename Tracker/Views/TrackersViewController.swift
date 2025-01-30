@@ -117,8 +117,8 @@ final class TrackersViewController: UIViewController {
         layout.scrollDirection = .vertical
 
         let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        view.register(TrackerCell.self,
-                      forCellWithReuseIdentifier: TrackerCell.reuseIdentifier)
+        view.register(TrackerCollectionViewCell.self,
+                      forCellWithReuseIdentifier: TrackerCollectionViewCell.reuseIdentifier)
         view.register(TrackerHeaderReusableView.self,
                       forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                       withReuseIdentifier: TrackerHeaderReusableView.reuseIdentifier)
@@ -351,9 +351,9 @@ extension TrackersViewController: UICollectionViewDataSource {
                         cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard
             let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: TrackerCell.reuseIdentifier,
+                withReuseIdentifier: TrackerCollectionViewCell.reuseIdentifier,
                 for: indexPath
-            ) as? TrackerCell,
+            ) as? TrackerCollectionViewCell,
             let tracker = trackerStore?.trackerObject(at: indexPath),
             let truncatedDate = datePicker.date.truncated
         else {
@@ -487,7 +487,7 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         contextMenuConfiguration configuration: UIContextMenuConfiguration,
                         highlightPreviewForItemAt indexPath: IndexPath) -> UITargetedPreview? {
-        guard let cell = collectionView.cellForItem(at: indexPath) as? TrackerCell else { return nil }
+        guard let cell = collectionView.cellForItem(at: indexPath) as? TrackerCollectionViewCell else { return nil }
         let selectedView = cell.configureSelectedView()
 
         return UITargetedPreview(view: selectedView)
