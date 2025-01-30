@@ -498,7 +498,7 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 extension TrackersViewController: TrackerCellDelegate {
     func changeTrackerState(
         tracker: TrackerUI?,
-        record: TrackerRecord?
+        record: RecordUI?
     ) {
         guard
             let tracker = tracker,
@@ -511,7 +511,7 @@ extension TrackersViewController: TrackerCellDelegate {
         if let record {
             try? recordStore?.deleteRecord(record)
         } else {
-            let newRecord = TrackerRecord(trackerId: tracker.id, date: truncatedDate)
+            let newRecord = RecordUI(trackerId: tracker.id, date: truncatedDate)
             try? recordStore?.addRecord(newRecord)
         }
     }

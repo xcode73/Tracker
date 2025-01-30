@@ -1,5 +1,5 @@
 //
-//  TrackerRecord.swift
+//  RecordUI.swift
 //  Tracker
 //
 //  Created by Nikolai Eremenko on 25.09.2024.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct TrackerRecord {
+struct RecordUI {
     let trackerId: UUID
     let date: Date
 }

@@ -74,7 +74,7 @@ final class TrackerStore: NSObject {
             case .completed:
                 fetchRequest.predicate = NSPredicate(
                     format: "ANY %K.%K == %@",
-                    #keyPath(Tracker.records), #keyPath(TrackerRecordCoreData.date), truncatedDate as NSDate
+                    #keyPath(Tracker.records), #keyPath(Record.date), truncatedDate as NSDate
                 )
             case .notCompleted:
                 let specialPredicate = NSCompoundPredicate(
@@ -97,7 +97,7 @@ final class TrackerStore: NSObject {
                                     weekday.rawValue),
                         NSPredicate(format: "SUBQUERY(%K, $record, $record.%K == %@).@count == 0",
                                     #keyPath(Tracker.records),
-                                    #keyPath(TrackerRecordCoreData.date),
+                                    #keyPath(Record.date),
                                     truncatedDate as NSDate)
                     ]
                 )

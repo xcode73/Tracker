@@ -4,6 +4,11 @@
         <attribute name="title" attributeType="String"/>
         <relationship name="trackers" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Tracker" inverseName="category" inverseEntity="Tracker"/>
     </entity>
+    <entity name="Record" representedClassName="Record" syncable="YES">
+        <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="trackerId" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="tracker" maxCount="1" deletionRule="Nullify" destinationEntity="Tracker" inverseName="records" inverseEntity="Tracker"/>
+    </entity>
     <entity name="ScheduleCoreData" representedClassName="ScheduleCoreData" syncable="YES">
         <attribute name="weekDay" attributeType="Integer 16" valueTransformerName="DaysValueTransformer" defaultValueString="0" usesScalarValueType="YES"/>
         <relationship name="tracker" maxCount="1" deletionRule="Nullify" destinationEntity="Tracker" inverseName="schedule" inverseEntity="Tracker"/>
@@ -15,12 +20,7 @@
         <attribute name="title" attributeType="String"/>
         <attribute name="trackerId" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="category" maxCount="1" deletionRule="Nullify" destinationEntity="Category" inverseName="trackers" inverseEntity="Category"/>
-        <relationship name="records" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TrackerRecordCoreData" inverseName="tracker" inverseEntity="TrackerRecordCoreData"/>
+        <relationship name="records" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Record" inverseName="tracker" inverseEntity="Record"/>
         <relationship name="schedule" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ScheduleCoreData" inverseName="tracker" inverseEntity="ScheduleCoreData"/>
-    </entity>
-    <entity name="TrackerRecordCoreData" representedClassName="TrackerRecordCoreData" syncable="YES">
-        <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
-        <attribute name="trackerId" attributeType="UUID" usesScalarValueType="NO"/>
-        <relationship name="tracker" maxCount="1" deletionRule="Nullify" destinationEntity="Tracker" inverseName="records" inverseEntity="Tracker"/>
     </entity>
 </model>

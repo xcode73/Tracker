@@ -8,14 +8,14 @@
 import UIKit
 
 protocol TrackerCellDelegate: AnyObject {
-    func changeTrackerState(tracker: TrackerUI?, record: TrackerRecord?)
+    func changeTrackerState(tracker: TrackerUI?, record: RecordUI?)
 }
 
 final class TrackerCollectionViewCell: UICollectionViewCell {
     weak var delegate: TrackerCellDelegate?
     static let reuseIdentifier = "TrackerCollectionViewCell"
     private var tracker: TrackerUI?
-    private var record: TrackerRecord?
+    private var record: RecordUI?
 
     // MARK: - UI Components
     private lazy var verticalStackView: UIStackView = {
@@ -105,7 +105,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     // MARK: - Configuration
     func configure(
         tracker: TrackerUI,
-        record: TrackerRecord?,
+        record: RecordUI?,
         completedTitle: String
     ) {
         self.tracker = tracker
