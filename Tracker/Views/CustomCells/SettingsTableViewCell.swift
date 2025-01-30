@@ -44,7 +44,7 @@ final class SettingsTableViewCell: UITableViewCell {
 
     private lazy var titleLabel: UILabel = {
         let view = UILabel()
-        view.font = Constants.Fonts.ypRegular17
+        view.font = Fonts.ypRegular17
         view.textColor = .ypBlack
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -52,7 +52,7 @@ final class SettingsTableViewCell: UITableViewCell {
 
     private lazy var descriptionLabel: UILabel = {
         let view = UILabel()
-        view.font = Constants.Fonts.ypRegular17
+        view.font = Fonts.ypRegular17
         view.textColor = .ypGray
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -62,7 +62,7 @@ final class SettingsTableViewCell: UITableViewCell {
         let view = UIImageView()
         view.tintColor = .ypGray
         view.contentMode = .center
-        view.image = Constants.Icons.chevronRight
+        view.image = Icons.chevronRight
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()

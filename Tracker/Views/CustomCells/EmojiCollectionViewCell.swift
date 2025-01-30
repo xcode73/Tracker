@@ -18,7 +18,7 @@ final class EmojiCollectionViewCell: UICollectionViewCell {
 
     private lazy var emojiLabel: UILabel = {
         let view = UILabel()
-        view.font = Constants.Fonts.ypBold32
+        view.font = Fonts.ypBold32
         view.textAlignment = .center
         view.translatesAutoresizingMaskIntoConstraints = false
         return view

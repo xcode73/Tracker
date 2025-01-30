@@ -44,7 +44,7 @@ class ScheduleTableViewCell: UITableViewCell {
 
     private lazy var titleLabel: UILabel = {
         let view = UILabel()
-        view.font = Constants.Fonts.ypRegular17
+        view.font = Fonts.ypRegular17
         view.textColor = .ypBlack
         view.translatesAutoresizingMaskIntoConstraints = false
         return view

@@ -18,7 +18,7 @@ class OnboardingContentViewController: UIViewController {
     // MARK: - UI Components
     private lazy var featureLabel: UILabel = {
         let view = UILabel()
-        view.font = Constants.Fonts.ypBold32
+        view.font = Fonts.ypBold32
         view.textAlignment = .center
         view.numberOfLines = 3
         view.textColor = .black
@@ -40,7 +40,7 @@ class OnboardingContentViewController: UIViewController {
         view.layer.masksToBounds = true
         view.layer.cornerRadius = 16
         view.backgroundColor = .black
-        view.titleLabel?.font = Constants.Fonts.ypMedium16
+        view.titleLabel?.font = Fonts.ypMedium16
         view.setTitleColor(.white, for: .normal)
         view.addTarget(self, action: #selector(didTapConfirmButton), for: .touchUpInside)
         view.setTitle(onboardingItem.buttonTitle, for: .normal)

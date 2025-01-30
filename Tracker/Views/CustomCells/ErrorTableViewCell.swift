@@ -10,7 +10,7 @@ import UIKit
 class ErrorTableViewCell: UITableViewCell {
     private lazy var errorLabel: UILabel = {
         let view = UILabel()
-        view.font = Constants.Fonts.ypRegular17
+        view.font = Fonts.ypRegular17
         view.textAlignment = .center
         view.textColor = .ypRed
         view.translatesAutoresizingMaskIntoConstraints = false

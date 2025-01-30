@@ -50,7 +50,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
 
     private lazy var emojiLabel: UILabel = {
         let view = UILabel()
-        view.font = Constants.Fonts.ypRegular12
+        view.font = Fonts.ypRegular12
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -66,7 +66,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
 
     private lazy var titleLabel: UILabel = {
         let view = UILabel()
-        view.font = Constants.Fonts.ypMedium12
+        view.font = Fonts.ypMedium12
         view.numberOfLines = 0
         view.lineBreakMode = .byWordWrapping
         view.textColor = .ypWhite
@@ -76,7 +76,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
 
     private lazy var daysCompletedLabel: UILabel = {
         let view = UILabel()
-        view.font = Constants.Fonts.ypMedium12
+        view.font = Fonts.ypMedium12
         view.textColor = .ypBlack
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -119,10 +119,10 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
 
         if record == nil {
             checkButton.layer.opacity = 1
-            checkButton.setImage(Constants.Icons.plus, for: .normal)
+            checkButton.setImage(Icons.plus, for: .normal)
         } else {
             checkButton.layer.opacity = 0.3
-            checkButton.setImage(Constants.Icons.checkmark, for: .normal)
+            checkButton.setImage(Icons.checkmark, for: .normal)
         }
     }
 

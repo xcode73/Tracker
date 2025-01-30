@@ -54,7 +54,7 @@ final class CategoriesViewController: UIViewController {
     private lazy var placeholderLabel: UILabel = {
         let view = UILabel()
         view.numberOfLines = 2
-        view.font = Constants.Fonts.ypMedium12
+        view.font = Fonts.ypMedium12
         view.textAlignment = .center
         view.textColor = .ypBlack
         view.text = NSLocalizedString("placeholderCategories", comment: "")
@@ -67,7 +67,7 @@ final class CategoriesViewController: UIViewController {
         view.layer.masksToBounds = true
         view.layer.cornerRadius = 16
         view.backgroundColor = .ypBlack
-        view.titleLabel?.font = Constants.Fonts.ypMedium16
+        view.titleLabel?.font = Fonts.ypMedium16
         view.setTitleColor(.white, for: .normal)
         view.addTarget(self, action: #selector(showCategoryViewController), for: .touchUpInside)
         view.setTitle(NSLocalizedString("buttonAddCategory", comment: ""), for: .normal)

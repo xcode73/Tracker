@@ -11,7 +11,7 @@ final class SectionHeaderTableViewCell: UITableViewCell {
     // MARK: - UI Components
     private let headerLabel: UILabel = {
         let view = UILabel()
-        view.font = Constants.Fonts.ypBold19
+        view.font = Fonts.ypBold19
         view.textColor = .ypBlack
         view.translatesAutoresizingMaskIntoConstraints = false
         return view

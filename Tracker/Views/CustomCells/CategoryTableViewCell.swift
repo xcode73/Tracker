@@ -21,7 +21,7 @@ final class CategoryTableViewCell: UITableViewCell {
 
     private lazy var titleLabel: UILabel = {
         let view = UILabel()
-        view.font = Constants.Fonts.ypRegular17
+        view.font = Fonts.ypRegular17
         view.textColor = .ypBlack
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -31,7 +31,7 @@ final class CategoryTableViewCell: UITableViewCell {
         let view = UIImageView()
         view.tintColor = .ypGray
         view.contentMode = .center
-        view.image = Constants.Icons.checkmark
+        view.image = Icons.checkmark
         view.tintColor = .ypBlue
         view.isHidden = true
         view.translatesAutoresizingMaskIntoConstraints = false

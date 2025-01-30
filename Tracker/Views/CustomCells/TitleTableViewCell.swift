@@ -34,7 +34,7 @@ final class TitleTableViewCell: UITableViewCell {
 
     private lazy var titleTextField: UITextField = {
         let view = UITextField()
-        view.font = Constants.Fonts.ypRegular17
+        view.font = Fonts.ypRegular17
         view.returnKeyType = .done
         view.clearButtonMode = .whileEditing
         view.delegate = self

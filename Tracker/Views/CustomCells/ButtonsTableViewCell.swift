@@ -33,7 +33,7 @@ final class ButtonsTableViewCell: UITableViewCell {
         view.backgroundColor = .ypWhite
         view.layer.borderColor = UIColor.ypRed.cgColor
         view.layer.borderWidth = 1
-        view.titleLabel?.font = Constants.Fonts.ypMedium16
+        view.titleLabel?.font = Fonts.ypMedium16
         view.setTitleColor(.ypRed, for: .normal)
         view.addTarget(self, action: #selector(didTapCancelButton), for: .touchUpInside)
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -45,7 +45,7 @@ final class ButtonsTableViewCell: UITableViewCell {
         view.isEnabled = false
         view.layer.masksToBounds = true
         view.layer.cornerRadius = 16
-        view.titleLabel?.font = Constants.Fonts.ypMedium16
+        view.titleLabel?.font = Fonts.ypMedium16
         view.setTitleColor(.ypWhite, for: .normal)
         view.addTarget(self, action: #selector(didTapDoneButton), for: .touchUpInside)
         view.translatesAutoresizingMaskIntoConstraints = false

@@ -56,7 +56,7 @@ final class TrackersViewController: UIViewController {
     // MARK: - UI Components
     private lazy var addButton: UIBarButtonItem = {
         let view = UIBarButtonItem()
-        view.image = Constants.Icons.plus
+        view.image = Icons.plus
         view.tintColor = .ypBlack
         view.target = self
         view.action = #selector(didTapAddButton)
@@ -95,7 +95,7 @@ final class TrackersViewController: UIViewController {
 
     private lazy var placeholderLabel: UILabel = {
         let view = UILabel()
-        view.font = Constants.Fonts.ypMedium12
+        view.font = Fonts.ypMedium12
         return view
     }()
 
@@ -104,7 +104,7 @@ final class TrackersViewController: UIViewController {
         view.layer.masksToBounds = true
         view.layer.cornerRadius = 16
         view.backgroundColor = .ypBlue
-        view.titleLabel?.font = Constants.Fonts.ypMedium16
+        view.titleLabel?.font = Fonts.ypMedium16
         view.setTitleColor(.white, for: .normal)
         view.addTarget(self, action: #selector(didTapFiltersButton), for: .touchUpInside)
         view.setTitle(NSLocalizedString("buttonFilters", comment: ""), for: .normal)

@@ -50,7 +50,7 @@ final class TrackerTableViewController: UITableViewController {
     // MARK: - UI Components
     private lazy var daysCompletedLabel: UILabel = {
         let view = UILabel()
-        view.font = Constants.Fonts.ypBold32
+        view.font = Fonts.ypBold32
         view.textColor = .ypBlack
         view.textAlignment = .center
         return view
