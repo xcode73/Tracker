@@ -9,8 +9,8 @@ import CoreData
 
 protocol TrackerDataStore {
     var managedObjectContext: NSManagedObjectContext? { get }
-    func addTracker(tracker: TrackerUI, category: TrackerCategoryCoreData) throws
-    func addCategory(category: TrackerCategory) throws
+    func addTracker(tracker: TrackerUI, category: Category) throws
+    func addCategory(category: CategoryUI) throws
     func saveContext() throws
     func refresh() throws
     func deleteItem(_ item: NSManagedObject) throws
@@ -96,7 +96,7 @@ extension DataStore: TrackerDataStore {
         }
     }
 
-    func addTracker(tracker: TrackerUI, category: TrackerCategoryCoreData) throws {
+    func addTracker(tracker: TrackerUI, category: Category) throws {
         try performSync { context in
             Result {
                 context.refreshAllObjects()
@@ -114,10 +114,10 @@ extension DataStore: TrackerDataStore {
         }
     }
 
-    func addCategory(category: TrackerCategory) throws {
+    func addCategory(category: CategoryUI) throws {
         try performSync { context in
             Result {
-                let trackerCategoryCoreData = TrackerCategoryCoreData(context: context)
+                let trackerCategoryCoreData = Category(context: context)
                 trackerCategoryCoreData.title = category.title
                 try context.save()
             }

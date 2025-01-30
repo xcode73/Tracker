@@ -38,7 +38,7 @@ final class CategoriesViewModel {
         trackerCategoryStore?.categoryTitle(at: indexPath)
     }
 
-    func addCategory(category: TrackerCategory) {
+    func addCategory(category: CategoryUI) {
         try? trackerCategoryStore?.addCategory(category: category)
     }
 

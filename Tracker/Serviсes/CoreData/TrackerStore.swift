@@ -186,9 +186,9 @@ extension TrackerStore: TrackerStoreProtocol {
     }
 
     func addTracker(_ tracker: TrackerUI) throws {
-        let request = NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData")
+        let request = NSFetchRequest<Category>(entityName: "Category")
         request.predicate = NSPredicate(format: "%K == %@",
-                                        #keyPath(TrackerCategoryCoreData.title),
+                                        #keyPath(Category.title),
                                         tracker.categoryTitle)
 
         guard let storedCategory = try? context.fetch(request).first else { return }
@@ -197,9 +197,9 @@ extension TrackerStore: TrackerStoreProtocol {
     }
 
     func updateTracker(tracker: TrackerUI, at indexPath: IndexPath) throws {
-        let categoryRequest = NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData")
+        let categoryRequest = NSFetchRequest<Category>(entityName: "Category")
         categoryRequest.predicate = NSPredicate(format: "%K == %@",
-                                                #keyPath(TrackerCategoryCoreData.title),
+                                                #keyPath(Category.title),
                                                 tracker.categoryTitle)
         guard let storedCategory = try? context.fetch(categoryRequest).first else { return }
 

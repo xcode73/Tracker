@@ -15,7 +15,7 @@ public class Tracker: NSManagedObject, Identifiable {
     @NSManaged public var emoji: String
     @NSManaged public var title: String
     @NSManaged public var trackerId: UUID
-    @NSManaged public var category: TrackerCategoryCoreData
+    @NSManaged public var category: Category
     @NSManaged public var records: NSSet?
     @NSManaged public var schedule: NSSet?
 }

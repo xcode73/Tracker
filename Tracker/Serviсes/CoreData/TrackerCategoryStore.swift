@@ -22,7 +22,7 @@ protocol TrackerCategoryStoreProtocol {
     var numberOfSections: Int { get }
     func numberOfRowsInSection(_ section: Int) -> Int
     func categoryTitle(at indexPath: IndexPath) -> (String)?
-    func addCategory(category: TrackerCategory) throws
+    func addCategory(category: CategoryUI) throws
     func updateCategory(categoryTitle: String, at indexPath: IndexPath) throws
     func deleteCategory(at indexPath: IndexPath) throws
 }
@@ -38,10 +38,10 @@ final class TrackerCategoryStore: NSObject {
     private let context: NSManagedObjectContext
     private let dataStore: TrackerDataStore
 
-    private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCategoryCoreData> = {
-        let fetchRequest = NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData")
+    private lazy var fetchedResultsController: NSFetchedResultsController<Category> = {
+        let fetchRequest = NSFetchRequest<Category>(entityName: "Category")
         fetchRequest.sortDescriptors = [
-            NSSortDescriptor(keyPath: \TrackerCategoryCoreData.title, ascending: true)
+            NSSortDescriptor(keyPath: \Category.title, ascending: true)
         ]
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
                                                                   managedObjectContext: context,
@@ -76,7 +76,7 @@ extension TrackerCategoryStore: TrackerCategoryStoreProtocol {
         fetchedResultsController.object(at: indexPath).title
     }
 
-    func addCategory(category: TrackerCategory) throws {
+    func addCategory(category: CategoryUI) throws {
         try? dataStore.addCategory(category: category)
     }
 

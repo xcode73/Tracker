@@ -360,7 +360,7 @@ extension CategoriesViewController: UITableViewDelegate {
 // MARK: - CategoryViewControllerDelegate
 extension CategoriesViewController: CategoryViewControllerDelegate {
     func createCategory(categoryTitle: String) {
-        let category = TrackerCategory(title: categoryTitle, trackers: nil)
+        let category = CategoryUI(title: categoryTitle, trackers: nil)
 
         viewModel?.addCategory(category: category)
         dismiss(animated: true)
