@@ -9,7 +9,7 @@
         <attribute name="trackerId" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="tracker" maxCount="1" deletionRule="Nullify" destinationEntity="Tracker" inverseName="records" inverseEntity="Tracker"/>
     </entity>
-    <entity name="ScheduleCoreData" representedClassName="ScheduleCoreData" syncable="YES">
+    <entity name="Schedule" representedClassName="Schedule" syncable="YES">
         <attribute name="weekDay" attributeType="Integer 16" valueTransformerName="DaysValueTransformer" defaultValueString="0" usesScalarValueType="YES"/>
         <relationship name="tracker" maxCount="1" deletionRule="Nullify" destinationEntity="Tracker" inverseName="schedule" inverseEntity="Tracker"/>
     </entity>
@@ -21,6 +21,6 @@
         <attribute name="trackerId" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="category" maxCount="1" deletionRule="Nullify" destinationEntity="Category" inverseName="trackers" inverseEntity="Category"/>
         <relationship name="records" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Record" inverseName="tracker" inverseEntity="Record"/>
-        <relationship name="schedule" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ScheduleCoreData" inverseName="tracker" inverseEntity="ScheduleCoreData"/>
+        <relationship name="schedule" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Schedule" inverseName="tracker" inverseEntity="Schedule"/>
     </entity>
 </model>

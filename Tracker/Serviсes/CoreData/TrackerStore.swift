@@ -66,7 +66,7 @@ final class TrackerStore: NSObject {
                 format: "%K == %@ AND %K CONTAINS[cd] %@ OR ANY %K.%K == %lld AND %K CONTAINS[cd] %@",
                 #keyPath(Tracker.date), truncatedDate as NSDate,
                 #keyPath(Tracker.title), searchText,
-                #keyPath(Tracker.schedule), #keyPath(ScheduleCoreData.weekDay), weekday.rawValue,
+                #keyPath(Tracker.schedule), #keyPath(Schedule.weekDay), weekday.rawValue,
                 #keyPath(Tracker.title), searchText
             )
         } else {
@@ -93,7 +93,7 @@ final class TrackerStore: NSObject {
                     subpredicates: [
                         NSPredicate(format: "ANY %K.%K == %lld",
                                     #keyPath(Tracker.schedule),
-                                    #keyPath(ScheduleCoreData.weekDay),
+                                    #keyPath(Schedule.weekDay),
                                     weekday.rawValue),
                         NSPredicate(format: "SUBQUERY(%K, $record, $record.%K == %@).@count == 0",
                                     #keyPath(Tracker.records),
@@ -109,7 +109,7 @@ final class TrackerStore: NSObject {
                 fetchRequest.predicate = NSPredicate(
                     format: "%K == %@ OR ANY %K.%K == %lld",
                     #keyPath(Tracker.date), truncatedDate as NSDate,
-                    #keyPath(Tracker.schedule), #keyPath(ScheduleCoreData.weekDay), weekday.rawValue
+                    #keyPath(Tracker.schedule), #keyPath(Schedule.weekDay), weekday.rawValue
                 )
             }
         }

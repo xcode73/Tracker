@@ -46,7 +46,7 @@ extension ScheduleStore: ScheduleStoreProtocol {
         }
 
         for day in schedule {
-            let newScheduleCoreData = ScheduleCoreData(context: context)
+            let newScheduleCoreData = Schedule(context: context)
             newScheduleCoreData.tracker = storedTracker
 
             newScheduleCoreData.weekDay = day
@@ -63,9 +63,9 @@ extension ScheduleStore: ScheduleStoreProtocol {
 
         if let storedSchedule = storedTracker.schedule {
             for _ in storedSchedule {
-                let request = NSFetchRequest<ScheduleCoreData>(entityName: "ScheduleCoreData")
+                let request = NSFetchRequest<Schedule>(entityName: "Schedule")
                 request.predicate = NSPredicate(format: "%K == %@",
-                                                #keyPath(ScheduleCoreData.tracker.trackerId), tracker.id as NSUUID)
+                                                #keyPath(Schedule.tracker.trackerId), tracker.id as NSUUID)
                 guard let schedule = try? context.fetch(request).first else { continue }
                 try? dataStore.deleteItem(schedule)
             }
@@ -75,9 +75,9 @@ extension ScheduleStore: ScheduleStoreProtocol {
     }
 
     func getSchedule(for tracker: TrackerUI) -> [WeekDay]? {
-        let request = NSFetchRequest<ScheduleCoreData>(entityName: "ScheduleCoreData")
+        let request = NSFetchRequest<Schedule>(entityName: "Schedule")
         request.predicate = NSPredicate(format: "%K == %@",
-                                        #keyPath(ScheduleCoreData.tracker.trackerId), tracker.id as NSUUID)
+                                        #keyPath(Schedule.tracker.trackerId), tracker.id as NSUUID)
 
         guard let storedSchedule = try? context.fetch(request) else { return nil }
 
