@@ -1,5 +1,5 @@
 //
-//  NewTracker.swift
+//  NewTrackerUI.swift
 //  Tracker
 //
 //  Created by Nikolai Eremenko on 08.12.2024.
@@ -7,21 +7,21 @@
 
 import Foundation
 
-struct NewTracker {
+struct NewTrackerUI {
     var id: UUID?
-    var categoryTitle: String?
     var title: String?
     var emoji: String?
     var color: String?
+    var isPinned: Bool
     var schedule: [WeekDay]?
     var date: Date?
 
     init(from tracker: TrackerUI) {
         id = tracker.id
-        categoryTitle = tracker.categoryTitle
         title = tracker.title
         emoji = tracker.emoji
         color = tracker.color
+        isPinned = tracker.isPinned
         schedule = tracker.schedule
         date = tracker.date
     }
@@ -31,13 +31,14 @@ struct NewTracker {
          title: String? = nil,
          emoji: String? = nil,
          color: String? = nil,
+         isPinned: Bool = false,
          schedule: [WeekDay]? = nil,
          date: Date? = nil) {
         self.id = id
-        self.categoryTitle = categoryTitle
         self.title = title
         self.emoji = emoji
         self.color = color
+        self.isPinned = isPinned
         self.schedule = schedule
         self.date = date
     }

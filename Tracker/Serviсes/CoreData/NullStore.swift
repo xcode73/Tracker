@@ -9,11 +9,8 @@ import CoreData
 
 final class NullStore {}
 
-extension NullStore: TrackerDataStore {
+extension NullStore: DataStoreProtocol {
     var managedObjectContext: NSManagedObjectContext? { nil }
-    func addTracker(tracker: TrackerUI, category: Category) throws {}
-    func addCategory(category: CategoryUI) throws {}
     func saveContext() throws {}
-    func refresh() throws {}
     func deleteItem(_ item: NSManagedObject) throws {}
 }

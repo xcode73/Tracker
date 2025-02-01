@@ -3,6 +3,8 @@
 //  Tracker
 //
 //  Created by Nikolai Eremenko on 29.09.2024.
+//  Description: This file holds all constant values used throughout the app, such as API endpoints, color schemes,
+//               and default settings.
 //
 
 import UIKit

@@ -59,11 +59,10 @@ final class EmojiCollectionViewCell: UICollectionViewCell {
 #if DEBUG
 @available(iOS 17, *)
 #Preview("Special") {
-    let trackerDataStore = Constants.appDelegate().trackerDataStore
+    let dataStore = Constants.appDelegate().trackerDataStore
     let viewController = TrackerTableViewController(
         tableType: .special(Date()),
-        trackerDataStore: trackerDataStore,
-        indexPath: nil
+        dataStore: dataStore
     )
     let navigationController = UINavigationController(rootViewController: viewController)
     navigationController.modalPresentationStyle = .pageSheet
@@ -73,11 +72,10 @@ final class EmojiCollectionViewCell: UICollectionViewCell {
 
 @available(iOS 17, *)
 #Preview("Regular") {
-    let trackerDataStore = Constants.appDelegate().trackerDataStore
+    let dataStore = Constants.appDelegate().trackerDataStore
     let viewController = TrackerTableViewController(
         tableType: .regular,
-        trackerDataStore: trackerDataStore,
-        indexPath: nil
+        dataStore: dataStore
     )
     let navigationController = UINavigationController(rootViewController: viewController)
     navigationController.modalPresentationStyle = .pageSheet

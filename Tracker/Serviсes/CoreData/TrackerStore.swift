@@ -13,15 +13,15 @@ enum TrackerStoreUpdate: Hashable {
         case deleted(Int)
     }
 
-  enum ObjectUpdate: Hashable {
-    case inserted(at: IndexPath)
-    case deleted(from: IndexPath)
-    case updated(at: IndexPath)
-    case moved(from: IndexPath, to: IndexPath)
-  }
+    enum ObjectUpdate: Hashable {
+        case inserted(at: IndexPath)
+        case deleted(from: IndexPath)
+        case updated(at: IndexPath)
+        case moved(from: IndexPath, to: IndexPath)
+    }
 
-  case section(SectionUpdate)
-  case object(ObjectUpdate)
+    case section(SectionUpdate)
+    case object(ObjectUpdate)
 }
 
 protocol TrackerStoreDelegate: AnyObject {
@@ -29,199 +29,189 @@ protocol TrackerStoreDelegate: AnyObject {
 }
 
 protocol TrackerStoreProtocol {
-    var numberOfSections: Int? { get }
+    var numberOfSections: Int { get }
+    func updateFetchRequest(with filter: Filter, for date: Date)
+    func updateFetchRequest(with searchText: String?, for date: Date)
     func numberOfItemsInSection(_ section: Int) -> Int
-    func trackerObject(at indexPath: IndexPath) -> TrackerUI?
-    func addTracker(_ tracker: TrackerUI) throws
-    func updateTracker(tracker: TrackerUI, at indexPath: IndexPath) throws
+    func fetchTracker(at indexPath: IndexPath) -> TrackerUI
+    func fetchTrackerWithCategory(at indexPath: IndexPath) -> (CategoryUI, TrackerUI)?
+    func saveTracker(from trackerUI: TrackerUI, categoryUI: CategoryUI) throws
     func deleteTracker(at indexPath: IndexPath) throws
     func sectionTitle(at section: Int) -> String?
-    func categoryTitle(at indexPath: IndexPath) -> String?
-    func refresh() throws
-    func performFetch() throws
 }
 
 final class TrackerStore: NSObject {
-    enum TrackerDataProviderError: Error {
+    enum TrackerStoreError: Error {
         case failedToInitializeContext
+        case failedToFindCategory
     }
 
     weak var delegate: TrackerStoreDelegate?
     private var inProgressChanges: [TrackerStoreUpdate] = []
 
     private let context: NSManagedObjectContext
-    private let dataStore: TrackerDataStore
-    private var date: Date
-    private var searchText: String?
+    private let dataStore: DataStoreProtocol
     private var selectedFilter: Filter
 
-    private lazy var fetchedResultsController: NSFetchedResultsController<Tracker> = {
-        guard let truncatedDate = date.truncated else { return NSFetchedResultsController() }
-
-        let weekday = WeekDay(date: date)
-        let fetchRequest = NSFetchRequest<Tracker>(entityName: "Tracker")
-
-        if let searchText {
-            fetchRequest.predicate = NSPredicate(
-                format: "%K == %@ AND %K CONTAINS[cd] %@ OR ANY %K.%K == %lld AND %K CONTAINS[cd] %@",
-                #keyPath(Tracker.date), truncatedDate as NSDate,
-                #keyPath(Tracker.title), searchText,
-                #keyPath(Tracker.schedule), #keyPath(Schedule.weekDay), weekday.rawValue,
-                #keyPath(Tracker.title), searchText
-            )
-        } else {
-            switch selectedFilter {
-            case .completed:
-                fetchRequest.predicate = NSPredicate(
-                    format: "ANY %K.%K == %@",
-                    #keyPath(Tracker.records), #keyPath(Record.date), truncatedDate as NSDate
-                )
-            case .notCompleted:
-                let specialPredicate = NSCompoundPredicate(
-                    type: .and,
-                    subpredicates: [
-                        NSPredicate(format: "%K == %@",
-                                    #keyPath(Tracker.date),
-                                    truncatedDate as NSDate),
-                        NSPredicate(format: "ANY %K == NIL",
-                                    #keyPath(Tracker.records))
-                    ]
-                )
-
-                let regularPredicate = NSCompoundPredicate(
-                    type: .and,
-                    subpredicates: [
-                        NSPredicate(format: "ANY %K.%K == %lld",
-                                    #keyPath(Tracker.schedule),
-                                    #keyPath(Schedule.weekDay),
-                                    weekday.rawValue),
-                        NSPredicate(format: "SUBQUERY(%K, $record, $record.%K == %@).@count == 0",
-                                    #keyPath(Tracker.records),
-                                    #keyPath(Record.date),
-                                    truncatedDate as NSDate)
-                    ]
-                )
-
-                let predicate = NSCompoundPredicate(type: .or, subpredicates: [specialPredicate, regularPredicate])
-
-                fetchRequest.predicate = predicate
-            default:
-                fetchRequest.predicate = NSPredicate(
-                    format: "%K == %@ OR ANY %K.%K == %lld",
-                    #keyPath(Tracker.date), truncatedDate as NSDate,
-                    #keyPath(Tracker.schedule), #keyPath(Schedule.weekDay), weekday.rawValue
-                )
-            }
-        }
-
-        fetchRequest.sortDescriptors = [
-            NSSortDescriptor(keyPath: \Tracker.category.title, ascending: true),
-            NSSortDescriptor(keyPath: \Tracker.title, ascending: true)
-        ]
-
-        let fetchedResultsController = NSFetchedResultsController(
-            fetchRequest: fetchRequest,
-            managedObjectContext: context,
-            sectionNameKeyPath: #keyPath(Tracker.category.title),
-            cacheName: nil
-        )
-        fetchedResultsController.delegate = self
-        try? fetchedResultsController.performFetch()
-        return fetchedResultsController
-    }()
+    private var fetchedResultsController: NSFetchedResultsController<Tracker>
 
     init(
-        dataStore: TrackerDataStore,
-        delegate: TrackerStoreDelegate,
-        date: Date,
-        selectedFilter: Filter,
-        searchText: String?
+        dataStore: DataStoreProtocol,
+        delegate: TrackerStoreDelegate? = nil,
+        selectedFilter: Filter
     ) throws {
+
         guard
             let context = dataStore.managedObjectContext
         else {
-            throw TrackerDataProviderError.failedToInitializeContext
+            throw TrackerStoreError.failedToInitializeContext
         }
-        self.date = date
+
         self.delegate = delegate
         self.context = context
         self.dataStore = dataStore
         self.selectedFilter = selectedFilter
-        self.searchText = searchText
+        self.fetchedResultsController = NSFetchedResultsController()
+    }
+
+    private func applySortAndRefresh(with fetchRequest: NSFetchRequest<Tracker>) {
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "isPinned", ascending: false),
+            NSSortDescriptor(key: "sectionTitle", ascending: true),
+            NSSortDescriptor(key: "title", ascending: true)
+        ]
+
+        let newFetchedResultsController = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: context,
+            sectionNameKeyPath: "sectionTitle",
+            cacheName: nil
+        )
+
+        newFetchedResultsController.delegate = self
+        fetchedResultsController = newFetchedResultsController
+
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            print("❌ Ошибка загрузки данных:", error)
+        }
+
+        delegate?.didUpdate(inProgressChanges)
+    }
+
+    private func findTracker(by id: UUID) -> Tracker? {
+        let fetchRequest: NSFetchRequest<Tracker> = Tracker.fetchRequest()
+        fetchRequest.predicate = PredicateFactory.TrackerPredicate.byId(id)
+
+        return try? context.fetch(fetchRequest).first
+    }
+
+    private func findCategory(by id: UUID) throws -> Category {
+        let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
+        fetchRequest.predicate = PredicateFactory.CategoryPredicate.byId(id)
+
+        guard
+            let category = try context.fetch(fetchRequest).first
+        else {
+            throw TrackerStoreError.failedToFindCategory
+        }
+
+        return category
     }
 }
 
 // MARK: - TrackerStoreProtocol
 extension TrackerStore: TrackerStoreProtocol {
-    var numberOfSections: Int? {
-        fetchedResultsController.sections?.count
+    func updateFetchRequest(with filter: Filter, for date: Date) {
+        let newFetchRequest: NSFetchRequest<Tracker> = Tracker.fetchRequest()
+
+        switch filter {
+        case .completed:
+            newFetchRequest.predicate = PredicateFactory.TrackerPredicate.completed(on: date)
+        case .notCompleted:
+            newFetchRequest.predicate = PredicateFactory.TrackerPredicate.notCompleted(date)
+        default:
+            newFetchRequest.predicate = PredicateFactory.TrackerPredicate.all(date)
+        }
+
+        applySortAndRefresh(with: newFetchRequest)
+    }
+
+    func updateFetchRequest(with searchText: String?, for date: Date) {
+        let newFetchRequest: NSFetchRequest<Tracker> = Tracker.fetchRequest()
+
+        if let searchText {
+            newFetchRequest.predicate = PredicateFactory.TrackerPredicate.search(
+                date: date,
+                searchText: searchText
+            )
+        } else {
+            newFetchRequest.predicate = PredicateFactory.TrackerPredicate.all(date)
+        }
+
+        applySortAndRefresh(with: newFetchRequest)
+    }
+
+    var numberOfSections: Int {
+        fetchedResultsController.sections?.count ?? 0
     }
 
     func numberOfItemsInSection(_ section: Int) -> Int {
         fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
 
-    func performFetch() throws {
-        try fetchedResultsController.performFetch()
+    func fetchTracker(at indexPath: IndexPath) -> TrackerUI {
+        TrackerUI(from: fetchedResultsController.object(at: indexPath))
     }
 
-    func trackerObject(at indexPath: IndexPath) -> TrackerUI? {
-        let storedTracker = fetchedResultsController.object(at: indexPath)
+    func fetchTrackerWithCategory(at indexPath: IndexPath) -> (CategoryUI, TrackerUI)? {
+        let tracker = fetchedResultsController.object(at: indexPath)
+        let category = tracker.category
+        let categoryUI = CategoryUI(from: category)
+        let trackerUI = TrackerUI(from: tracker)
 
-        return TrackerUI(id: storedTracker.trackerId,
-                       categoryTitle: storedTracker.category.title,
-                       title: storedTracker.title,
-                       color: storedTracker.color,
-                       emoji: storedTracker.emoji,
-                       schedule: storedTracker.schedule?.allObjects.map { ($0 as AnyObject).weekDay },
-                       date: storedTracker.date)
-    }
-
-    func categoryTitle(at indexPath: IndexPath) -> String? {
-        return fetchedResultsController.object(at: indexPath).category.title
+        return (categoryUI, trackerUI)
     }
 
     func sectionTitle(at section: Int) -> String? {
         fetchedResultsController.sections?[section].name
     }
 
-    func addTracker(_ tracker: TrackerUI) throws {
-        let request = NSFetchRequest<Category>(entityName: "Category")
-        request.predicate = NSPredicate(format: "%K == %@",
-                                        #keyPath(Category.title),
-                                        tracker.categoryTitle)
+    func saveTracker(from trackerUI: TrackerUI, categoryUI: CategoryUI) throws {
+        do {
+            let category = try findCategory(by: categoryUI.id)
+            let tracker: Tracker
 
-        guard let storedCategory = try? context.fetch(request).first else { return }
+            if let existingTracker = findTracker(by: trackerUI.id) {
+                tracker = existingTracker // Обновляем существующий
+            } else {
+                tracker = Tracker(context: context) // Создаем новый
+            }
 
-        try? dataStore.addTracker(tracker: tracker, category: storedCategory)
-    }
+            tracker.update(from: trackerUI, category: category, in: context)
 
-    func updateTracker(tracker: TrackerUI, at indexPath: IndexPath) throws {
-        let categoryRequest = NSFetchRequest<Category>(entityName: "Category")
-        categoryRequest.predicate = NSPredicate(format: "%K == %@",
-                                                #keyPath(Category.title),
-                                                tracker.categoryTitle)
-        guard let storedCategory = try? context.fetch(categoryRequest).first else { return }
-
-        let storedTracker = fetchedResultsController.object(at: indexPath)
-        storedTracker.trackerId = tracker.id
-        storedTracker.title = tracker.title
-        storedTracker.color = tracker.color
-        storedTracker.emoji = tracker.emoji
-        storedTracker.date = tracker.date
-        storedTracker.category = storedCategory
-
-        try? dataStore.saveContext()
+            try dataStore.saveContext()
+        } catch {
+            throw NSError(
+                domain: "AppError",
+                code: 404,
+                userInfo: [
+                    NSLocalizedDescriptionKey: NSLocalizedString("alertMessageTrackerStoreTracker", comment: "")
+                ]
+            )
+        }
     }
 
     func deleteTracker(at indexPath: IndexPath) throws {
         let tracker = fetchedResultsController.object(at: indexPath)
-        try? dataStore.deleteItem(tracker)
-        try? dataStore.saveContext()
-    }
 
-    func refresh() throws {
-        try? dataStore.refresh()
+        do {
+            try dataStore.deleteItem(tracker)
+            try dataStore.saveContext()
+        } catch {
+            print(error)
+        }
     }
 }
 

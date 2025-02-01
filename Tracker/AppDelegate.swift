@@ -10,7 +10,7 @@ import CoreData
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    lazy var trackerDataStore: TrackerDataStore = {
+    lazy var trackerDataStore: DataStoreProtocol = {
         do {
             return try DataStore()
         } catch {

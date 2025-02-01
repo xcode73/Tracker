@@ -14,7 +14,6 @@ protocol TitleCellDelegate: AnyObject {
 
 final class TitleTableViewCell: UITableViewCell {
     weak var delegate: TitleCellDelegate?
-
     private let maxTitleLength = 38
 
     // MARK: - UI Components
@@ -124,11 +123,10 @@ extension TitleTableViewCell: UITextFieldDelegate {
 #if DEBUG
 @available(iOS 17, *)
 #Preview("Special") {
-    let trackerDataStore = Constants.appDelegate().trackerDataStore
+    let dataStore = Constants.appDelegate().trackerDataStore
     let viewController = TrackerTableViewController(
         tableType: .special(Date()),
-        trackerDataStore: trackerDataStore,
-        indexPath: nil
+        dataStore: dataStore
     )
     let navigationController = UINavigationController(rootViewController: viewController)
     navigationController.modalPresentationStyle = .pageSheet
@@ -138,11 +136,10 @@ extension TitleTableViewCell: UITextFieldDelegate {
 
 @available(iOS 17, *)
 #Preview("Regular") {
-    let trackerDataStore = Constants.appDelegate().trackerDataStore
+    let dataStore = Constants.appDelegate().trackerDataStore
     let viewController = TrackerTableViewController(
         tableType: .regular,
-        trackerDataStore: trackerDataStore,
-        indexPath: nil
+        dataStore: dataStore
     )
     let navigationController = UINavigationController(rootViewController: viewController)
     navigationController.modalPresentationStyle = .pageSheet

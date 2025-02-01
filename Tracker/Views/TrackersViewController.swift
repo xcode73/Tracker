@@ -9,10 +9,10 @@ import UIKit
 
 final class TrackersViewController: UIViewController {
     // MARK: - Properties
+    private let dataStore: DataStoreProtocol
+    private var trackerStore: TrackerStoreProtocol
+    private var selectedFilter: Filter
     private var placeholderState: PlaceholderState = .trackers
-    private let dataStore = Constants.appDelegate().trackerDataStore
-
-    private var trackerStore: TrackerStoreProtocol?
 
     private lazy var scheduleStore: ScheduleStoreProtocol? = {
         do {
@@ -20,18 +20,19 @@ final class TrackersViewController: UIViewController {
             return scheduleStore
         } catch {
             placeholderState = .search
-            showStoreErrorAlert()
+            showStoreErrorAlert(NSLocalizedString("alertMessageScheduleStoreInitError",
+                                                  comment: ""))
             return nil
         }
     }()
 
-    private lazy var recordStore: TrackerRecordStoreProtocol? = {
+    private lazy var recordStore: RecordStoreProtocol? = {
         do {
-            try recordStore = TrackerRecordStore(dataStore: dataStore)
+            try recordStore = RecordStore(dataStore: dataStore)
             return recordStore
         } catch {
             placeholderState = .search
-            showStoreErrorAlert()
+            showStoreErrorAlert(NSLocalizedString("alertMessageRecordStoreInitError", comment: ""))
             return nil
         }
     }()
@@ -129,29 +130,32 @@ final class TrackersViewController: UIViewController {
         return view
     }()
 
+    init(
+        dataStore: DataStoreProtocol,
+        trackerStore: TrackerStoreProtocol,
+        selectedFilter: Filter
+    ) {
+        self.dataStore = dataStore
+        self.trackerStore = trackerStore
+        self.selectedFilter = selectedFilter
+
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
 
         setupUI()
-        updateStore()
-    }
 
-    // MARK: - Setup Store
-    func updateStore(
-        searchText: String? = nil
-    ) {
-        do {
-            try trackerStore = TrackerStore(
-                dataStore: dataStore,
-                delegate: self,
-                date: datePicker.date,
-                selectedFilter: UserDefaults.standard.loadFilter(),
-                searchText: searchText
-            )
-        } catch {
-            showStoreErrorAlert()
-        }
+        trackerStore.updateFetchRequest(
+            with: selectedFilter,
+            for: datePicker.date.truncated
+        )
     }
 
     // MARK: - Update View
@@ -193,21 +197,11 @@ final class TrackersViewController: UIViewController {
 
     // MARK: - Show Tracker Detail
     private func showTrackerDetail(indexPath: IndexPath) {
-        guard let trackerDetail = trackerStore?.trackerObject(at: indexPath) else { return }
-
-        let schedule = scheduleStore?.getSchedule(for: trackerDetail)
-        let tracker = TrackerUI(id: trackerDetail.id,
-                              categoryTitle: trackerDetail.categoryTitle,
-                              title: trackerDetail.title,
-                              color: trackerDetail.color,
-                              emoji: trackerDetail.emoji,
-                              schedule: schedule,
-                              date: trackerDetail.date)
+        guard let (category, tracker) = trackerStore.fetchTrackerWithCategory(at: indexPath) else { return }
 
         let counterTitle = updateCounterTitle(for: tracker.id)
-        let viewController = TrackerTableViewController(tableType: .edit(tracker, counterTitle),
-                                            trackerDataStore: dataStore,
-                                            indexPath: indexPath)
+        let viewController = TrackerTableViewController(tableType: .edit(tracker, category, counterTitle),
+                                                        dataStore: dataStore)
         viewController.delegate = self
         let navigationController = UINavigationController(
             rootViewController: viewController
@@ -220,7 +214,11 @@ final class TrackersViewController: UIViewController {
     // MARK: - Delete Tracker
     private func deleteTracker(at indexPaths: [IndexPath]) {
         let indexPath = indexPaths[0]
-        try? trackerStore?.deleteTracker(at: indexPath)
+        do {
+            try trackerStore.deleteTracker(at: indexPath)
+        } catch {
+            showStoreErrorAlert("TrackerStore")
+        }
         placeholderState = .trackers
     }
 
@@ -241,10 +239,10 @@ final class TrackersViewController: UIViewController {
         AlertPresenter.showAlert(on: self, model: model)
     }
 
-    func showStoreErrorAlert() {
+    func showStoreErrorAlert(_ message: String) {
         let model = AlertModel(
             title: NSLocalizedString("alertTitleStoreError", comment: ""),
-            message: NSLocalizedString("alertMessageStoreError", comment: ""),
+            message: message,
             buttons: [.cancelButton],
             identifier: "Tracker Store Error Alert",
             completion: nil
@@ -256,8 +254,8 @@ final class TrackersViewController: UIViewController {
     // MARK: - Actions
     @objc
     private func didTapAddButton() {
-        let viewController = TrackerTypeViewController(trackerDataStore: dataStore,
-                                           currentDate: datePicker.date)
+        let viewController = TrackerTypeViewController(dataStore: dataStore,
+                                                       currentDate: datePicker.date.truncated)
         viewController.delegate = self
         let navigationController = UINavigationController( rootViewController: viewController )
         navigationController.modalPresentationStyle = .pageSheet
@@ -267,9 +265,12 @@ final class TrackersViewController: UIViewController {
 
     @objc
     private func didSelectDate(_ sender: UIDatePicker) {
-        updateStore()
+        trackerStore.updateFetchRequest(
+            with: selectedFilter,
+            for: sender.date.truncated
+        )
         placeholderState = .trackers
-        collectionView.reloadData()
+//        collectionView.reloadData()
 
         self.dismiss(animated: true)
     }
@@ -277,7 +278,7 @@ final class TrackersViewController: UIViewController {
     @objc
     private func didTapFiltersButton() {
         let viewController = FiltersViewController()
-        let viewModel = FiltersViewModel(selectedFilter: UserDefaults.standard.loadFilter())
+        let viewModel = FiltersViewModel(selectedFilter: selectedFilter)
         viewController.initialize(viewModel: viewModel)
         viewController.delegate = self
         let navigationController = UINavigationController( rootViewController: viewController )
@@ -324,7 +325,7 @@ final class TrackersViewController: UIViewController {
 // MARK: - UICollectionViewDataSource
 extension TrackersViewController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        let numberOfSections = trackerStore?.numberOfSections ?? 0
+        let numberOfSections = trackerStore.numberOfSections
 
         updatePlaceholderState(placeholderState: placeholderState)
 
@@ -339,12 +340,12 @@ extension TrackersViewController: UICollectionViewDataSource {
             filtersButton.isHidden = false
         }
 
-        return trackerStore?.numberOfSections ?? 0
-     }
+        return numberOfSections
+    }
 
     func collectionView(_ collectionView: UICollectionView,
                         numberOfItemsInSection section: Int) -> Int {
-        trackerStore?.numberOfItemsInSection(section) ?? 0
+        trackerStore.numberOfItemsInSection(section)
     }
 
     func collectionView(_ collectionView: UICollectionView,
@@ -353,14 +354,13 @@ extension TrackersViewController: UICollectionViewDataSource {
             let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: TrackerCollectionViewCell.reuseIdentifier,
                 for: indexPath
-            ) as? TrackerCollectionViewCell,
-            let tracker = trackerStore?.trackerObject(at: indexPath),
-            let truncatedDate = datePicker.date.truncated
+            ) as? TrackerCollectionViewCell
         else {
             return UICollectionViewCell()
         }
 
-        let trackerRecord = recordStore?.recordObject(for: tracker.id, date: truncatedDate)
+        let tracker = trackerStore.fetchTracker(at: indexPath)
+        let trackerRecord = recordStore?.recordObject(for: tracker.id, date: datePicker.date.truncated)
 
         cell.delegate = self
         cell.configure(
@@ -376,7 +376,7 @@ extension TrackersViewController: UICollectionViewDataSource {
                         viewForSupplementaryElementOfKind kind: String,
                         at indexPath: IndexPath) -> UICollectionReusableView {
         let section = indexPath.section
-        guard let title = trackerStore?.sectionTitle(at: section) else { return UICollectionReusableView() }
+        guard let title = trackerStore.sectionTitle(at: section) else { return UICollectionReusableView() }
 
         var id: String
         switch kind {
@@ -447,7 +447,7 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
                         layout collectionViewLayout: UICollectionViewLayout,
                         referenceSizeForHeaderInSection section: Int) -> CGSize {
         let headerView = TrackerHeaderReusableView(frame: .zero)
-        guard let categoryTitle = trackerStore?.sectionTitle(at: section) else { return .zero }
+        guard let categoryTitle = trackerStore.sectionTitle(at: section) else { return .zero }
 
         headerView.configure(with: categoryTitle)
 
@@ -478,8 +478,8 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
                 },
                 UIAction(title: NSLocalizedString("buttonDelete", comment: ""),
                          attributes: .destructive) { [weak self] _ in
-                    self?.showDeleteTrackerAlert(for: indexPaths)
-                }
+                             self?.showDeleteTrackerAlert(for: indexPaths)
+                         }
             ])
         })
     }
@@ -502,7 +502,6 @@ extension TrackersViewController: TrackerCellDelegate {
     ) {
         guard
             let tracker = tracker,
-            let truncatedDate = datePicker.date.truncated,
             datePicker.date <= Date()
         else {
             return
@@ -511,7 +510,7 @@ extension TrackersViewController: TrackerCellDelegate {
         if let record {
             try? recordStore?.deleteRecord(record)
         } else {
-            let newRecord = RecordUI(trackerId: tracker.id, date: truncatedDate)
+            let newRecord = RecordUI(trackerId: tracker.id, date: datePicker.date.truncated)
             try? recordStore?.addRecord(newRecord)
         }
     }
@@ -520,29 +519,18 @@ extension TrackersViewController: TrackerCellDelegate {
 // MARK: - TrackerTableViewControllerDelegate
 extension TrackersViewController: TrackerTableViewControllerDelegate, TrackerTypeViewControllerDelegate {
     func cancelButtonTapped() {
-        try? trackerStore?.refresh()
         dismiss(animated: true)
     }
 
-    func createTracker(tracker: TrackerUI) {
-        try? trackerStore?.addTracker(tracker)
-        if tracker.schedule != nil {
-            try? scheduleStore?.addSchedule(to: tracker)
-        }
+    func saveTracker(trackerUI: TrackerUI, categoryUI: CategoryUI) {
         placeholderState = .trackers
         dismiss(animated: true)
-    }
 
-    func updateTracker(tracker: TrackerUI, at indexPath: IndexPath) {
-        try? trackerStore?.refresh()
-        try? trackerStore?.updateTracker(tracker: tracker, at: indexPath)
-        if tracker.schedule != nil {
-            try? scheduleStore?.deleteSchedule(for: tracker)
-            try? scheduleStore?.addSchedule(to: tracker)
+        do {
+            try trackerStore.saveTracker(from: trackerUI, categoryUI: categoryUI)
+        } catch {
+            showStoreErrorAlert(error.localizedDescription)
         }
-
-        collectionView.reloadData()
-        dismiss(animated: true)
     }
 }
 
@@ -552,14 +540,12 @@ extension TrackersViewController: UISearchResultsUpdating {
         guard let searchText = searchController.searchBar.text else { return }
 
         if searchText.isEmpty {
-            updateStore()
+            trackerStore.updateFetchRequest(with: selectedFilter, for: datePicker.date.truncated)
             placeholderState = .trackers
         } else {
-            updateStore(searchText: searchText)
+            trackerStore.updateFetchRequest(with: searchText, for: datePicker.date.truncated)
             placeholderState = .search
         }
-
-        collectionView.reloadData()
     }
 }
 
@@ -567,6 +553,7 @@ extension TrackersViewController: UISearchResultsUpdating {
 extension TrackersViewController: FiltersViewControllerDelegate {
     func didSelectFilter(filter: Filter) {
         UserDefaults.standard.saveFilter(filter)
+        selectedFilter = filter
 
         switch filter {
         case .all:
@@ -578,8 +565,7 @@ extension TrackersViewController: FiltersViewControllerDelegate {
             placeholderState = .search
         }
 
-        updateStore()
-        collectionView.reloadData()
+        trackerStore.updateFetchRequest(with: filter, for: datePicker.date.truncated)
         dismiss(animated: true)
     }
 }
@@ -589,33 +575,38 @@ extension TrackersViewController: TrackerStoreDelegate {
     func didUpdate(_ updates: [TrackerStoreUpdate]) {
         var movedToIndexPaths = [IndexPath]()
 
-        collectionView.performBatchUpdates({
-            for update in updates {
-                switch update {
-                case let .section(sectionUpdate):
-                    switch sectionUpdate {
-                    case let .inserted(index):
-                        collectionView.insertSections([index])
-                    case let .deleted(index):
-                        collectionView.deleteSections([index])
-                    }
-                case let .object(objectUpdate):
-                    switch objectUpdate {
-                    case let .inserted(at: indexPath):
-                        collectionView.insertItems(at: [indexPath])
-                    case let .deleted(from: indexPath):
-                        collectionView.deleteItems(at: [indexPath])
-                    case let .updated(at: indexPath):
-                        collectionView.reloadItems(at: [indexPath])
-                    case let .moved(from: source, to: target):
-                        collectionView.moveItem(at: source, to: target)
-                        movedToIndexPaths.append(target)
+        if updates.isEmpty {
+            collectionView.reloadData()
+        } else {
+            collectionView.performBatchUpdates({
+                for update in updates {
+                    switch update {
+                    case let .section(sectionUpdate):
+                        switch sectionUpdate {
+                        case let .inserted(index):
+                            collectionView.insertSections([index])
+                        case let .deleted(index):
+                            collectionView.deleteSections([index])
+                        }
+                    case let .object(objectUpdate):
+                        switch objectUpdate {
+                        case let .inserted(at: indexPath):
+                            collectionView.insertItems(at: [indexPath])
+                        case let .deleted(from: indexPath):
+                            collectionView.deleteItems(at: [indexPath])
+                        case let .updated(at: indexPath):
+                            collectionView.reloadItems(at: [indexPath])
+                        case let .moved(from: source, to: target):
+                            collectionView.moveItem(at: source, to: target)
+                            movedToIndexPaths.append(target)
+                        }
                     }
                 }
-            }
-        }, completion: { _ in
-            self.collectionView.reloadItems(at: movedToIndexPaths)
-        })
+            }, completion: { _ in
+                self.collectionView.reloadItems(at: movedToIndexPaths)
+                movedToIndexPaths.removeAll()
+            })
+        }
     }
 }
 

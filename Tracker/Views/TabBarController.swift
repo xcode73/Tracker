@@ -8,6 +8,10 @@
 import UIKit
 
 final class TabBarController: UITabBarController {
+    private let dataStore = Constants.appDelegate().trackerDataStore
+    private var selectedFilter: Filter = UserDefaults.standard.loadFilter()
+    private var trackerStore: TrackerStore?
+
     // MARK: - UI Components
     private lazy var trackersTabBarItem: UITabBarItem = {
         let view = UITabBarItem()
@@ -35,8 +39,18 @@ final class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        setupTrackerStore()
         setupTabBar()
         setupTabs()
+    }
+
+    // MARK: - Создание TrackerStore
+    private func setupTrackerStore() {
+        do {
+            trackerStore = try TrackerStore(dataStore: dataStore, selectedFilter: selectedFilter)
+        } catch {
+            showStoreErrorAlert(NSLocalizedString("alertMessageTrackerStoreInitError", comment: ""))
+        }
     }
 
     private func setupTabBar() {
@@ -51,15 +65,21 @@ final class TabBarController: UITabBarController {
     }
 
     private func setupTabs() {
+        guard let trackerStore else { return }
+
         // Trackers Tab
-        let trackersViewController = TrackersViewController()
+        let trackersViewController = TrackersViewController(
+            dataStore: dataStore,
+            trackerStore: trackerStore,
+            selectedFilter: selectedFilter
+        )
         trackersViewController.title = NSLocalizedString("vcTitleTrackers", comment: "")
         let trackerNavigationController = UINavigationController(rootViewController: trackersViewController)
 
         trackerNavigationController.navigationBar.prefersLargeTitles = true
         trackerNavigationController.navigationItem.largeTitleDisplayMode = .always
-
         trackersViewController.tabBarItem = trackersTabBarItem
+        trackerStore.delegate = trackersViewController
 
         // Statistic Tab
         let statisticViewController = StatisticViewController()
@@ -69,6 +89,18 @@ final class TabBarController: UITabBarController {
         statNavigationController.tabBarItem = statisticsTabBarItem
 
         self.viewControllers = [trackerNavigationController, statNavigationController]
+    }
+
+    func showStoreErrorAlert(_ message: String) {
+        let model = AlertModel(
+            title: NSLocalizedString("alertTitleStoreError", comment: ""),
+            message: message,
+            buttons: [.cancelButton],
+            identifier: "Tracker Store Error Alert",
+            completion: nil
+        )
+
+        AlertPresenter.showAlert(on: self, model: model)
     }
 }
 

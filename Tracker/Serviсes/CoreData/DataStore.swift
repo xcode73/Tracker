@@ -3,61 +3,111 @@
 //  Tracker
 //
 //  Created by Nikolai Eremenko on 22.11.2024.
+//  Description: This file contains the DataStore class, which handles low-level tasks
+//               for working with the NSManagedObjectContext context, such as creating a context,
+//               saving and deleting records in the context
 //
 
 import CoreData
 
-protocol TrackerDataStore {
+protocol DataStoreProtocol {
     var managedObjectContext: NSManagedObjectContext? { get }
-    func addTracker(tracker: TrackerUI, category: Category) throws
-    func addCategory(category: CategoryUI) throws
     func saveContext() throws
-    func refresh() throws
     func deleteItem(_ item: NSManagedObject) throws
+}
+
+enum DataStoreError: Error {
+    case modelNotFound
+    case failedToLoadPersistentContainer(Error)
+    case unexpectedNilResult
+    case failedToSave(Error)
+    case dataCorruption
+    case delegateNotFound
+
+    var userFriendlyMessage: String {
+        switch self {
+        case .failedToSave:
+            return "Не удалось сохранить данные. Попробуйте еще раз."
+        case .unexpectedNilResult:
+            return "Внутренняя ошибка. Перезапустите приложение."
+        case .dataCorruption:
+            return "Данные повреждены. Попробуйте переустановить приложение."
+        case .delegateNotFound, .failedToLoadPersistentContainer, .modelNotFound:
+            return "Не удалось получить данные. Попробуйте еще раз."
+        }
+    }
 }
 
 final class DataStore {
     private let modelName = "Tracker"
-    private let storeURL = NSPersistentContainer
-                                .defaultDirectoryURL()
-                                .appendingPathComponent("data-store.sqlite")
-
+    private static let storeURL: URL = {
+        NSPersistentContainer.defaultDirectoryURL().appendingPathComponent("data-store.sqlite")
+    }()
     private let container: NSPersistentContainer
     private let context: NSManagedObjectContext
-
-    enum StoreError: Error {
-        case modelNotFound
-        case failedToLoadPersistentContainer(Error)
-    }
 
     init() throws {
         guard let modelUrl = Bundle(for: DataStore.self).url(forResource: modelName, withExtension: "momd"),
               let model = NSManagedObjectModel(contentsOf: modelUrl)
         else {
-            throw StoreError.modelNotFound
+            throw DataStoreError.modelNotFound
         }
 
         do {
-            container = try NSPersistentContainer.load(name: modelName,
-                                                       model: model,
-                                                       url: storeURL)
+            container = try NSPersistentContainer.load(
+                name: modelName,
+                model: model,
+                url: DataStore.storeURL
+            )
             context = container.newBackgroundContext()
         } catch {
-            throw StoreError.failedToLoadPersistentContainer(error)
+            throw DataStoreError.failedToLoadPersistentContainer(error)
         }
     }
 
-    func performSync<R>(_ action: (NSManagedObjectContext) -> Result<R, Error>) throws -> R {
+    func performSync<R>(_ action: (NSManagedObjectContext) throws -> R) throws -> R {
         let context = self.context
-        var result: Result<R, Error>!
-        context.performAndWait { result = action(context) }
-        return try result.get()
+        var result: R?
+        var caughtError: Error?
+
+        context.performAndWait {
+            do {
+                result = try action(context)
+            } catch {
+                caughtError = error
+            }
+        }
+
+        if let error = caughtError { throw error }
+        guard let value = result else { throw DataStoreError.unexpectedNilResult }
+        return value
+    }
+
+    func performSync(_ action: (NSManagedObjectContext) throws -> Void) throws {
+        let context = self.context
+        var caughtError: Error?
+
+        context.performAndWait {
+            do {
+                try action(context)
+            } catch {
+                caughtError = error
+            }
+        }
+
+        if let error = caughtError { throw error }
     }
 
     private func cleanUpReferencesToPersistentStores() {
-        context.performAndWait {
-            let coordinator = self.container.persistentStoreCoordinator
-            try? coordinator.persistentStores.forEach(coordinator.remove)
+        let coordinator = container.persistentStoreCoordinator
+        DispatchQueue.global(qos: .background).async {
+            for store in coordinator.persistentStores {
+                do {
+                    try coordinator.destroyPersistentStore(at: DataStore.storeURL, ofType: store.type, options: nil)
+                } catch {
+                    print("Failed to destroy persistent store: \(error)")
+                }
+            }
         }
     }
 
@@ -66,60 +116,29 @@ final class DataStore {
     }
 }
 
-// MARK: - TrackerDataStore
-extension DataStore: TrackerDataStore {
+// MARK: - DataStoreProtocol
+extension DataStore: DataStoreProtocol {
     var managedObjectContext: NSManagedObjectContext? {
         context
     }
 
     func saveContext() throws {
-        try performSync { context in
-            Result {
-                try context.save()
+        do {
+            try performSync { context in
+                if context.hasChanges {
+                    context.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+                    try context.save()
+                }
             }
-        }
-    }
-
-    func refresh() throws {
-        try performSync { context in
-            Result {
-                context.refreshAllObjects()
-            }
+        } catch {
+            throw DataStoreError.failedToSave(error)
         }
     }
 
     func deleteItem(_ item: NSManagedObject) throws {
         try performSync { context in
-            Result {
+            if item.managedObjectContext == context {
                 context.delete(item)
-            }
-        }
-    }
-
-    func addTracker(tracker: TrackerUI, category: Category) throws {
-        try performSync { context in
-            Result {
-                context.refreshAllObjects()
-
-                let trackerCoreData = Tracker(context: context)
-                trackerCoreData.trackerId = tracker.id
-                trackerCoreData.title = tracker.title
-                trackerCoreData.emoji = tracker.emoji
-                trackerCoreData.color = tracker.color
-                trackerCoreData.date = tracker.date
-                trackerCoreData.category = category
-
-                try context.save()
-            }
-        }
-    }
-
-    func addCategory(category: CategoryUI) throws {
-        try performSync { context in
-            Result {
-                let trackerCategoryCoreData = Category(context: context)
-                trackerCategoryCoreData.title = category.title
-                try context.save()
             }
         }
     }

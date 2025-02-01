@@ -19,9 +19,9 @@ final class ScheduleStore: NSObject {
     }
 
     private let context: NSManagedObjectContext
-    private let dataStore: TrackerDataStore
+    private let dataStore: DataStoreProtocol
 
-    init(dataStore: TrackerDataStore) throws {
+    init(dataStore: DataStoreProtocol) throws {
         guard
             let context = dataStore.managedObjectContext
         else {

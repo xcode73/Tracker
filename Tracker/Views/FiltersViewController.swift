@@ -21,7 +21,7 @@ class FiltersViewController: UIViewController {
     private lazy var tableView: UITableView = {
         let view = UITableView(frame: view.bounds, style: .insetGrouped)
         view.backgroundColor = .ypWhite
-        view.register(CategoryTableViewCell.self, forCellReuseIdentifier: CategoryTableViewCell.reuseIdentifier)
+        view.register(FiltersTableViewCell.self, forCellReuseIdentifier: FiltersTableViewCell.reuseIdentifier)
         view.separatorStyle = .singleLine
         view.separatorColor = .ypBlack
         view.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
@@ -68,15 +68,14 @@ extension FiltersViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView,
                    cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard
-            let cell = tableView.dequeueReusableCell(withIdentifier: CategoryTableViewCell.reuseIdentifier,
-                                                     for: indexPath) as? CategoryTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: FiltersTableViewCell.reuseIdentifier,
+                                                     for: indexPath) as? FiltersTableViewCell,
+            let filter = viewModel?.getFilter(at: indexPath)
         else {
             return UITableViewCell()
         }
 
-        cell.configure(
-            with: viewModel?.getFilter(at: indexPath).title ?? ""
-        )
+        cell.configure(with: filter)
 
         return cell
     }

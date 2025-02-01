@@ -1,13 +1,13 @@
 //
-//  CategoryTableViewCell.swift
+//  FiltersTableViewCell.swift
 //  Tracker
 //
-//  Created by Nikolai Eremenko on 17.10.2024.
+//  Created by Nikolai Eremenko on 31.01.2025.
 //
 
 import UIKit
 
-final class CategoryTableViewCell: UITableViewCell {
+final class FiltersTableViewCell: UITableViewCell {
     // MARK: - UI Components
     private lazy var horizontalStackView: UIStackView = {
         let view = UIStackView()
@@ -61,8 +61,8 @@ final class CategoryTableViewCell: UITableViewCell {
     }
 
     // MARK: - Config
-    func configure(with categoryUI: CategoryUI ) {
-        titleLabel.text = categoryUI.title
+    func configure(with filter: Filter ) {
+        titleLabel.text = filter.title
     }
 
     func configureSelectedView() -> UIView {
@@ -94,21 +94,19 @@ final class CategoryTableViewCell: UITableViewCell {
     }
 }
 
-//// MARK: - Preview
-// #if DEBUG
-// @available(iOS 17, *)
-// #Preview("Categories") {
-//    let dataStore = Constants.appDelegate().dataStore
-//
-//    let viewModel = CategoriesViewModel(dataStore: dataStore)
-//    let viewController = CategoriesViewController(selectedCategory: nil)
-//    viewController.initialize(viewModel: viewModel)
-//
-//    let navigationController = UINavigationController(
-//        rootViewController: viewController
-//    )
-//    navigationController.modalPresentationStyle = .pageSheet
-//
-//    return navigationController
-// }
-// #endif
+// MARK: - Preview
+#if DEBUG
+@available(iOS 17, *)
+#Preview("Filters") {
+    let viewModel = FiltersViewModel(selectedFilter: nil)
+    let viewController = FiltersViewController()
+    viewController.initialize(viewModel: viewModel)
+
+    let navigationController = UINavigationController(
+        rootViewController: viewController
+    )
+    navigationController.modalPresentationStyle = .pageSheet
+
+    return navigationController
+}
+#endif

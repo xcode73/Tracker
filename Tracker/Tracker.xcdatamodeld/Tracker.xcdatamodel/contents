@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23605" systemVersion="24D60" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
     <entity name="Category" representedClassName="Category" syncable="YES">
+        <attribute name="categoryId" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="title" attributeType="String"/>
         <relationship name="trackers" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Tracker" inverseName="category" inverseEntity="Tracker"/>
     </entity>
@@ -17,6 +18,8 @@
         <attribute name="color" attributeType="String"/>
         <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="emoji" attributeType="String"/>
+        <attribute name="isPinned" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="sectionTitle" attributeType="String"/>
         <attribute name="title" attributeType="String"/>
         <attribute name="trackerId" attributeType="UUID" usesScalarValueType="NO"/>
         <relationship name="category" maxCount="1" deletionRule="Nullify" destinationEntity="Category" inverseName="trackers" inverseEntity="Category"/>

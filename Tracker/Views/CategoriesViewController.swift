@@ -8,7 +8,7 @@
 import UIKit
 
 protocol CategoriesViewControllerDelegate: AnyObject {
-    func didSelectCategory(selectedCategoryTitle: String)
+    func didSelectCategory(_ categoryUI: CategoryUI)
 }
 
 final class CategoriesViewController: UIViewController {
@@ -16,7 +16,7 @@ final class CategoriesViewController: UIViewController {
     weak var delegate: CategoriesViewControllerDelegate?
 
     private var viewModel: CategoriesViewModel?
-    private var selectedCategoryTitle: String?
+    private var selectedCategory: CategoryUI?
 
     // MARK: - UI Components
     private lazy var tableView: UITableView = {
@@ -77,9 +77,9 @@ final class CategoriesViewController: UIViewController {
 
     // MARK: - Init
     init(
-        selectedCategoryTitle: String?
+        selectedCategory: CategoryUI?
     ) {
-        self.selectedCategoryTitle = selectedCategoryTitle
+        self.selectedCategory = selectedCategory
 
         super.init(nibName: nil, bundle: nil)
     }
@@ -109,11 +109,11 @@ final class CategoriesViewController: UIViewController {
         }
 
         viewModel.onErrorStateChange = { [weak self] _ in
-            self?.showStoreErrorAlert()
+            self?.showStoreErrorAlert("")
         }
     }
 
-    private func update(_ updates: [TrackerCategoryStoreUpdate]) {
+    private func update(_ updates: [CategoryStoreUpdate]) {
         var movedToIndexPaths = [IndexPath]()
         var lastIndexPaths = [IndexPath]()
 
@@ -149,8 +149,7 @@ final class CategoriesViewController: UIViewController {
     // MARK: - Context Menu
     private func showCategoryDetail(indexPath: IndexPath) {
         let viewController = CategoryViewController(
-            categoryTitle: viewModel?.getCategoryTitle(at: indexPath),
-            indexPath: indexPath
+            categoryUI: viewModel?.getCategory(at: indexPath)
         )
         viewController.delegate = self
         let navigationController = UINavigationController(
@@ -183,10 +182,10 @@ final class CategoriesViewController: UIViewController {
         AlertPresenter.showAlert(on: self, model: model)
     }
 
-    func showStoreErrorAlert() {
+    func showStoreErrorAlert(_ message: String) {
         let model = AlertModel(
             title: NSLocalizedString("alertTitleStoreError", comment: ""),
-            message: NSLocalizedString("alertMessageStoreError", comment: ""),
+            message: message,
             buttons: [.cancelButton],
             identifier: "Category Store Error Alert",
             completion: nil
@@ -198,7 +197,7 @@ final class CategoriesViewController: UIViewController {
     // MARK: - Actions
     @objc
     private func showCategoryViewController() {
-        let viewController = CategoryViewController(categoryTitle: nil, indexPath: nil)
+        let viewController = CategoryViewController()
         viewController.delegate = self
         let navigationController = UINavigationController(
             rootViewController: viewController
@@ -277,14 +276,12 @@ extension CategoriesViewController: UITableViewDataSource {
         guard
             let cell = tableView.dequeueReusableCell(withIdentifier: CategoryTableViewCell.reuseIdentifier,
                                                      for: indexPath) as? CategoryTableViewCell,
-            let categoryTitle = viewModel?.getCategoryTitle(at: indexPath)
+            let categoryUI = viewModel?.getCategory(at: indexPath)
         else {
             return UITableViewCell()
         }
 
-        cell.configure(
-            with: categoryTitle
-        )
+        cell.configure(with: categoryUI)
 
         return cell
     }
@@ -300,26 +297,22 @@ extension CategoriesViewController: UITableViewDelegate {
                    willDisplay cell: UITableViewCell,
                    forRowAt indexPath: IndexPath) {
         guard
-            let categoryTitle = viewModel?.getCategoryTitle(at: indexPath),
-            let selectedCategoryTitle
+            let category = viewModel?.getCategory(at: indexPath),
+            let selectedCategory
         else {
             return
         }
 
-        if selectedCategoryTitle == categoryTitle {
+        if selectedCategory.id == category.id {
             tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
         }
     }
 
     func tableView(_ tableView: UITableView,
                    didSelectRowAt indexPath: IndexPath) {
-        guard
-            let categoryTitle = viewModel?.getCategoryTitle(at: indexPath)
-        else {
-            return
-        }
+        guard let categoryUI = viewModel?.getCategory(at: indexPath) else { return }
 
-        delegate?.didSelectCategory(selectedCategoryTitle: categoryTitle)
+        delegate?.didSelectCategory(categoryUI)
     }
 
     func tableView(_ tableView: UITableView,
@@ -335,8 +328,8 @@ extension CategoriesViewController: UITableViewDelegate {
                 },
                 UIAction(title: NSLocalizedString("buttonDelete", comment: ""),
                          attributes: .destructive) { [weak self] _ in
-                    self?.showDeleteCategoryAlert(for: indexPath)
-                }
+                             self?.showDeleteCategoryAlert(for: indexPath)
+                         }
             ])
         })
     }
@@ -359,34 +352,32 @@ extension CategoriesViewController: UITableViewDelegate {
 
 // MARK: - CategoryViewControllerDelegate
 extension CategoriesViewController: CategoryViewControllerDelegate {
-    func createCategory(categoryTitle: String) {
-        let category = CategoryUI(title: categoryTitle, trackers: nil)
-
-        viewModel?.addCategory(category: category)
+    func saveCategory(_ categoryUI: CategoryUI) {
         dismiss(animated: true)
-    }
 
-    func editCategory(categoryTitle: String, at indexPath: IndexPath) {
-        viewModel?.updateCategory(categoryTitle: categoryTitle, at: indexPath)
-        dismiss(animated: true)
+        do {
+            try viewModel?.saveCategory(from: categoryUI)
+        } catch {
+            showStoreErrorAlert(error.localizedDescription)
+        }
     }
 }
 
-// MARK: - Preview
-#if DEBUG
-@available(iOS 17, *)
-#Preview("Categories") {
-    let trackerDataStore = Constants.appDelegate().trackerDataStore
-
-    let viewModel = CategoriesViewModel(trackerDataStore: trackerDataStore)
-    let viewController = CategoriesViewController(selectedCategoryTitle: nil)
-    viewController.initialize(viewModel: viewModel)
-
-    let navigationController = UINavigationController(
-        rootViewController: viewController
-    )
-    navigationController.modalPresentationStyle = .pageSheet
-
-    return navigationController
-}
-#endif
+//// MARK: - Preview
+// #if DEBUG
+// @available(iOS 17, *)
+// #Preview("Categories") {
+//    let dataStore = Constants.appDelegate().dataStore
+//
+//    let viewModel = CategoriesViewModel(dataStore: dataStore)
+//    let viewController = CategoriesViewController(selectedCategory: nil)
+//    viewController.initialize(viewModel: viewModel)
+//
+//    let navigationController = UINavigationController(
+//        rootViewController: viewController
+//    )
+//    navigationController.modalPresentationStyle = .pageSheet
+//
+//    return navigationController
+// }
+// #endif

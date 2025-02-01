@@ -8,8 +8,7 @@
 import UIKit
 
 protocol CategoryViewControllerDelegate: AnyObject {
-    func createCategory(categoryTitle: String)
-    func editCategory(categoryTitle: String, at indexPath: IndexPath)
+    func saveCategory(_ categoryUI: CategoryUI)
 }
 
 final class CategoryViewController: UIViewController {
@@ -17,7 +16,7 @@ final class CategoryViewController: UIViewController {
     weak var delegate: CategoryViewControllerDelegate?
     private var sectionItems = [""]
     private var categoryTitle: String?
-    private var indexPath: IndexPath?
+    private var categoryUI: CategoryUI?
 
     private enum LocalConst {
         static let createCategoryViewTitle = NSLocalizedString("vcTitleCategoryAdd", comment: "")
@@ -59,13 +58,13 @@ final class CategoryViewController: UIViewController {
 
     // MARK: - Init
     init(
-        categoryTitle: String?,
-        indexPath: IndexPath?
+        categoryUI: CategoryUI? = nil
     ) {
-        self.categoryTitle = categoryTitle
-        self.indexPath = indexPath
-
         super.init(nibName: nil, bundle: nil)
+
+        guard let categoryUI else { return }
+        self.categoryUI = categoryUI
+        self.categoryTitle = categoryUI.title
     }
 
     required init?(coder: NSCoder) {
@@ -114,11 +113,19 @@ final class CategoryViewController: UIViewController {
     private func didTapSaveCategoryButton() {
         guard let categoryTitle else { return }
 
-        if let indexPath {
-            delegate?.editCategory(categoryTitle: categoryTitle, at: indexPath)
+        let updatedCategoryUI: CategoryUI?
+
+        if let categoryUI {
+            updatedCategoryUI = CategoryUI(categoryID: categoryUI.id,
+                                           title: categoryTitle,
+                                           trackers: categoryUI.trackers)
         } else {
-            delegate?.createCategory(categoryTitle: categoryTitle)
+            updatedCategoryUI = CategoryUI(categoryID: UUID(), title: categoryTitle)
         }
+
+        guard let updatedCategoryUI else { return }
+
+        delegate?.saveCategory(updatedCategoryUI)
     }
 
     @objc
@@ -204,7 +211,6 @@ extension CategoryViewController: CategoryTitleCellDelegate {
                 } completion: { _ in }
             }
             sectionItems = [title]
-
         case 38:
             sectionItems.append(LocalConst.errorCellTitle)
             tableView.performBatchUpdates {
@@ -220,20 +226,9 @@ extension CategoryViewController: CategoryTitleCellDelegate {
 #if DEBUG
 @available(iOS 17, *)
 #Preview("Add Category") {
+    let viewController = CategoryViewController()
     let navigationController = UINavigationController(
-        rootViewController: CategoryViewController(categoryTitle: nil, indexPath: nil)
-    )
-    navigationController.modalPresentationStyle = .pageSheet
-
-    return navigationController
-}
-
-@available(iOS 17, *)
-#Preview("Edit Category") {
-    let categoryTitle = "Foo"
-    let indexPath = IndexPath(row: 0, section: 0)
-    let navigationController = UINavigationController(
-        rootViewController: CategoryViewController(categoryTitle: categoryTitle, indexPath: indexPath)
+        rootViewController: viewController
     )
     navigationController.modalPresentationStyle = .pageSheet
 

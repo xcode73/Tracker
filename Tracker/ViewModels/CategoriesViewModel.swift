@@ -8,52 +8,58 @@
 import Foundation
 
 final class CategoriesViewModel {
-    var onChange: Binding<[TrackerCategoryStoreUpdate]>?
+    var onChange: Binding<[CategoryStoreUpdate]>?
     var onErrorStateChange: Binding<String?>?
 
-    private let trackerDataStore: TrackerDataStore
+    private let dataStore: DataStoreProtocol
 
-    private lazy var trackerCategoryStore: TrackerCategoryStoreProtocol? = {
+    private lazy var categoryStore: CategoryStoreProtocol? = {
         do {
-            try trackerCategoryStore = TrackerCategoryStore(
-                trackerDataStore,
+            try categoryStore = CategoryStore(
+                dataStore,
                 delegate: self
             )
-            return trackerCategoryStore
+            return categoryStore
         } catch {
             onErrorStateChange?("Данные недоступны.")
             return nil
         }
     }()
 
-    init(trackerDataStore: TrackerDataStore) {
-        self.trackerDataStore = trackerDataStore
+    init(dataStore: DataStoreProtocol) {
+        self.dataStore = dataStore
     }
 
     func numberOfRowsInSection(section: Int) -> Int? {
-        trackerCategoryStore?.numberOfRowsInSection(section)
+        categoryStore?.numberOfRowsInSection(section)
     }
 
-    func getCategoryTitle(at indexPath: IndexPath) -> String? {
-        trackerCategoryStore?.categoryTitle(at: indexPath)
+    func getCategory(at indexPath: IndexPath) -> CategoryUI? {
+        categoryStore?.fetchCategory(at: indexPath)
     }
 
-    func addCategory(category: CategoryUI) {
-        try? trackerCategoryStore?.addCategory(category: category)
-    }
-
-    func updateCategory(categoryTitle: String, at indexPath: IndexPath) {
-        try? trackerCategoryStore?.updateCategory(categoryTitle: categoryTitle, at: indexPath)
+    func saveCategory(from categoryUI: CategoryUI) throws {
+        do {
+            try categoryStore?.saveCategory(from: categoryUI)
+        } catch {
+            throw NSError(
+                domain: "AppError",
+                code: 404,
+                userInfo: [
+                    NSLocalizedDescriptionKey: NSLocalizedString("alertMessageTrackerStoreTracker", comment: "")
+                ]
+            )
+        }
     }
 
     func deleteCategory(at indexPath: IndexPath) {
-        try? trackerCategoryStore?.deleteCategory(at: indexPath)
+        try? categoryStore?.deleteCategory(at: indexPath)
     }
 }
 
-// MARK: - TrackerCategoryStoreDelegate
-extension CategoriesViewModel: TrackerCategoryStoreDelegate {
-    func didUpdate(_ updates: [TrackerCategoryStoreUpdate]) {
+// MARK: - CategoryStoreDelegate
+extension CategoriesViewModel: CategoryStoreDelegate {
+    func didUpdate(_ updates: [CategoryStoreUpdate]) {
         onChange?(updates)
     }
 }

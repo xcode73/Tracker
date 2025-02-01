@@ -9,14 +9,13 @@ import UIKit
 
 protocol TrackerTypeViewControllerDelegate: AnyObject {
     func cancelButtonTapped()
-    func createTracker(tracker: TrackerUI)
-    func updateTracker(tracker: TrackerUI, at indexPath: IndexPath)
+    func saveTracker(trackerUI: TrackerUI, categoryUI: CategoryUI)
 }
 
 final class TrackerTypeViewController: UIViewController {
     weak var delegate: TrackerTypeViewControllerDelegate?
     private var currentDate: Date
-    private let trackerDataStore: TrackerDataStore
+    private let dataStore: DataStoreProtocol
 
     // MARK: - UI Components
     private lazy var buttonsStackView: UIStackView = {
@@ -51,11 +50,11 @@ final class TrackerTypeViewController: UIViewController {
 
     // MARK: - Init
     init(
-        trackerDataStore: TrackerDataStore,
+        dataStore: DataStoreProtocol,
         currentDate: Date
     ) {
         self.currentDate = currentDate
-        self.trackerDataStore = trackerDataStore
+        self.dataStore = dataStore
 
         super.init(nibName: nil, bundle: nil)
     }
@@ -75,8 +74,7 @@ final class TrackerTypeViewController: UIViewController {
     @objc
     private func didTapRegularButton() {
         let viewController = TrackerTableViewController(tableType: .regular,
-                                            trackerDataStore: trackerDataStore,
-                                            indexPath: nil)
+                                                        dataStore: dataStore)
         viewController.delegate = self
         let navigationController = UINavigationController(
             rootViewController: viewController
@@ -88,8 +86,7 @@ final class TrackerTypeViewController: UIViewController {
     @objc
     private func didTapNonRegularButton() {
         let viewController = TrackerTableViewController(tableType: .special(currentDate),
-                                            trackerDataStore: trackerDataStore,
-                                            indexPath: nil)
+                                                        dataStore: dataStore)
         viewController.delegate = self
         let navigationController = UINavigationController(
             rootViewController: viewController
@@ -123,13 +120,8 @@ extension TrackerTypeViewController: TrackerTableViewControllerDelegate {
         dismiss(animated: true)
     }
 
-    func createTracker(tracker: TrackerUI) {
-        delegate?.createTracker(tracker: tracker)
-        dismiss(animated: true)
-    }
-
-    func updateTracker(tracker: TrackerUI, at indexPath: IndexPath) {
-        delegate?.updateTracker(tracker: tracker, at: indexPath)
+    func saveTracker(trackerUI: TrackerUI, categoryUI: CategoryUI) {
+        delegate?.saveTracker(trackerUI: trackerUI, categoryUI: categoryUI)
         dismiss(animated: true)
     }
 }
@@ -139,7 +131,7 @@ extension TrackerTypeViewController: TrackerTableViewControllerDelegate {
 @available(iOS 17, *)
 #Preview() {
     let trackerDataStore = Constants.appDelegate().trackerDataStore
-    let viewController = TrackerTypeViewController(trackerDataStore: trackerDataStore, currentDate: Date())
+    let viewController = TrackerTypeViewController(dataStore: trackerDataStore, currentDate: Date())
     let navigationController = UINavigationController(rootViewController: viewController)
     navigationController.modalPresentationStyle = .pageSheet
 

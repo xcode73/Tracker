@@ -9,27 +9,27 @@ import Foundation
 
 struct TrackerUI: Identifiable, Equatable {
     let id: UUID
-    let categoryTitle: String
     let title: String
     let color: String
     let emoji: String
+    let isPinned: Bool
     let schedule: [WeekDay]?
     let date: Date?
 
     init(
         id: UUID,
-        categoryTitle: String,
         title: String,
         color: String,
         emoji: String,
+        isPinned: Bool,
         schedule: [WeekDay]?,
         date: Date?
     ) {
         self.id = id
-        self.categoryTitle = categoryTitle
         self.title = title
         self.color = color
         self.emoji = emoji
+        self.isPinned = isPinned
         self.schedule = schedule
         self.date = date
     }
@@ -37,16 +37,16 @@ struct TrackerUI: Identifiable, Equatable {
     init(
         with schedule: [WeekDay],
         id: UUID,
-        categoryTitle: String,
         title: String,
         color: String,
-        emoji: String
+        emoji: String,
+        isPinned: Bool
     ) {
         self.id = id
-        self.categoryTitle = categoryTitle
         self.title = title
         self.color = color
         self.emoji = emoji
+        self.isPinned = isPinned
         self.schedule = schedule
         self.date = nil
     }
@@ -54,17 +54,32 @@ struct TrackerUI: Identifiable, Equatable {
     init(
         with date: Date,
         id: UUID,
-        categoryTitle: String,
         title: String,
         color: String,
-        emoji: String
+        emoji: String,
+        isPinned: Bool
     ) {
         self.id = id
-        self.categoryTitle = categoryTitle
         self.title = title
         self.color = color
         self.emoji = emoji
+        self.isPinned = isPinned
         self.schedule = nil
         self.date = date
+    }
+
+    init(from entity: Tracker) {
+        self.id = entity.trackerId
+        self.title = entity.title
+        self.color = entity.color
+        self.emoji = entity.emoji
+        self.isPinned = entity.isPinned
+        self.date = entity.date
+
+        if let scheduleSet = entity.schedule as? Set<Schedule> {
+            self.schedule = scheduleSet.map { $0.weekDay }
+        } else {
+            self.schedule = nil
+        }
     }
 }

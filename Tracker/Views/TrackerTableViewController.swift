@@ -10,7 +10,7 @@ import UIKit
 enum TrackerTableType {
     case special(Date)
     case regular
-    case edit(TrackerUI, String)
+    case edit(TrackerUI, CategoryUI, String)
 }
 
 enum CellPosition {
@@ -22,8 +22,7 @@ enum CellPosition {
 
 protocol TrackerTableViewControllerDelegate: AnyObject {
     func cancelButtonTapped()
-    func createTracker(tracker: TrackerUI)
-    func updateTracker(tracker: TrackerUI, at indexPath: IndexPath)
+    func saveTracker(trackerUI: TrackerUI, categoryUI: CategoryUI)
 }
 
 final class TrackerTableViewController: UITableViewController {
@@ -31,15 +30,16 @@ final class TrackerTableViewController: UITableViewController {
     weak var delegate: TrackerTableViewControllerDelegate?
 
     private var tableType: TrackerTableType
-    private var indexPath: IndexPath?
-    private var trackerDataStore: TrackerDataStore
-
+    private var dataStore: DataStoreProtocol
     private var titleSectionItems = [""]
     private var tableSectionItems = [String]()
 
     private var tracker: TrackerUI?
-    private var newTracker = NewTracker()
+    private var category: CategoryUI?
+    private var newTracker = NewTrackerUI()
+    private var newCategory = NewCategoryUI()
     private var updatedTracker: TrackerUI?
+    private var updatedCategory: CategoryUI?
 
     private let weekDays = Constants.weekDays
     private let emojis = Constants.emojis
@@ -65,12 +65,10 @@ final class TrackerTableViewController: UITableViewController {
     // MARK: - Init
     init(
         tableType: TrackerTableType,
-        trackerDataStore: TrackerDataStore,
-        indexPath: IndexPath?
+        dataStore: DataStoreProtocol
     ) {
         self.tableType = tableType
-        self.trackerDataStore = trackerDataStore
-        self.indexPath = indexPath
+        self.dataStore = dataStore
 
         super.init(nibName: nil, bundle: nil)
     }
@@ -105,13 +103,16 @@ final class TrackerTableViewController: UITableViewController {
             tableSectionItems = [NSLocalizedString("rowTitleCategory", comment: ""),
                                  NSLocalizedString("rowTitleSchedule", comment: "")]
             daysCompletedLabel.frame.size.height = 0
-        case .edit(let tracker, let daysCompleted):
+        case .edit(let tracker, let category, let daysCompleted):
             tableView.tableHeaderView = daysCompletedLabel
             daysCompletedLabel.frame.size.height = 70
             daysCompletedLabel.text = daysCompleted
 
             self.tracker = tracker
-            newTracker = NewTracker(from: tracker)
+            self.category = category
+
+            newTracker = NewTrackerUI(from: tracker)
+            newCategory = NewCategoryUI(from: category)
 
             if tracker.schedule != nil {
                 title = NSLocalizedString("vcTitleEditRegularTracker", comment: "")
@@ -127,59 +128,69 @@ final class TrackerTableViewController: UITableViewController {
     }
 
     private func updateDoneButtonState() {
-        if let tracker {
+        if let tracker, let category {
             if let newTrackerTitle = newTracker.title,
-               let newTrackerCategoryTitle = newTracker.categoryTitle,
                let newTrackerColor = newTracker.color,
                let newTrackerEmoji = newTracker.emoji,
+               let newCategoryTitle = newCategory.title,
                newTracker.schedule != nil || newTracker.date != nil {
 
                 if let schedule = newTracker.schedule {
                     updatedTracker = TrackerUI(with: schedule,
-                                             id: tracker.id,
-                                             categoryTitle: newTrackerCategoryTitle,
-                                             title: newTrackerTitle,
-                                             color: newTrackerColor,
-                                             emoji: newTrackerEmoji)
+                                               id: tracker.id,
+                                               title: newTrackerTitle,
+                                               color: newTrackerColor,
+                                               emoji: newTrackerEmoji,
+                                               isPinned: tracker.isPinned)
+                    updatedCategory = CategoryUI(categoryID: category.id, title: newCategoryTitle)
                 }
 
                 if let date = newTracker.date?.truncated {
                     updatedTracker = TrackerUI(with: date,
-                                             id: tracker.id,
-                                             categoryTitle: newTrackerCategoryTitle,
-                                             title: newTrackerTitle,
-                                             color: newTrackerColor,
-                                             emoji: newTrackerEmoji)
+                                               id: tracker.id,
+                                               title: newTrackerTitle,
+                                               color: newTrackerColor,
+                                               emoji: newTrackerEmoji,
+                                               isPinned: tracker.isPinned)
+                    updatedCategory = CategoryUI(categoryID: category.id, title: newCategoryTitle)
                 }
 
-                if updatedTracker != tracker {
+                if updatedTracker != tracker || updatedCategory != category {
                     isDoneButtonEnabled = true
                     return
                 }
             }
         } else {
             if let newTrackerTitle = newTracker.title,
-               let newTrackerCategoryTitle = newTracker.categoryTitle,
                let newTrackerColor = newTracker.color,
                let newTrackerEmoji = newTracker.emoji,
+               let newCategoryTitle = newCategory.title,
+               let newCategoryId = newCategory.categoryId,
+               let newCategoryTrackers = newCategory.trackers,
                newTracker.schedule != nil || newTracker.date != nil {
 
                 if let schedule = newTracker.schedule {
                     updatedTracker = TrackerUI(with: schedule,
-                                             id: UUID(),
-                                             categoryTitle: newTrackerCategoryTitle,
-                                             title: newTrackerTitle,
-                                             color: newTrackerColor,
-                                             emoji: newTrackerEmoji)
+                                               id: UUID(),
+                                               title: newTrackerTitle,
+                                               color: newTrackerColor,
+                                               emoji: newTrackerEmoji,
+                                               isPinned: false)
+                    updatedCategory = CategoryUI(categoryID: newCategoryId,
+                                                 title: newCategoryTitle,
+                                                 trackers: newCategoryTrackers)
                 }
 
                 if let date = newTracker.date?.truncated {
                     updatedTracker = TrackerUI(with: date,
-                                             id: UUID(),
-                                             categoryTitle: newTrackerCategoryTitle,
-                                             title: newTrackerTitle,
-                                             color: newTrackerColor,
-                                             emoji: newTrackerEmoji)
+                                               id: UUID(),
+                                               title: newTrackerTitle,
+                                               color: newTrackerColor,
+                                               emoji: newTrackerEmoji,
+                                               isPinned: false)
+                    updatedCategory = CategoryUI(categoryID: newCategoryId,
+                                                 title: newCategoryTitle,
+                                                 trackers: newCategoryTrackers)
                 }
 
                 isDoneButtonEnabled = true
@@ -257,7 +268,7 @@ final class TrackerTableViewController: UITableViewController {
             cell.configure(
                 itemTitle: tableSectionItems[indexPath.row],
                 cellPosition: cellPosition,
-                categoryTitle: newTracker.categoryTitle,
+                categoryTitle: newCategory.title,
                 selectedWeekDays: newTracker.schedule,
                 indexPath: indexPath
             )
@@ -315,8 +326,8 @@ final class TrackerTableViewController: UITableViewController {
         if indexPath.section == 1 {
             switch indexPath.row {
             case 0:
-                let viewController = CategoriesViewController(selectedCategoryTitle: newTracker.categoryTitle)
-                let viewModel = CategoriesViewModel(trackerDataStore: trackerDataStore)
+                let viewController = CategoriesViewController(selectedCategory: category)
+                let viewModel = CategoriesViewModel(dataStore: dataStore)
                 viewController.initialize(viewModel: viewModel)
                 viewController.delegate = self
                 let navigationController = UINavigationController(
@@ -420,8 +431,8 @@ extension TrackerTableViewController: TitleCellDelegate {
 
 // MARK: - CategoriesViewControllerDelegate
 extension TrackerTableViewController: CategoriesViewControllerDelegate {
-    func didSelectCategory(selectedCategoryTitle: String) {
-        newTracker.categoryTitle = selectedCategoryTitle
+    func didSelectCategory(_ categoryUI: CategoryUI) {
+        newCategory = NewCategoryUI(from: categoryUI)
 
         tableView.reloadData()
         updateDoneButtonState()
@@ -467,13 +478,9 @@ extension TrackerTableViewController: ButtonsCellDelegate {
     }
 
     func didTapDoneButton() {
-        guard let updatedTracker else { return }
+        guard let updatedTracker, let updatedCategory else { return }
 
-        if let indexPath {
-            delegate?.updateTracker(tracker: updatedTracker, at: indexPath)
-        } else {
-            delegate?.createTracker(tracker: updatedTracker)
-        }
+        delegate?.saveTracker(trackerUI: updatedTracker, categoryUI: updatedCategory)
     }
 }
 
@@ -481,11 +488,10 @@ extension TrackerTableViewController: ButtonsCellDelegate {
 #if DEBUG
 @available(iOS 17, *)
 #Preview("Special") {
-    let trackerDataStore = Constants.appDelegate().trackerDataStore
+    let dataStore = Constants.appDelegate().trackerDataStore
     let viewController = TrackerTableViewController(
         tableType: .special(Date()),
-        trackerDataStore: trackerDataStore,
-        indexPath: nil
+        dataStore: dataStore
     )
     let navigationController = UINavigationController(rootViewController: viewController)
     navigationController.modalPresentationStyle = .pageSheet
@@ -495,11 +501,10 @@ extension TrackerTableViewController: ButtonsCellDelegate {
 
 @available(iOS 17, *)
 #Preview("Regular") {
-    let trackerDataStore = Constants.appDelegate().trackerDataStore
+    let dataStore = Constants.appDelegate().trackerDataStore
     let viewController = TrackerTableViewController(
         tableType: .regular,
-        trackerDataStore: trackerDataStore,
-        indexPath: nil
+        dataStore: dataStore
     )
     let navigationController = UINavigationController(rootViewController: viewController)
     navigationController.modalPresentationStyle = .pageSheet

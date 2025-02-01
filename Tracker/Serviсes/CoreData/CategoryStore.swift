@@ -1,5 +1,5 @@
 //
-//  TrackerCategoryStore.swift
+//  CategoryStore.swift
 //  Tracker
 //
 //  Created by Nikolai Eremenko on 22.11.2024.
@@ -7,36 +7,35 @@
 
 import CoreData
 
-enum TrackerCategoryStoreUpdate: Hashable {
+enum CategoryStoreUpdate: Hashable {
     case inserted(at: IndexPath)
     case deleted(from: IndexPath)
     case updated(at: IndexPath)
     case moved(from: IndexPath, to: IndexPath)
 }
 
-protocol TrackerCategoryStoreDelegate: AnyObject {
-    func didUpdate(_ update: [TrackerCategoryStoreUpdate])
+protocol CategoryStoreDelegate: AnyObject {
+    func didUpdate(_ update: [CategoryStoreUpdate])
 }
 
-protocol TrackerCategoryStoreProtocol {
+protocol CategoryStoreProtocol {
     var numberOfSections: Int { get }
     func numberOfRowsInSection(_ section: Int) -> Int
-    func categoryTitle(at indexPath: IndexPath) -> (String)?
-    func addCategory(category: CategoryUI) throws
-    func updateCategory(categoryTitle: String, at indexPath: IndexPath) throws
+    func fetchCategory(at indexPath: IndexPath) -> CategoryUI
+    func saveCategory(from categoryUI: CategoryUI) throws
     func deleteCategory(at indexPath: IndexPath) throws
 }
 
-final class TrackerCategoryStore: NSObject {
+final class CategoryStore: NSObject {
     enum CategoriesDataProviderError: Error {
         case failedToInitializeContext
     }
 
-    weak var delegate: TrackerCategoryStoreDelegate?
-    var inProgressChanges: [TrackerCategoryStoreUpdate] = []
+    weak var delegate: CategoryStoreDelegate?
+    var inProgressChanges: [CategoryStoreUpdate] = []
 
     private let context: NSManagedObjectContext
-    private let dataStore: TrackerDataStore
+    private let dataStore: DataStoreProtocol
 
     private lazy var fetchedResultsController: NSFetchedResultsController<Category> = {
         let fetchRequest = NSFetchRequest<Category>(entityName: "Category")
@@ -52,7 +51,7 @@ final class TrackerCategoryStore: NSObject {
         return fetchedResultsController
     }()
 
-    init(_ dataStore: TrackerDataStore, delegate: TrackerCategoryStoreDelegate) throws {
+    init(_ dataStore: DataStoreProtocol, delegate: CategoryStoreDelegate? = nil) throws {
         guard let context = dataStore.managedObjectContext else {
             throw CategoriesDataProviderError.failedToInitializeContext
         }
@@ -60,10 +59,17 @@ final class TrackerCategoryStore: NSObject {
         self.context = context
         self.dataStore = dataStore
     }
+
+    private func findCategory(by id: UUID) throws -> Category? {
+        let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
+        fetchRequest.predicate = PredicateFactory.CategoryPredicate.byId(id)
+
+        return try context.fetch(fetchRequest).first
+    }
 }
 
-// MARK: - TrackerCategoryStoreProtocol
-extension TrackerCategoryStore: TrackerCategoryStoreProtocol {
+// MARK: - CategoryStoreProtocol
+extension CategoryStore: CategoryStoreProtocol {
     var numberOfSections: Int {
         fetchedResultsController.sections?.count ?? 0
     }
@@ -72,19 +78,26 @@ extension TrackerCategoryStore: TrackerCategoryStoreProtocol {
         fetchedResultsController.sections?[section].numberOfObjects ?? 0
     }
 
-    func categoryTitle(at indexPath: IndexPath) -> (String)? {
-        fetchedResultsController.object(at: indexPath).title
-    }
-
-    func addCategory(category: CategoryUI) throws {
-        try? dataStore.addCategory(category: category)
-    }
-
-    func updateCategory(categoryTitle: String, at indexPath: IndexPath) throws {
+    func fetchCategory(at indexPath: IndexPath) -> CategoryUI {
         let category = fetchedResultsController.object(at: indexPath)
-        category.title = categoryTitle
+        return CategoryUI(from: category)
+    }
 
-        try? dataStore.saveContext()
+    func saveCategory(from categoryUI: CategoryUI) throws {
+        do {
+            let category: Category
+
+            if let existingCategory = try findCategory(by: categoryUI.id) {
+                category = existingCategory // Обновляем
+            } else {
+                category = Category(context: context) // Создаем
+            }
+
+            category.update(from: categoryUI, in: context)
+
+            try dataStore.saveContext()
+        } catch {
+        }
     }
 
     func deleteCategory(at indexPath: IndexPath) throws {
@@ -95,7 +108,7 @@ extension TrackerCategoryStore: TrackerCategoryStoreProtocol {
 }
 
 // MARK: - NSFetchedResultsControllerDelegate
-extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
+extension CategoryStore: NSFetchedResultsControllerDelegate {
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         inProgressChanges.removeAll()
     }

@@ -15,7 +15,40 @@ public class Tracker: NSManagedObject, Identifiable {
     @NSManaged public var emoji: String
     @NSManaged public var title: String
     @NSManaged public var trackerId: UUID
+    @NSManaged public var sectionTitle: String
+    @NSManaged public var isPinned: Bool
     @NSManaged public var category: Category
     @NSManaged public var records: NSSet?
     @NSManaged public var schedule: NSSet?
+
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<Tracker> {
+        return NSFetchRequest<Tracker>(entityName: "Tracker")
+    }
+}
+
+extension Tracker {
+    func update(from trackerUI: TrackerUI, category: Category, in context: NSManagedObjectContext) {
+        self.trackerId = trackerUI.id
+        self.title = trackerUI.title
+        self.color = trackerUI.color
+        self.emoji = trackerUI.emoji
+        self.isPinned = trackerUI.isPinned
+        self.date = trackerUI.date
+        self.category = category
+        self.sectionTitle = isPinned ? NSLocalizedString("sectionHeaderPinned", comment: "") : (category.title)
+
+        if let existingSchedules = self.schedule as? Set<Schedule> {
+            for schedule in existingSchedules {
+                context.delete(schedule)
+            }
+        }
+
+        if let newSchedule = trackerUI.schedule {
+            for weekDay in newSchedule {
+                let schedule = Schedule(context: context)
+                schedule.weekDay = weekDay
+                schedule.tracker = self
+            }
+        }
+    }
 }

@@ -1,5 +1,5 @@
 //
-//  TrackerRecordStore.swift
+//  RecordStore.swift
 //  Tracker
 //
 //  Created by Nikolai Eremenko on 22.11.2024.
@@ -7,22 +7,22 @@
 
 import CoreData
 
-protocol TrackerRecordStoreProtocol {
+protocol RecordStoreProtocol {
     func addRecord(_ record: RecordUI) throws
     func deleteRecord(_ record: RecordUI) throws
     func recordObject(for trackerId: UUID, date: Date) -> RecordUI?
     func recordsCount(for trackerId: UUID) -> Int?
 }
 
-final class TrackerRecordStore: NSObject {
+final class RecordStore: NSObject {
     enum RecordDataProviderError: Error {
         case failedToInitializeContext
     }
 
     private let context: NSManagedObjectContext
-    private let dataStore: TrackerDataStore
+    private let dataStore: DataStoreProtocol
 
-    init(dataStore: TrackerDataStore) throws {
+    init(dataStore: DataStoreProtocol) throws {
         guard
             let context = dataStore.managedObjectContext
         else {
@@ -34,7 +34,7 @@ final class TrackerRecordStore: NSObject {
     }
 }
 
-extension TrackerRecordStore: TrackerRecordStoreProtocol {
+extension RecordStore: RecordStoreProtocol {
     func recordObject(for trackerId: UUID, date: Date) -> RecordUI? {
         let request = NSFetchRequest<Record>(entityName: "Record")
         request.predicate = NSPredicate(format: "%K == %@ AND %K == %@",

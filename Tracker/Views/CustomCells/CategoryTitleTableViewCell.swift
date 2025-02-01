@@ -122,19 +122,7 @@ extension CategoryTitleTableViewCell: UITextFieldDelegate {
 @available(iOS 17, *)
 #Preview("Add Category") {
     let navigationController = UINavigationController(
-        rootViewController: CategoryViewController(categoryTitle: nil, indexPath: nil)
-    )
-    navigationController.modalPresentationStyle = .pageSheet
-
-    return navigationController
-}
-
-@available(iOS 17, *)
-#Preview("Edit Category") {
-    let categoryTitle = "Foo"
-    let indexPath = IndexPath(row: 0, section: 0)
-    let navigationController = UINavigationController(
-        rootViewController: CategoryViewController(categoryTitle: categoryTitle, indexPath: indexPath)
+        rootViewController: CategoryViewController()
     )
     navigationController.modalPresentationStyle = .pageSheet
 
