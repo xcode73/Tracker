@@ -36,7 +36,7 @@ protocol TrackerStoreProtocol {
     func fetchTracker(at indexPath: IndexPath) -> TrackerUI
     func fetchTrackerWithCategory(at indexPath: IndexPath) -> (CategoryUI, TrackerUI)?
     func saveTracker(from trackerUI: TrackerUI, categoryUI: CategoryUI) throws
-    func deleteTracker(at indexPath: IndexPath) throws
+    func deleteTracker(_ trackerUI: TrackerUI) throws
     func sectionTitle(at section: Int) -> String?
 }
 
@@ -77,7 +77,7 @@ final class TrackerStore: NSObject {
     private func applySortAndRefresh(with fetchRequest: NSFetchRequest<Tracker>) {
         fetchRequest.sortDescriptors = [
             NSSortDescriptor(key: "isPinned", ascending: false),
-            NSSortDescriptor(key: "sectionTitle", ascending: true),
+            NSSortDescriptor(key: "sectionTitle", ascending: false),
             NSSortDescriptor(key: "title", ascending: true)
         ]
 
@@ -203,14 +203,22 @@ extension TrackerStore: TrackerStoreProtocol {
         }
     }
 
-    func deleteTracker(at indexPath: IndexPath) throws {
-        let tracker = fetchedResultsController.object(at: indexPath)
+    func deleteTracker(_ trackerUI: TrackerUI) throws {
+        guard let tracker = findTracker(by: trackerUI.id) else {
+            throw NSError(
+                domain: "AppError",
+                code: 404,
+                userInfo: [
+                    NSLocalizedDescriptionKey: NSLocalizedString("alertMessageTrackerStoreTracker", comment: "")
+                ]
+            )
+        }
 
         do {
             try dataStore.deleteItem(tracker)
             try dataStore.saveContext()
         } catch {
-            print(error)
+            throw error
         }
     }
 }

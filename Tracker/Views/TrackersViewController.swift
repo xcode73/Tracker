@@ -196,11 +196,9 @@ final class TrackersViewController: UIViewController {
     }
 
     // MARK: - Show Tracker Detail
-    private func showTrackerDetail(indexPath: IndexPath) {
-        guard let (category, tracker) = trackerStore.fetchTrackerWithCategory(at: indexPath) else { return }
-
-        let counterTitle = updateCounterTitle(for: tracker.id)
-        let viewController = TrackerTableViewController(tableType: .edit(tracker, category, counterTitle),
+    private func showTrackerDetail(trackerUI: TrackerUI, categoryUI: CategoryUI) {
+        let counterTitle = updateCounterTitle(for: trackerUI.id)
+        let viewController = TrackerTableViewController(tableType: .edit(trackerUI, categoryUI, counterTitle),
                                                         dataStore: dataStore)
         viewController.delegate = self
         let navigationController = UINavigationController(
@@ -212,27 +210,34 @@ final class TrackersViewController: UIViewController {
     }
 
     // MARK: - Delete Tracker
-    private func deleteTracker(at indexPaths: [IndexPath]) {
-        let indexPath = indexPaths[0]
+    private func deleteTracker(_ trackerUI: TrackerUI) {
         do {
-            try trackerStore.deleteTracker(at: indexPath)
+            try trackerStore.deleteTracker(trackerUI)
         } catch {
             showStoreErrorAlert("TrackerStore")
         }
+
         placeholderState = .trackers
     }
 
+    // MARK: - Update Tracker
+    private func updateTracker(trackerUI: TrackerUI, categoryUI: CategoryUI) {
+        do {
+            try trackerStore.saveTracker(from: trackerUI, categoryUI: categoryUI)
+        } catch {
+            showStoreErrorAlert(error.localizedDescription)
+        }
+    }
+
     // MARK: - Alerts
-    func showDeleteTrackerAlert(for indexPaths: [IndexPath]) {
+    func showDeleteTrackerAlert(for tracker: TrackerUI) {
         let model = AlertModel(
             title: nil,
             message: NSLocalizedString("alertMessageDeleteTracker", comment: ""),
             buttons: [.deleteButton, .cancelButton],
             identifier: "Delete Tracker Alert",
             completion: { [weak self] in
-                guard let self else { return }
-
-                self.deleteTracker(at: indexPaths)
+                self?.deleteTracker(tracker)
             }
         )
 
@@ -468,17 +473,35 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 
         let indexPath = indexPaths[0]
 
+        guard let (category, tracker) = trackerStore.fetchTrackerWithCategory(at: indexPath) else { return nil }
+
+        var pinButtonTitle: String {
+            if tracker.isPinned {
+                return NSLocalizedString("buttonUnpin", comment: "")
+            } else {
+                return NSLocalizedString("buttonPin", comment: "")
+            }
+        }
+
         return UIContextMenuConfiguration(actionProvider: { _ in
             return UIMenu(children: [
-                UIAction(title: NSLocalizedString("buttonPin", comment: "")) { /*[weak self]*/ _ in
-                    // TODO: implement
+                UIAction(title: pinButtonTitle) { [weak self] _ in
+                    let isPinned = tracker.isPinned ? false : true
+                    let updatedTracker = TrackerUI(id: tracker.id,
+                                                   title: tracker.title,
+                                                   color: tracker.color,
+                                                   emoji: tracker.emoji,
+                                                   isPinned: isPinned,
+                                                   schedule: tracker.schedule,
+                                                   date: tracker.date)
+                    self?.updateTracker(trackerUI: updatedTracker, categoryUI: category)
                 },
                 UIAction(title: NSLocalizedString("buttonEdit", comment: "")) { [weak self] _ in
-                    self?.showTrackerDetail(indexPath: indexPath)
+                    self?.showTrackerDetail(trackerUI: tracker, categoryUI: category)
                 },
                 UIAction(title: NSLocalizedString("buttonDelete", comment: ""),
                          attributes: .destructive) { [weak self] _ in
-                             self?.showDeleteTrackerAlert(for: indexPaths)
+                             self?.showDeleteTrackerAlert(for: tracker)
                          }
             ])
         })
@@ -524,13 +547,8 @@ extension TrackersViewController: TrackerTableViewControllerDelegate, TrackerTyp
 
     func saveTracker(trackerUI: TrackerUI, categoryUI: CategoryUI) {
         placeholderState = .trackers
+        updateTracker(trackerUI: trackerUI, categoryUI: categoryUI)
         dismiss(animated: true)
-
-        do {
-            try trackerStore.saveTracker(from: trackerUI, categoryUI: categoryUI)
-        } catch {
-            showStoreErrorAlert(error.localizedDescription)
-        }
     }
 }
 

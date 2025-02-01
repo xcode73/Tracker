@@ -310,6 +310,22 @@
         }
       }
     },
+    "buttonUnpin" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unpin"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открепить"
+          }
+        }
+      }
+    },
     "errorMessageCharacterLimit" : {
       "localizations" : {
         "en" : {

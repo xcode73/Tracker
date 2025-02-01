@@ -55,6 +55,14 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return view
     }()
 
+    private lazy var pinImageView: UIImageView = {
+        let view = UIImageView()
+        view.image = Icons.pin
+        view.tintColor = .white
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
     private lazy var emojiBackgroundView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 12
@@ -69,7 +77,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         view.font = Fonts.ypMedium12
         view.numberOfLines = 0
         view.lineBreakMode = .byWordWrapping
-        view.textColor = .ypWhite
+        view.textColor = .white
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -115,6 +123,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         checkButton.backgroundColor = UIColor(named: tracker.color)
         emojiLabel.text = tracker.emoji
         titleLabel.text = tracker.title
+        pinImageView.isHidden = !tracker.isPinned
         daysCompletedLabel.text = completedTitle
 
         if record == nil {
@@ -145,6 +154,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         verticalStackView.addArrangedSubview(colorView)
         colorView.addSubview(emojiBackgroundView)
         colorView.addSubview(titleLabel)
+        colorView.addSubview(pinImageView)
         emojiBackgroundView.addSubview(emojiLabel)
         verticalStackView.addArrangedSubview(horizontalStackView)
         horizontalStackView.addArrangedSubview(daysCompletedLabel)
@@ -161,6 +171,11 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             emojiBackgroundView.topAnchor.constraint(equalTo: colorView.topAnchor, constant: 12),
             emojiBackgroundView.widthAnchor.constraint(equalToConstant: 24),
             emojiBackgroundView.heightAnchor.constraint(equalToConstant: 24),
+
+            pinImageView.trailingAnchor.constraint(equalTo: colorView.trailingAnchor, constant: -12),
+            pinImageView.topAnchor.constraint(equalTo: colorView.topAnchor, constant: 19),
+            pinImageView.widthAnchor.constraint(equalToConstant: 13),
+            pinImageView.heightAnchor.constraint(equalToConstant: 13),
 
             emojiLabel.centerXAnchor.constraint(equalTo: emojiBackgroundView.centerXAnchor),
             emojiLabel.centerYAnchor.constraint(equalTo: emojiBackgroundView.centerYAnchor),
