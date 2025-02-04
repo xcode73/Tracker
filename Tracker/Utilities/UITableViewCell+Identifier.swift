@@ -1,5 +1,5 @@
 //
-//  UITableViewCell+Identifire.swift
+//  UITableViewCell+Identifier.swift
 //  Tracker
 //
 //  Created by Nikolai Eremenko on 28.09.2024.

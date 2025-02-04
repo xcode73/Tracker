@@ -9,7 +9,6 @@ import UIKit
 
 final class TabBarController: UITabBarController {
     private let dataStore = Constants.appDelegate().trackerDataStore
-    private var selectedFilter: Filter = UserDefaults.standard.loadFilter()
     private var trackerStore: TrackerStore?
 
     // MARK: - UI Components
@@ -29,39 +28,47 @@ final class TabBarController: UITabBarController {
         return view
     }()
 
-    private lazy var topBorderView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .ypGray
-        return view
-    }()
-
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        view.backgroundColor = .ypWhite
 
         setupTrackerStore()
         setupTabBar()
         setupTabs()
     }
 
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            tabBar.addTopBorder(color: .ypTabBarBorder, height: 1)
+        }
+    }
+
     // MARK: - Создание TrackerStore
     private func setupTrackerStore() {
         do {
-            trackerStore = try TrackerStore(dataStore: dataStore, selectedFilter: selectedFilter)
+            trackerStore = try TrackerStore(dataStore: dataStore)
         } catch {
             showStoreErrorAlert(NSLocalizedString("alertMessageTrackerStoreInitError", comment: ""))
         }
     }
 
     private func setupTabBar() {
-        let appearance = self.tabBar.standardAppearance
-        appearance.shadowImage = nil
-        appearance.shadowColor = nil
-        appearance.backgroundEffect = nil
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = .ypWhite
-        self.tabBar.standardAppearance = appearance
-        self.tabBar.layer.borderColor = UIColor.ypGray.cgColor
-        self.tabBar.layer.borderWidth = 1
+        appearance.backgroundEffect = .none
+        appearance.backgroundImage = UIImage()
+        appearance.shadowColor = .clear
+        appearance.shadowImage = UIImage()
+        tabBar.standardAppearance = appearance
+        if #available(iOS 15.0, *) {
+            tabBar.scrollEdgeAppearance = appearance
+        }
+
+        tabBar.addTopBorder(color: .ypTabBarBorder, height: 1)
     }
 
     private func setupTabs() {
@@ -70,14 +77,11 @@ final class TabBarController: UITabBarController {
         // Trackers Tab
         let trackersViewController = TrackersViewController(
             dataStore: dataStore,
-            trackerStore: trackerStore,
-            selectedFilter: selectedFilter
+            trackerStore: trackerStore
         )
         trackersViewController.title = NSLocalizedString("vcTitleTrackers", comment: "")
         let trackerNavigationController = UINavigationController(rootViewController: trackersViewController)
 
-        trackerNavigationController.navigationBar.prefersLargeTitles = true
-        trackerNavigationController.navigationItem.largeTitleDisplayMode = .always
         trackersViewController.tabBarItem = trackersTabBarItem
         trackerStore.delegate = trackersViewController
 

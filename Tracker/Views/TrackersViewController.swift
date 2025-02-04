@@ -10,8 +10,8 @@ import UIKit
 final class TrackersViewController: UIViewController {
     // MARK: - Properties
     private let dataStore: DataStoreProtocol
-    private var trackerStore: TrackerStoreProtocol
-    private var selectedFilter: Filter
+    var trackerStore: TrackerStoreProtocol
+    private var selectedFilter: Filter = UserDefaults.standard.loadFilter()
     private var placeholderState: PlaceholderState = .trackers
 
     private lazy var scheduleStore: ScheduleStoreProtocol? = {
@@ -37,17 +37,7 @@ final class TrackersViewController: UIViewController {
         }
     }()
 
-    private let params = GeometricParams(
-        cellCount: 2,
-        topInset: 8,
-        bottomInset: 16,
-        leftInset: 16,
-        rightInset: 16,
-        cellSpacing: 9,
-        cellHeight: 132,
-        lineSpacing: 16,
-        headerHeight: 18
-    )
+    private let params = Constants.trackersCollectionViewGeometricParam
 
     private enum PlaceholderState {
         case search
@@ -64,11 +54,10 @@ final class TrackersViewController: UIViewController {
         return view
     }()
 
-    private lazy var datePicker: UIDatePicker = {
+    lazy var datePicker: UIDatePicker = {
         let view = UIDatePicker()
         view.preferredDatePickerStyle = .compact
         view.datePickerMode = .date
-        view.locale = Locale(identifier: "ru_CH")
         view.addTarget(self, action: #selector(didSelectDate(_:)), for: .valueChanged)
         return view
     }()
@@ -123,6 +112,8 @@ final class TrackersViewController: UIViewController {
         view.register(TrackerHeaderReusableView.self,
                       forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
                       withReuseIdentifier: TrackerHeaderReusableView.reuseIdentifier)
+        view.backgroundColor = .clear
+        view.alwaysBounceVertical = true
         view.allowsMultipleSelection = false
         view.dataSource = self
         view.delegate = self
@@ -132,12 +123,10 @@ final class TrackersViewController: UIViewController {
 
     init(
         dataStore: DataStoreProtocol,
-        trackerStore: TrackerStoreProtocol,
-        selectedFilter: Filter
+        trackerStore: TrackerStoreProtocol
     ) {
         self.dataStore = dataStore
         self.trackerStore = trackerStore
-        self.selectedFilter = selectedFilter
 
         super.init(nibName: nil, bundle: nil)
     }
@@ -150,12 +139,28 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        setupUI()
+        view.backgroundColor = .ypWhite
 
-        trackerStore.updateFetchRequest(
-            with: selectedFilter,
-            for: datePicker.date.truncated
-        )
+        setupUI()
+        updateStore()
+    }
+
+    private func updateStore(with searchText: String? = nil) {
+        do {
+            if let searchText {
+                try trackerStore.updateFetchRequest(
+                    with: searchText,
+                    for: datePicker.date.truncated
+                )
+            } else {
+                try trackerStore.updateFetchRequest(
+                    with: selectedFilter,
+                    for: datePicker.date.truncated
+                )
+            }
+        } catch {
+            showStoreErrorAlert(NSLocalizedString("alertMessageTrackerStoreInitError", comment: ""))
+        }
     }
 
     // MARK: - Update View
@@ -176,15 +181,50 @@ final class TrackersViewController: UIViewController {
         addCollectionView()
         addFiltersButton()
         addPlaceholder()
+
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 70, right: 0)
+        collectionView.scrollIndicatorInsets = collectionView.contentInset
     }
 
     private func setupNavigationBar() {
+        guard let navigationBar = navigationController?.navigationBar else { return }
+
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .ypWhite
+        appearance.shadowImage = UIImage()
+        appearance.backgroundImage = UIImage()
+        appearance.backgroundEffect = .none
+        appearance.shadowColor = .clear
+        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.ypBlack]
+
+        navigationBar.standardAppearance = appearance
+        navigationBar.scrollEdgeAppearance = appearance
+        navigationBar.compactAppearance = appearance
+
+        navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
+        navigationItem.hidesSearchBarWhenScrolling = false
+
         navigationItem.leftBarButtonItem = addButton
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         navigationItem.searchController = searchController
 
+        searchController.hidesNavigationBarDuringPresentation = false
+
+        let searchTextField = searchController.searchBar.searchTextField
+        searchTextField.attributedPlaceholder = NSAttributedString(
+            string: NSLocalizedString("placeholderSearchTrackers", comment: ""),
+            attributes: [NSAttributedString.Key.foregroundColor: UIColor.ypGray]
+        )
+
+        if let leftView = searchTextField.leftView as? UIImageView {
+            leftView.tintColor = UIColor.ypGray
+        }
+
         NSLayoutConstraint.activate([
-            datePicker.widthAnchor.constraint(equalToConstant: 95)
+            datePicker.widthAnchor.constraint(equalToConstant: 100),
+            datePicker.heightAnchor.constraint(equalToConstant: 34)
         ])
     }
 
@@ -270,12 +310,8 @@ final class TrackersViewController: UIViewController {
 
     @objc
     private func didSelectDate(_ sender: UIDatePicker) {
-        trackerStore.updateFetchRequest(
-            with: selectedFilter,
-            for: sender.date.truncated
-        )
+        updateStore()
         placeholderState = .trackers
-//        collectionView.reloadData()
 
         self.dismiss(animated: true)
     }
@@ -367,6 +403,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         let tracker = trackerStore.fetchTracker(at: indexPath)
         let trackerRecord = recordStore?.recordObject(for: tracker.id, date: datePicker.date.truncated)
 
+        cell.backgroundColor = .clear
         cell.delegate = self
         cell.configure(
             tracker: tracker,
@@ -558,10 +595,10 @@ extension TrackersViewController: UISearchResultsUpdating {
         guard let searchText = searchController.searchBar.text else { return }
 
         if searchText.isEmpty {
-            trackerStore.updateFetchRequest(with: selectedFilter, for: datePicker.date.truncated)
+            updateStore()
             placeholderState = .trackers
         } else {
-            trackerStore.updateFetchRequest(with: searchText, for: datePicker.date.truncated)
+            updateStore(with: searchText)
             placeholderState = .search
         }
     }
@@ -573,7 +610,7 @@ extension TrackersViewController: FiltersViewControllerDelegate {
         UserDefaults.standard.saveFilter(filter)
         selectedFilter = filter
 
-        switch filter {
+        switch selectedFilter {
         case .all:
             placeholderState = .trackers
         case .today:
@@ -583,7 +620,7 @@ extension TrackersViewController: FiltersViewControllerDelegate {
             placeholderState = .search
         }
 
-        trackerStore.updateFetchRequest(with: filter, for: datePicker.date.truncated)
+        updateStore()
         dismiss(animated: true)
     }
 }

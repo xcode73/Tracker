@@ -133,6 +133,8 @@ final class TrackerTableViewController: UITableViewController {
                let newTrackerColor = newTracker.color,
                let newTrackerEmoji = newTracker.emoji,
                let newCategoryTitle = newCategory.title,
+               let newCategoryId = newCategory.categoryId,
+               let newCategoryTrackers = newCategory.trackers,
                newTracker.schedule != nil || newTracker.date != nil {
 
                 if let schedule = newTracker.schedule {
@@ -142,7 +144,9 @@ final class TrackerTableViewController: UITableViewController {
                                                color: newTrackerColor,
                                                emoji: newTrackerEmoji,
                                                isPinned: tracker.isPinned)
-                    updatedCategory = CategoryUI(categoryID: category.id, title: newCategoryTitle)
+                    updatedCategory = CategoryUI(categoryID: newCategoryId,
+                                                 title: newCategoryTitle,
+                                                 trackers: newCategoryTrackers)
                 }
 
                 if let date = newTracker.date?.truncated {
@@ -152,7 +156,9 @@ final class TrackerTableViewController: UITableViewController {
                                                color: newTrackerColor,
                                                emoji: newTrackerEmoji,
                                                isPinned: tracker.isPinned)
-                    updatedCategory = CategoryUI(categoryID: category.id, title: newCategoryTitle)
+                    updatedCategory = CategoryUI(categoryID: newCategoryId,
+                                                 title: newCategoryTitle,
+                                                 trackers: newCategoryTrackers)
                 }
 
                 if updatedTracker != tracker || updatedCategory != category {

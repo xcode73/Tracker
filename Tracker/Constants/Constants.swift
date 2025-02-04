@@ -32,4 +32,16 @@ enum Constants {
 
         return delegate
      }
+
+    static let trackersCollectionViewGeometricParam = GeometricParams(
+        cellCount: 2,
+        topInset: 8,
+        bottomInset: 16,
+        leftInset: 16,
+        rightInset: 16,
+        cellSpacing: 9,
+        cellHeight: 132,
+        lineSpacing: 16,
+        headerHeight: 18
+    )
 }

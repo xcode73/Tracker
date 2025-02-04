@@ -488,6 +488,22 @@
         }
       }
     },
+    "placeholderSearchTrackers" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск"
+          }
+        }
+      }
+    },
     "placeholderTracker" : {
       "localizations" : {
         "en" : {

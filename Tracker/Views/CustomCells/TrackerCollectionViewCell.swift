@@ -24,6 +24,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         view.alignment = .center
         view.spacing = 8
         view.distribution = .equalSpacing
+        view.backgroundColor = .clear
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -34,6 +35,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         view.alignment = .center
         view.distribution = .equalCentering
         view.spacing = 8
+        view.backgroundColor = .clear
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -43,7 +45,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         view.layer.cornerRadius = 16
         view.layer.masksToBounds = true
         view.layer.borderWidth = 1
-        view.layer.borderColor = UIColor.ypBackground.cgColor
+        view.layer.borderColor = UIColor.ypTrackerBorder.cgColor
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -78,6 +80,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         view.numberOfLines = 0
         view.lineBreakMode = .byWordWrapping
         view.textColor = .white
+        view.backgroundColor = .clear
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -86,6 +89,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let view = UILabel()
         view.font = Fonts.ypMedium12
         view.textColor = .ypBlack
+        view.backgroundColor = .clear
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -93,7 +97,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private lazy var checkButton: UIButton = {
         let view = UIButton(type: .custom)
         view.layer.cornerRadius = 17
-        view.tintColor = .ypWhite
+        view.tintColor = .white
+        view.backgroundColor = .clear
         view.addTarget(self, action: #selector(didTapCheckButton), for: .touchUpInside)
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
@@ -109,6 +114,13 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+//    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+//        super.traitCollectionDidChange(previousTraitCollection)
+//        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+//            tabBar.addTopBorder(color: .ypTabBarBorder, height: 1)
+//        }
+//    }
 
     // MARK: - Configuration
     func configure(
@@ -150,6 +162,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
 
     // MARK: - Constraints
     private func setupUI() {
+        contentView.backgroundColor = .clear
         contentView.addSubview(verticalStackView)
         verticalStackView.addArrangedSubview(colorView)
         colorView.addSubview(emojiBackgroundView)
