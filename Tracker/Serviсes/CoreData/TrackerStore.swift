@@ -284,8 +284,6 @@ extension TrackerStore: TrackerStoreProtocol {
             throw TrackerStoreError.failedToFindMockCategories
         }
 
-        let selectionColors = Constants.selectionColors
-        let emojis = Constants.emojis
         var schedule: [WeekDay]?
         var date: Date?
 
