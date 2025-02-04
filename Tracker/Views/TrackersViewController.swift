@@ -13,6 +13,7 @@ final class TrackersViewController: UIViewController {
     var trackerStore: TrackerStoreProtocol
     private var selectedFilter: Filter = UserDefaults.standard.loadFilter()
     private var placeholderState: PlaceholderState = .trackers
+    private let analyticsService: AnalyticsServiceProtocol
 
     private lazy var scheduleStore: ScheduleStoreProtocol? = {
         do {
@@ -121,12 +122,15 @@ final class TrackersViewController: UIViewController {
         return view
     }()
 
+    // MARK: - Init
     init(
         dataStore: DataStoreProtocol,
-        trackerStore: TrackerStoreProtocol
+        trackerStore: TrackerStoreProtocol,
+        analyticsService: AnalyticsServiceProtocol
     ) {
         self.dataStore = dataStore
         self.trackerStore = trackerStore
+        self.analyticsService = analyticsService
 
         super.init(nibName: nil, bundle: nil)
     }
@@ -139,10 +143,20 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .ypWhite
-
         setupUI()
         updateStore()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        analyticsService.report(event: .open, screen: .main)
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+
+        analyticsService.report(event: .close, screen: .main)
     }
 
     private func updateStore(with searchText: String? = nil) {
@@ -177,6 +191,7 @@ final class TrackersViewController: UIViewController {
 
     // MARK: - UI Setup
     private func setupUI() {
+        view.backgroundColor = .ypWhite
         setupNavigationBar()
         addCollectionView()
         addFiltersButton()
@@ -306,6 +321,7 @@ final class TrackersViewController: UIViewController {
         navigationController.modalPresentationStyle = .pageSheet
 
         present(navigationController, animated: true)
+        analyticsService.report(event: .click, screen: .main, item: .addTrack)
     }
 
     @objc
@@ -326,6 +342,7 @@ final class TrackersViewController: UIViewController {
         navigationController.modalPresentationStyle = .pageSheet
 
         present(navigationController, animated: true)
+        analyticsService.report(event: .click, screen: .main, item: .filter)
     }
 
     // MARK: - Constraints
@@ -523,6 +540,11 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
         return UIContextMenuConfiguration(actionProvider: { _ in
             return UIMenu(children: [
                 UIAction(title: pinButtonTitle) { [weak self] _ in
+                    guard let self else {
+                        print("Error: Cannot update tracker pin status")
+                        return
+                    }
+
                     let isPinned = tracker.isPinned ? false : true
                     let updatedTracker = TrackerUI(id: tracker.id,
                                                    title: tracker.title,
@@ -531,14 +553,26 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
                                                    isPinned: isPinned,
                                                    schedule: tracker.schedule,
                                                    date: tracker.date)
-                    self?.updateTracker(trackerUI: updatedTracker, categoryUI: category)
+                    self.updateTracker(trackerUI: updatedTracker, categoryUI: category)
                 },
                 UIAction(title: NSLocalizedString("buttonEdit", comment: "")) { [weak self] _ in
-                    self?.showTrackerDetail(trackerUI: tracker, categoryUI: category)
+                    guard let self else {
+                        print("Error: Cannot show tracker detail view")
+                        return
+                    }
+
+                    self.showTrackerDetail(trackerUI: tracker, categoryUI: category)
+                    self.analyticsService.report(event: .click, screen: .main, item: .edit)
                 },
                 UIAction(title: NSLocalizedString("buttonDelete", comment: ""),
                          attributes: .destructive) { [weak self] _ in
-                             self?.showDeleteTrackerAlert(for: tracker)
+                             guard let self else {
+                                 print("Error: Cannot show delete tracker flow")
+                                 return
+                             }
+
+                             self.showDeleteTrackerAlert(for: tracker)
+                             self.analyticsService.report(event: .click, screen: .main, item: .delete)
                          }
             ])
         })
@@ -547,7 +581,12 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         contextMenuConfiguration configuration: UIContextMenuConfiguration,
                         highlightPreviewForItemAt indexPath: IndexPath) -> UITargetedPreview? {
-        guard let cell = collectionView.cellForItem(at: indexPath) as? TrackerCollectionViewCell else { return nil }
+        guard
+            let cell = collectionView.cellForItem(at: indexPath) as? TrackerCollectionViewCell
+        else {
+            return nil
+        }
+
         let selectedView = cell.configureSelectedView()
 
         return UITargetedPreview(view: selectedView)
@@ -573,6 +612,8 @@ extension TrackersViewController: TrackerCellDelegate {
             let newRecord = RecordUI(trackerId: tracker.id, date: datePicker.date.truncated)
             try? recordStore?.addRecord(newRecord)
         }
+
+        analyticsService.report(event: .click, screen: .main, item: .track)
     }
 }
 
@@ -669,6 +710,7 @@ extension TrackersViewController: TrackerStoreDelegate {
 #if DEBUG
 @available(iOS 17, *)
 #Preview() {
-    TabBarController()
+    let analyticsService = AnalyticsService()
+    TabBarController(analyticsService: analyticsService)
 }
 #endif

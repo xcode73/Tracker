@@ -8,6 +8,7 @@
 import UIKit
 
 final class TabBarController: UITabBarController {
+    private let analyticsService: AnalyticsServiceProtocol
     private let dataStore = Constants.appDelegate().trackerDataStore
     private var trackerStore: TrackerStore?
 
@@ -27,6 +28,15 @@ final class TabBarController: UITabBarController {
         view.selectedImage = nil
         return view
     }()
+
+    init(analyticsService: AnalyticsServiceProtocol) {
+        self.analyticsService = analyticsService
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -77,7 +87,8 @@ final class TabBarController: UITabBarController {
         // Trackers Tab
         let trackersViewController = TrackersViewController(
             dataStore: dataStore,
-            trackerStore: trackerStore
+            trackerStore: trackerStore,
+            analyticsService: analyticsService
         )
         trackersViewController.title = NSLocalizedString("vcTitleTrackers", comment: "")
         let trackerNavigationController = UINavigationController(rootViewController: trackersViewController)
@@ -86,7 +97,7 @@ final class TabBarController: UITabBarController {
         trackerStore.delegate = trackersViewController
 
         // Statistic Tab
-        let statisticViewController = StatisticViewController()
+        let statisticViewController = StatisticViewController(analyticsService: analyticsService)
         statisticViewController.title = NSLocalizedString("vcTitleStatistics", comment: "")
         let statNavigationController = UINavigationController(rootViewController: statisticViewController)
         statNavigationController.navigationBar.prefersLargeTitles = true
@@ -112,6 +123,7 @@ final class TabBarController: UITabBarController {
 #if DEBUG
 @available(iOS 17, *)
 #Preview("TabController") {
-    TabBarController()
+    let analyticsService = AnalyticsService()
+    TabBarController(analyticsService: analyticsService)
 }
 #endif

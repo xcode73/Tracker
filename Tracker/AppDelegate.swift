@@ -19,10 +19,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }()
 
+    var analyticsService = AnalyticsService()
+
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        let configuration = AppMetricaConfiguration(apiKey: APIKeys.appMetricaKey)
-        AppMetrica.activate(with: configuration!)
+        guard
+            let configuration = AppMetricaConfiguration(apiKey: APIKeys.appMetricaKey)
+        else {
+            print("Failed to initialize AppMetricaConfiguration")
+            return true
+        }
+
+        AppMetrica.activate(with: configuration)
 
         return true
     }

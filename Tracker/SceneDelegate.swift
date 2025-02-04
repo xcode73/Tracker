@@ -15,8 +15,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                options connectionOptions: UIScene.ConnectionOptions) {
         guard let scene = (scene as? UIWindowScene) else { return }
 
+        let analyticsService: AnalyticsServiceProtocol
+
+        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+            analyticsService = appDelegate.analyticsService
+        } else {
+            analyticsService = AnalyticsService() // Фолбэк, если AppDelegate не найден
+        }
+
         window = UIWindow(windowScene: scene)
-        window?.rootViewController = SplashViewController()
+        window?.rootViewController = SplashViewController(analyticsService: analyticsService)
         window?.makeKeyAndVisible()
     }
 

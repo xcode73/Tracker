@@ -8,6 +8,7 @@
 import UIKit
 
 final class SplashViewController: UIViewController {
+    private let analyticsService: AnalyticsServiceProtocol
     // MARK: - UI Components
     private lazy var logoImageView: UIImageView = {
         let view = UIImageView()
@@ -16,6 +17,15 @@ final class SplashViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
+
+    init(analyticsService: AnalyticsServiceProtocol) {
+        self.analyticsService = analyticsService
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -43,7 +53,7 @@ final class SplashViewController: UIViewController {
     }
 
     private func switchToTabBarController() {
-        let tabBarController = TabBarController()
+        let tabBarController = TabBarController(analyticsService: analyticsService)
 
         guard let window = UIApplication.shared.windows.first else {
             assertionFailure("Invalid window configuration")
@@ -75,5 +85,6 @@ extension SplashViewController: OnboardingViewControllerDelegate {
 // MARK: - Preview
 @available(iOS 17, *)
 #Preview() {
-    SplashViewController()
+    let analyticsService = AnalyticsService()
+    SplashViewController(analyticsService: analyticsService)
 }
