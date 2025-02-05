@@ -7,6 +7,25 @@
 
 import CoreData
 
+protocol TrackerStoreProtocol {
+    var numberOfSections: Int { get }
+    func updateFetchRequest(with filter: Filter, for date: Date) throws
+    func updateFetchRequest(with searchText: String?, for date: Date) throws
+    func numberOfItemsInSection(_ section: Int) -> Int
+    func fetchTracker(at indexPath: IndexPath) -> TrackerUI
+    func fetchTrackerWithCategory(at indexPath: IndexPath) -> (CategoryUI, TrackerUI)?
+    func saveTracker(from trackerUI: TrackerUI, categoryUI: CategoryUI) throws
+    func deleteTracker(_ trackerUI: TrackerUI) throws
+    func sectionTitle(at section: Int) -> String?
+    func deleteAllCategories() throws
+    func createMockCategories() throws
+    func createMockTrackers(_ mockTrackers: [MockTracker], mockDate: Date) throws
+}
+
+protocol TrackerStoreDelegate: AnyObject {
+    func didUpdate(_ update: [TrackerStoreUpdate])
+}
+
 enum TrackerStoreError: Error {
     case failedToInitializeContext
     case failedToFindTracker
@@ -44,26 +63,8 @@ enum TrackerStoreUpdate: Hashable {
     case object(ObjectUpdate)
 }
 
-protocol TrackerStoreDelegate: AnyObject {
-    func didUpdate(_ update: [TrackerStoreUpdate])
-}
-
-protocol TrackerStoreProtocol {
-    var numberOfSections: Int { get }
-    func updateFetchRequest(with filter: Filter, for date: Date) throws
-    func updateFetchRequest(with searchText: String?, for date: Date) throws
-    func numberOfItemsInSection(_ section: Int) -> Int
-    func fetchTracker(at indexPath: IndexPath) -> TrackerUI
-    func fetchTrackerWithCategory(at indexPath: IndexPath) -> (CategoryUI, TrackerUI)?
-    func saveTracker(from trackerUI: TrackerUI, categoryUI: CategoryUI) throws
-    func deleteTracker(_ trackerUI: TrackerUI) throws
-    func sectionTitle(at section: Int) -> String?
-    func deleteAllCategories() throws
-    func createMockCategories() throws
-    func createMockTrackers(_ mockTrackers: [MockTracker], mockDate: Date) throws
-}
-
 final class TrackerStore: NSObject {
+    // MARK: - Properties
     weak var delegate: TrackerStoreDelegate?
     private var inProgressChanges: [TrackerStoreUpdate] = []
 
@@ -73,11 +74,11 @@ final class TrackerStore: NSObject {
 
     private var fetchedResultsController: NSFetchedResultsController<Tracker>
 
+    // MARK: - Init
     init(
         dataStore: DataStoreProtocol,
         delegate: TrackerStoreDelegate? = nil
     ) throws {
-
         guard
             let context = dataStore.managedObjectContext
         else {

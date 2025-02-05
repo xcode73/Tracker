@@ -244,7 +244,7 @@ final class TrackersViewController: UIViewController {
     }
 
     private func updateCounterTitle(for trackerId: UUID) -> String {
-        let completedCount = recordStore?.recordsCount(for: trackerId) ?? 0
+        let completedCount = recordStore?.fetchNumberOfRecords(for: trackerId) ?? 0
         let localizedFormatString = NSLocalizedString("trackers.daysCompleted", comment: "")
 
         return String(format: localizedFormatString, completedCount)

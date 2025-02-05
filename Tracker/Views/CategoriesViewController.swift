@@ -68,7 +68,7 @@ final class CategoriesViewController: UIViewController {
         view.layer.cornerRadius = 16
         view.backgroundColor = .ypBlack
         view.titleLabel?.font = Fonts.ypMedium16
-        view.setTitleColor(.white, for: .normal)
+        view.setTitleColor(.ypWhite, for: .normal)
         view.addTarget(self, action: #selector(showCategoryViewController), for: .touchUpInside)
         view.setTitle(NSLocalizedString("buttonAddCategory", comment: ""), for: .normal)
         view.translatesAutoresizingMaskIntoConstraints = false

@@ -11,22 +11,24 @@ protocol RecordStoreProtocol {
     func addRecord(_ record: RecordUI) throws
     func deleteRecord(_ record: RecordUI) throws
     func recordObject(for trackerId: UUID, date: Date) -> RecordUI?
-    func recordsCount(for trackerId: UUID) -> Int?
+    func fetchNumberOfRecords(for trackerId: UUID) -> Int?
+}
+
+enum RecordStoreError: Error {
+    case failedToInitializeContext
 }
 
 final class RecordStore: NSObject {
-    enum RecordDataProviderError: Error {
-        case failedToInitializeContext
-    }
-
     private let context: NSManagedObjectContext
     private let dataStore: DataStoreProtocol
 
-    init(dataStore: DataStoreProtocol) throws {
+    init(
+        dataStore: DataStoreProtocol
+    ) throws {
         guard
             let context = dataStore.managedObjectContext
         else {
-            throw RecordDataProviderError.failedToInitializeContext
+            throw RecordStoreError.failedToInitializeContext
         }
 
         self.context = context
@@ -34,6 +36,7 @@ final class RecordStore: NSObject {
     }
 }
 
+// MARK: - RecordStoreProtocol
 extension RecordStore: RecordStoreProtocol {
     func recordObject(for trackerId: UUID, date: Date) -> RecordUI? {
         let request = NSFetchRequest<Record>(entityName: "Record")
@@ -46,7 +49,7 @@ extension RecordStore: RecordStoreProtocol {
         return RecordUI(trackerId: record.trackerId, date: record.date)
     }
 
-    func recordsCount(for trackerId: UUID) -> Int? {
+    func fetchNumberOfRecords(for trackerId: UUID) -> Int? {
         let request = NSFetchRequest<Record>(entityName: "Record")
         request.predicate = NSPredicate(format: "%K == %@",
                                         #keyPath(Record.trackerId),

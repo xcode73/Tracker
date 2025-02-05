@@ -42,7 +42,7 @@ final class CategoryViewController: UIViewController {
         view.layer.masksToBounds = true
         view.layer.cornerRadius = 16
         view.titleLabel?.font = Fonts.ypMedium16
-        view.setTitleColor(.white, for: .normal)
+        view.setTitleColor(.ypWhite, for: .normal)
         view.addTarget(self, action: #selector(didTapSaveCategoryButton), for: .touchUpInside)
         view.setTitle(LocalConst.createButtonTitle, for: .normal)
         view.translatesAutoresizingMaskIntoConstraints = false

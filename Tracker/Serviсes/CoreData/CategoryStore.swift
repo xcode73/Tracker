@@ -7,23 +7,23 @@
 
 import CoreData
 
-enum CategoryStoreUpdate: Hashable {
-    case inserted(at: IndexPath)
-    case deleted(from: IndexPath)
-    case updated(at: IndexPath)
-    case moved(from: IndexPath, to: IndexPath)
-}
-
-protocol CategoryStoreDelegate: AnyObject {
-    func didUpdate(_ update: [CategoryStoreUpdate])
-}
-
 protocol CategoryStoreProtocol {
     var numberOfSections: Int { get }
     func numberOfRowsInSection(_ section: Int) -> Int
     func fetchCategory(at indexPath: IndexPath) -> CategoryUI
     func saveCategory(from categoryUI: CategoryUI) throws
     func deleteCategory(at indexPath: IndexPath) throws
+}
+
+protocol CategoryStoreDelegate: AnyObject {
+    func didUpdate(_ update: [CategoryStoreUpdate])
+}
+
+enum CategoryStoreUpdate: Hashable {
+    case inserted(at: IndexPath)
+    case deleted(from: IndexPath)
+    case updated(at: IndexPath)
+    case moved(from: IndexPath, to: IndexPath)
 }
 
 final class CategoryStore: NSObject {
@@ -38,7 +38,7 @@ final class CategoryStore: NSObject {
     private let dataStore: DataStoreProtocol
 
     private lazy var fetchedResultsController: NSFetchedResultsController<Category> = {
-        let fetchRequest = NSFetchRequest<Category>(entityName: "Category")
+        let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
         fetchRequest.sortDescriptors = [
             NSSortDescriptor(keyPath: \Category.title, ascending: true)
         ]
@@ -51,10 +51,16 @@ final class CategoryStore: NSObject {
         return fetchedResultsController
     }()
 
-    init(_ dataStore: DataStoreProtocol, delegate: CategoryStoreDelegate? = nil) throws {
-        guard let context = dataStore.managedObjectContext else {
+    init(
+        _ dataStore: DataStoreProtocol,
+        delegate: CategoryStoreDelegate? = nil
+    ) throws {
+        guard
+            let context = dataStore.managedObjectContext
+        else {
             throw CategoriesDataProviderError.failedToInitializeContext
         }
+
         self.delegate = delegate
         self.context = context
         self.dataStore = dataStore

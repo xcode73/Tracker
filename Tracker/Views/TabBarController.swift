@@ -11,6 +11,7 @@ final class TabBarController: UITabBarController {
     private let analyticsService: AnalyticsServiceProtocol
     private let dataStore = Constants.appDelegate().trackerDataStore
     private var trackerStore: TrackerStore?
+    private var statisticStore: StatisticStore?
 
     // MARK: - UI Components
     private lazy var trackersTabBarItem: UITabBarItem = {
@@ -45,6 +46,7 @@ final class TabBarController: UITabBarController {
         view.backgroundColor = .ypWhite
 
         setupTrackerStore()
+        setupStatisticStore()
         setupTabBar()
         setupTabs()
     }
@@ -56,12 +58,25 @@ final class TabBarController: UITabBarController {
         }
     }
 
-    // MARK: - Создание TrackerStore
     private func setupTrackerStore() {
         do {
             trackerStore = try TrackerStore(dataStore: dataStore)
         } catch {
-            showStoreErrorAlert(NSLocalizedString("alertMessageTrackerStoreInitError", comment: ""))
+            let trackerError = error as? StatisticStoreError
+            showStoreErrorAlert(
+                trackerError?.userFriendlyMessage ?? error.localizedDescription
+            )
+        }
+    }
+
+    private func setupStatisticStore() {
+        do {
+            statisticStore = try StatisticStore(dataStore: dataStore)
+        } catch {
+            let statError = error as? StatisticStoreError
+            showStoreErrorAlert(
+                statError?.userFriendlyMessage ?? error.localizedDescription
+            )
         }
     }
 
@@ -82,7 +97,15 @@ final class TabBarController: UITabBarController {
     }
 
     private func setupTabs() {
-        guard let trackerStore else { return }
+        guard
+            let trackerStore,
+            let statisticStore
+        else {
+            showStoreErrorAlert(
+                NSLocalizedString("alertTitleStoreError", comment: "")
+            )
+            return
+        }
 
         // Trackers Tab
         let trackersViewController = TrackersViewController(
@@ -97,15 +120,24 @@ final class TabBarController: UITabBarController {
         trackerStore.delegate = trackersViewController
 
         // Statistic Tab
-        let statisticViewController = StatisticViewController(analyticsService: analyticsService)
+        let statisticViewController = StatisticViewController(
+            statisticStore: statisticStore,
+            analyticsService: analyticsService
+        )
         statisticViewController.title = NSLocalizedString("vcTitleStatistics", comment: "")
         let statNavigationController = UINavigationController(rootViewController: statisticViewController)
-        statNavigationController.navigationBar.prefersLargeTitles = true
-        statNavigationController.tabBarItem = statisticsTabBarItem
 
-        self.viewControllers = [trackerNavigationController, statNavigationController]
+        statNavigationController.tabBarItem = statisticsTabBarItem
+        statNavigationController.navigationBar.prefersLargeTitles = true
+        statisticStore.delegate = statisticViewController
+
+        self.viewControllers = [
+            trackerNavigationController,
+            statNavigationController
+        ]
     }
 
+    // MARK: - Alerts
     func showStoreErrorAlert(_ message: String) {
         let model = AlertModel(
             title: NSLocalizedString("alertTitleStoreError", comment: ""),

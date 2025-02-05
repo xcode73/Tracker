@@ -14,6 +14,11 @@
         <attribute name="weekDay" attributeType="Integer 16" valueTransformerName="DaysValueTransformer" defaultValueString="0" usesScalarValueType="YES"/>
         <relationship name="tracker" maxCount="1" deletionRule="Nullify" destinationEntity="Tracker" inverseName="schedule" inverseEntity="Tracker"/>
     </entity>
+    <entity name="Statistic" representedClassName="Statistic" syncable="YES">
+        <attribute name="statisticId" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="value" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
     <entity name="Tracker" representedClassName="Tracker" syncable="YES">
         <attribute name="color" attributeType="String"/>
         <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>

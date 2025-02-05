@@ -37,7 +37,7 @@ final class ScheduleViewController: UIViewController {
         view.layer.cornerRadius = 16
         view.backgroundColor = .ypGray
         view.titleLabel?.font = Fonts.ypMedium16
-        view.setTitleColor(.white, for: .normal)
+        view.setTitleColor(.ypWhite, for: .normal)
         view.addTarget(self, action: #selector(didTapCreateScheduleButton), for: .touchUpInside)
         view.setTitle(NSLocalizedString("buttonDone", comment: ""), for: .normal)
         view.translatesAutoresizingMaskIntoConstraints = false
