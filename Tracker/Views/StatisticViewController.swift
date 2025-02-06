@@ -93,8 +93,10 @@ final class StatisticViewController: UIViewController {
         do {
             if try statisticStore.fetchNumberOfRecords() == 0 {
                 placeholderStackView.isHidden = false
+                tableView.isHidden = true
             } else {
                 placeholderStackView.isHidden = true
+                tableView.isHidden = false
             }
         } catch {
             showStoreErrorAlert(error.localizedDescription)

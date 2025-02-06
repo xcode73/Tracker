@@ -84,45 +84,7 @@ final class StatisticStore: NSObject {
         self.context = context
     }
 
-    func setupStatisticsIfNeeded() throws {
-        let statistics: Int
-
-        do {
-            statistics = try context.count(for: Statistic.fetchRequest())
-        } catch {
-            throw error
-        }
-
-        if statistics == 0 {
-            do {
-                let statisticsUI: [StatisticUI] = [
-                    StatisticUI(statisticId: 1,
-                                title: NSLocalizedString("statisticBestPeriod", comment: ""),
-                                value: 0),
-                    StatisticUI(statisticId: 2,
-                                title: NSLocalizedString("statisticPerfectDays", comment: ""),
-                                value: 0),
-                    StatisticUI(statisticId: 3,
-                                title: NSLocalizedString("statisticCompletedTrackers", comment: ""),
-                                value: 0),
-                    StatisticUI(statisticId: 4,
-                                title: NSLocalizedString("statisticAverageTrackers", comment: ""),
-                                value: 0)
-                ]
-
-                for statisticUI in statisticsUI {
-                    let statistic = Statistic(context: context)
-
-                    statistic.update(from: statisticUI, in: context)
-                }
-
-                try dataStore.saveContext()
-            } catch {
-                throw error
-            }
-        }
-    }
-
+    // MARK: - Helpers
     private func findStatistic(by id: Int) throws -> Statistic {
         let fetchRequest: NSFetchRequest<Statistic> = Statistic.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "statisticId == %d", id)
@@ -137,6 +99,65 @@ final class StatisticStore: NSObject {
         }
     }
 
+    /// Fetches grouped Record entries by date.
+    private func fetchGroupedRecords() throws -> [NSDictionary] {
+        let request = NSFetchRequest<NSDictionary>(entityName: "Record")
+
+        let dateExpression = NSExpressionDescription()
+        dateExpression.name = "date"
+        dateExpression.expression = NSExpression(forKeyPath: "date")
+        dateExpression.expressionResultType = .dateAttributeType
+
+        let countExpression = NSExpressionDescription()
+        countExpression.name = "trackerCount"
+        countExpression.expression = NSExpression(
+            forFunction: "count:",
+            arguments: [NSExpression(forKeyPath: "trackerId")]
+        )
+        countExpression.expressionResultType = .integer64AttributeType
+
+        request.propertiesToFetch = [dateExpression, countExpression]
+        request.propertiesToGroupBy = [dateExpression]
+        request.resultType = .dictionaryResultType
+
+        return try context.fetch(request)
+    }
+
+    /// Fetches all trackers from Core Data.
+    private func fetchAllTrackers() throws -> [Tracker] {
+        let trackerFetchRequest: NSFetchRequest<Tracker> = Tracker.fetchRequest()
+        return try context.fetch(trackerFetchRequest)
+    }
+
+    /// Determines which trackers are active on a given date.
+    private func getActiveTrackers(for date: Date, allTrackers: [Tracker], calendar: Calendar) -> [Tracker] {
+        allTrackers.filter { tracker in
+            if let trackerDate = tracker.date {
+                return calendar.isDate(trackerDate, inSameDayAs: date)
+            } else if let schedule = tracker.schedule as? Set<Schedule> {
+                let weekday = calendar.component(.weekday, from: date)
+                return schedule.contains { $0.weekDay.rawValue == weekday }
+            }
+            return false
+        }
+    }
+
+    /// Updates statistics based on completed trackers data.
+    private func updateStatistics(with completedDates: [Date], totalCompletedTrackers: Int, recordCount: Int) throws {
+        let bestPeriodStatistic = try findStatistic(by: 1)
+        let perfectDaysStatistic = try findStatistic(by: 2)
+        let completedTrackersStatistic = try findStatistic(by: 3)
+        let averageTrackersStatistic = try findStatistic(by: 4)
+
+        bestPeriodStatistic.value = Int64(bestPeriod(dates: completedDates))
+        perfectDaysStatistic.value = Int64(completedDates.count)
+        completedTrackersStatistic.value = Int64(totalCompletedTrackers)
+        averageTrackersStatistic.value = recordCount == 0 ? 0 : Int64(totalCompletedTrackers) / Int64(recordCount)
+
+        try dataStore.saveContext()
+    }
+
+    /// Finds the longest period of fully completed days.
     private func bestPeriod(dates: [Date]) -> Int {
         guard !dates.isEmpty else { return 0 }
 
@@ -186,65 +207,69 @@ extension StatisticStore: StatisticStoreProtocol {
         }
     }
 
-    func calculateStatistics() throws {
-        let request = NSFetchRequest<NSDictionary>(entityName: "Record")
-
-        let dateExpression = NSExpressionDescription()
-        dateExpression.name = "date"
-        dateExpression.expression = NSExpression(forKeyPath: "date")
-        dateExpression.expressionResultType = .dateAttributeType
-
-        let countExpression = NSExpressionDescription()
-        countExpression.name = "trackerCount"
-        countExpression.expression = NSExpression(
-            forFunction: "count:",
-            arguments: [NSExpression(forKeyPath: "trackerId")]
-        )
-        countExpression.expressionResultType = .integer64AttributeType
-
-        request.propertiesToFetch = [dateExpression, countExpression]
-        request.propertiesToGroupBy = [dateExpression]
-        request.resultType = .dictionaryResultType
+    func setupStatisticsIfNeeded() throws {
+        let statistics: Int
 
         do {
-            let results = try context.fetch(request)
-            let trackerFetchRequest: NSFetchRequest<Tracker> = Tracker.fetchRequest()
-            let allTrackers = try context.fetch(trackerFetchRequest)
+            statistics = try context.count(for: Statistic.fetchRequest())
+        } catch {
+            throw error
+        }
+
+        if statistics == 0 {
+            do {
+                let statisticsUI: [StatisticUI] = [
+                    StatisticUI(statisticId: 1,
+                                title: NSLocalizedString("statisticBestPeriod", comment: ""),
+                                value: 0),
+                    StatisticUI(statisticId: 2,
+                                title: NSLocalizedString("statisticPerfectDays", comment: ""),
+                                value: 0),
+                    StatisticUI(statisticId: 3,
+                                title: NSLocalizedString("statisticCompletedTrackers", comment: ""),
+                                value: 0),
+                    StatisticUI(statisticId: 4,
+                                title: NSLocalizedString("statisticAverageTrackers", comment: ""),
+                                value: 0)
+                ]
+
+                for statisticUI in statisticsUI {
+                    let statistic = Statistic(context: context)
+
+                    statistic.update(from: statisticUI, in: context)
+                }
+
+                try dataStore.saveContext()
+            } catch {
+                throw error
+            }
+        }
+    }
+
+    func calculateStatistics() throws {
+        do {
+            let results = try fetchGroupedRecords()
+            let allTrackers = try fetchAllTrackers()
 
             let calendar = Calendar.current
-                    let today = calendar.component(.weekday, from: Date())
-            let activeTrackers = allTrackers.filter { tracker in
-                if let schedule = tracker.schedule as? Set<Schedule> {
-                    return schedule.contains { $0.weekDay.rawValue == today }
-                }
-                return tracker.date != nil
-            }
-            let totalTrackers = activeTrackers.count
-
             var completedDates: [Date] = []
             var totalCompletedTrackers = 0
 
             for dict in results {
                 if let count = dict["trackerCount"] as? Int64, let date = dict["date"] as? Date {
                     totalCompletedTrackers += Int(count)
-                    if count == Int64(totalTrackers) {
+
+                    let activeTrackers = getActiveTrackers(for: date, allTrackers: allTrackers, calendar: calendar)
+
+                    if count == Int64(activeTrackers.count) {
                         completedDates.append(date)
                     }
                 }
             }
+
             completedDates.sort()
+            try updateStatistics(with: completedDates, totalCompletedTrackers: totalCompletedTrackers, recordCount: results.count)
 
-            let bestPeriodStatistic = try findStatistic(by: 1)
-            let perfectDaysStatistic = try findStatistic(by: 2)
-            let completedTrackersStatistic = try findStatistic(by: 3)
-            let averageTrackersStatistic = try findStatistic(by: 4)
-
-            bestPeriodStatistic.value = Int64(bestPeriod(dates: completedDates))
-            perfectDaysStatistic.value = Int64(completedDates.count)
-            completedTrackersStatistic.value = Int64(totalCompletedTrackers)
-            averageTrackersStatistic.value = results.isEmpty ? 0 : Int64(totalCompletedTrackers) / Int64(results.count)
-
-            try dataStore.saveContext()
         } catch {
             throw error
         }
