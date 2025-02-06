@@ -123,7 +123,7 @@ extension TitleTableViewCell: UITextFieldDelegate {
 #if DEBUG
 @available(iOS 17, *)
 #Preview("Special") {
-    let dataStore = Constants.appDelegate().trackerDataStore
+    let dataStore = Constants.appDelegate().dataStore
     let viewController = TrackerTableViewController(
         tableType: .special(Date()),
         dataStore: dataStore
@@ -136,7 +136,7 @@ extension TitleTableViewCell: UITextFieldDelegate {
 
 @available(iOS 17, *)
 #Preview("Regular") {
-    let dataStore = Constants.appDelegate().trackerDataStore
+    let dataStore = Constants.appDelegate().dataStore
     let viewController = TrackerTableViewController(
         tableType: .regular,
         dataStore: dataStore

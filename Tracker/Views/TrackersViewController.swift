@@ -173,7 +173,7 @@ final class TrackersViewController: UIViewController {
                 )
             }
         } catch {
-            showStoreErrorAlert(NSLocalizedString("alertMessageTrackerStoreInitError", comment: ""))
+            showStoreErrorAlert(error.localizedDescription)
         }
     }
 

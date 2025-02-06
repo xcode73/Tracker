@@ -130,7 +130,7 @@ extension TrackerTypeViewController: TrackerTableViewControllerDelegate {
 #if DEBUG
 @available(iOS 17, *)
 #Preview() {
-    let trackerDataStore = Constants.appDelegate().trackerDataStore
+    let trackerDataStore = Constants.appDelegate().dataStore
     let viewController = TrackerTypeViewController(dataStore: trackerDataStore, currentDate: Date())
     let navigationController = UINavigationController(rootViewController: viewController)
     navigationController.modalPresentationStyle = .pageSheet

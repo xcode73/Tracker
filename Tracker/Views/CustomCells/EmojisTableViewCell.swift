@@ -121,7 +121,7 @@ extension EmojisTableViewCell: UICollectionViewDelegateFlowLayout {
 #if DEBUG
 @available(iOS 17, *)
 #Preview("Special") {
-    let dataStore = Constants.appDelegate().trackerDataStore
+    let dataStore = Constants.appDelegate().dataStore
     let viewController = TrackerTableViewController(
         tableType: .special(Date()),
         dataStore: dataStore
@@ -134,7 +134,7 @@ extension EmojisTableViewCell: UICollectionViewDelegateFlowLayout {
 
 @available(iOS 17, *)
 #Preview("Regular") {
-    let dataStore = Constants.appDelegate().trackerDataStore
+    let dataStore = Constants.appDelegate().dataStore
     let viewController = TrackerTableViewController(
         tableType: .regular,
         dataStore: dataStore

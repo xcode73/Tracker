@@ -11,7 +11,7 @@ import AppMetricaCore
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    lazy var trackerDataStore: DataStoreProtocol = {
+    lazy var dataStore: DataStoreProtocol = {
         do {
             return try DataStore()
         } catch {

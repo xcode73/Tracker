@@ -9,7 +9,7 @@ import UIKit
 
 final class TabBarController: UITabBarController {
     private let analyticsService: AnalyticsServiceProtocol
-    private let dataStore = Constants.appDelegate().trackerDataStore
+    private let dataStore = Constants.appDelegate().dataStore
     private var trackerStore: TrackerStore?
     private var statisticStore: StatisticStore?
 

@@ -13,22 +13,34 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene,
                willConnectTo session: UISceneSession,
                options connectionOptions: UIScene.ConnectionOptions) {
-        guard let scene = (scene as? UIWindowScene) else { return }
-
-        let analyticsService: AnalyticsServiceProtocol
-
-        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
-            analyticsService = appDelegate.analyticsService
-        } else {
-            analyticsService = AnalyticsService() // Фолбэк, если AppDelegate не найден
+        guard let scene = (scene as? UIWindowScene) else {
+            print("Ошибка: UIWindowScene не найден")
+            return
         }
 
+        guard
+            let appDelegate = UIApplication.shared.delegate as? AppDelegate
+        else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+                    print("AppDelegate найден после задержки")
+                } else {
+                    print("Ошибка: AppDelegate не найден")
+                }
+            }
+            return
+        }
+
+        let analyticsService = appDelegate.analyticsService
+        let dataStore = appDelegate.dataStore
+
         window = UIWindow(windowScene: scene)
-        window?.rootViewController = SplashViewController(analyticsService: analyticsService)
+        window?.rootViewController = SplashViewController(dataStore: dataStore,
+                                                          analyticsService: analyticsService)
         window?.makeKeyAndVisible()
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {
-        try? Constants.appDelegate().trackerDataStore.saveContext()
+        try? Constants.appDelegate().dataStore.saveContext()
     }
 }

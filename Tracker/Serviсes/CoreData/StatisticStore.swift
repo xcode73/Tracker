@@ -10,7 +10,7 @@ import CoreData
 protocol StatisticStoreProtocol {
     var numberOfSections: Int { get }
     func numberOfRowsInSection(_ section: Int) -> Int
-    func setupStatisticsIfNeeded() throws
+    func setupStatisticStore() throws
     func fetchStatisticUI(at indexPath: IndexPath) -> StatisticUI
     func calculateStatistics() throws
     func fetchNumberOfRecords() throws -> Int
@@ -30,6 +30,7 @@ enum StatisticStoreUpdate: Hashable {
 enum StatisticStoreError: Error {
     case failedToInitializeContext
     case failedToFindStatistic
+    case statisticAlreadyExists
 
     var userFriendlyMessage: String {
         switch self {
@@ -37,6 +38,8 @@ enum StatisticStoreError: Error {
             return "Не удалось получить данные. Попробуйте еще раз."
         case .failedToFindStatistic:
             return "Не удалось получить данные. Попробуйте переустановить приложение."
+        case .statisticAlreadyExists:
+            return "Не удалось запустить приложение. Попробуйте переустановить."
         }
     }
 }
@@ -85,14 +88,12 @@ final class StatisticStore: NSObject {
     }
 
     // MARK: - Helpers
-    private func findStatistic(by id: Int) throws -> Statistic {
+    private func findStatistic(by id: Int) throws -> Statistic? {
         let fetchRequest: NSFetchRequest<Statistic> = Statistic.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "statisticId == %d", id)
 
         do {
-            guard let statistic = try context.fetch(fetchRequest).first else {
-                throw StatisticStoreError.failedToFindStatistic
-            }
+            let statistic = try context.fetch(fetchRequest).first
             return statistic
         } catch {
             throw error
@@ -144,17 +145,25 @@ final class StatisticStore: NSObject {
 
     /// Updates statistics based on completed trackers data.
     private func updateStatistics(with completedDates: [Date], totalCompletedTrackers: Int, recordCount: Int) throws {
-        let bestPeriodStatistic = try findStatistic(by: 1)
-        let perfectDaysStatistic = try findStatistic(by: 2)
-        let completedTrackersStatistic = try findStatistic(by: 3)
-        let averageTrackersStatistic = try findStatistic(by: 4)
+        do {
+            guard
+                let bestPeriodStatistic = try findStatistic(by: 1),
+                let perfectDaysStatistic = try findStatistic(by: 2),
+                let completedTrackersStatistic = try findStatistic(by: 3),
+                let averageTrackersStatistic = try findStatistic(by: 4)
+            else {
+                throw StatisticStoreError.failedToFindStatistic
+            }
 
-        bestPeriodStatistic.value = Int64(bestPeriod(dates: completedDates))
-        perfectDaysStatistic.value = Int64(completedDates.count)
-        completedTrackersStatistic.value = Int64(totalCompletedTrackers)
-        averageTrackersStatistic.value = recordCount == 0 ? 0 : Int64(totalCompletedTrackers) / Int64(recordCount)
+            bestPeriodStatistic.value = Int64(bestPeriod(dates: completedDates))
+            perfectDaysStatistic.value = Int64(completedDates.count)
+            completedTrackersStatistic.value = Int64(totalCompletedTrackers)
+            averageTrackersStatistic.value = recordCount == 0 ? 0 : Int64(totalCompletedTrackers) / Int64(recordCount)
 
-        try dataStore.saveContext()
+            try dataStore.saveContext()
+        } catch {
+            throw error
+        }
     }
 
     /// Finds the longest period of fully completed days.
@@ -207,42 +216,38 @@ extension StatisticStore: StatisticStoreProtocol {
         }
     }
 
-    func setupStatisticsIfNeeded() throws {
-        let statistics: Int
-
+    func setupStatisticStore() throws {
         do {
-            statistics = try context.count(for: Statistic.fetchRequest())
-        } catch {
-            throw error
-        }
+            let statisticsUI: [StatisticUI] = [
+                StatisticUI(statisticId: 1,
+                            title: NSLocalizedString("statisticBestPeriod", comment: ""),
+                            value: 0),
+                StatisticUI(statisticId: 2,
+                            title: NSLocalizedString("statisticPerfectDays", comment: ""),
+                            value: 0),
+                StatisticUI(statisticId: 3,
+                            title: NSLocalizedString("statisticCompletedTrackers", comment: ""),
+                            value: 0),
+                StatisticUI(statisticId: 4,
+                            title: NSLocalizedString("statisticAverageTrackers", comment: ""),
+                            value: 0)
+            ]
 
-        if statistics == 0 {
-            do {
-                let statisticsUI: [StatisticUI] = [
-                    StatisticUI(statisticId: 1,
-                                title: NSLocalizedString("statisticBestPeriod", comment: ""),
-                                value: 0),
-                    StatisticUI(statisticId: 2,
-                                title: NSLocalizedString("statisticPerfectDays", comment: ""),
-                                value: 0),
-                    StatisticUI(statisticId: 3,
-                                title: NSLocalizedString("statisticCompletedTrackers", comment: ""),
-                                value: 0),
-                    StatisticUI(statisticId: 4,
-                                title: NSLocalizedString("statisticAverageTrackers", comment: ""),
-                                value: 0)
-                ]
+            for statisticUI in statisticsUI {
+                let statistic: Statistic
 
-                for statisticUI in statisticsUI {
-                    let statistic = Statistic(context: context)
-
-                    statistic.update(from: statisticUI, in: context)
+                if (try findStatistic(by: statisticUI.statisticId)) != nil {
+                    throw StatisticStoreError.statisticAlreadyExists
+                } else {
+                    statistic = Statistic(context: context)
                 }
 
-                try dataStore.saveContext()
-            } catch {
-                throw error
+                statistic.update(from: statisticUI, in: context)
             }
+
+            try dataStore.saveContext()
+        } catch {
+            throw error
         }
     }
 
@@ -266,10 +271,13 @@ extension StatisticStore: StatisticStoreProtocol {
                     }
                 }
             }
-
             completedDates.sort()
-            try updateStatistics(with: completedDates, totalCompletedTrackers: totalCompletedTrackers, recordCount: results.count)
 
+            try updateStatistics(
+                with: completedDates,
+                totalCompletedTrackers: totalCompletedTrackers,
+                recordCount: results.count
+            )
         } catch {
             throw error
         }

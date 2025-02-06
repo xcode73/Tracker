@@ -72,7 +72,6 @@ final class StatisticViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        setupStatisticsIfNeeded()
         setupUI()
     }
 
@@ -105,7 +104,7 @@ final class StatisticViewController: UIViewController {
 
     private func setupStatisticsIfNeeded() {
         do {
-            try statisticStore.setupStatisticsIfNeeded()
+            try statisticStore.setupStatisticStore()
         } catch {
             showStoreErrorAlert(error.localizedDescription)
         }

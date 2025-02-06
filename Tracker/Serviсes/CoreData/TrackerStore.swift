@@ -215,9 +215,9 @@ extension TrackerStore: TrackerStoreProtocol {
             let tracker: Tracker
 
             if let existingTracker = findTracker(by: trackerUI.id) {
-                tracker = existingTracker // Обновляем существующий
+                tracker = existingTracker
             } else {
-                tracker = Tracker(context: context) // Создаем новый
+                tracker = Tracker(context: context)
             }
 
             tracker.update(from: trackerUI, category: category, in: context)

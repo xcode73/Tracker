@@ -8,8 +8,19 @@
 import UIKit
 
 final class SplashViewController: UIViewController {
+    private let dataStore: DataStoreProtocol
     private let analyticsService: AnalyticsServiceProtocol
-    // MARK: - UI Components
+
+    private lazy var statisticStore: StatisticStoreProtocol? = {
+        do {
+            try statisticStore = StatisticStore(dataStore: dataStore)
+            return statisticStore
+        } catch {
+            print("Error: \(error)")
+            return nil
+        }
+    }()
+
     private lazy var logoImageView: UIImageView = {
         let view = UIImageView()
         view.image = .icLogo
@@ -18,7 +29,12 @@ final class SplashViewController: UIViewController {
         return view
     }()
 
-    init(analyticsService: AnalyticsServiceProtocol) {
+    // MARK: - Init
+    init(
+        dataStore: DataStoreProtocol,
+        analyticsService: AnalyticsServiceProtocol
+    ) {
+        self.dataStore = dataStore
         self.analyticsService = analyticsService
         super.init(nibName: nil, bundle: nil)
     }
@@ -41,6 +57,14 @@ final class SplashViewController: UIViewController {
             switchToTabBarController()
         } else {
             switchToOnboardingViewController()
+        }
+    }
+
+    private func setupStatisticStore() {
+        do {
+            try statisticStore?.setupStatisticStore()
+        } catch {
+            print("Error: \(error)")
         }
     }
 
@@ -79,12 +103,14 @@ final class SplashViewController: UIViewController {
 extension SplashViewController: OnboardingViewControllerDelegate {
     func onboardingCompleted() {
         dismiss(animated: true)
+        setupStatisticStore()
     }
 }
 
 // MARK: - Preview
 @available(iOS 17, *)
 #Preview() {
+    let dataStore = Constants.appDelegate().dataStore
     let analyticsService = AnalyticsService()
-    SplashViewController(analyticsService: analyticsService)
+    SplashViewController(dataStore: dataStore, analyticsService: analyticsService)
 }
