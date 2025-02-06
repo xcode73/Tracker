@@ -37,7 +37,7 @@ final class StatisticViewController: UIViewController {
 
     private lazy var placeholderImageView: UIImageView = {
         let view = UIImageView()
-        view.image = .icDizzy
+        view.image = .icCrying
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -48,7 +48,7 @@ final class StatisticViewController: UIViewController {
         view.font = Fonts.ypMedium12
         view.textAlignment = .center
         view.textColor = .ypBlack
-        view.text = NSLocalizedString("placeholderCategories", comment: "")
+        view.text = NSLocalizedString("placeholderStatistics", comment: "")
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
