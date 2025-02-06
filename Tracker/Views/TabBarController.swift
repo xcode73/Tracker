@@ -9,7 +9,7 @@ import UIKit
 
 final class TabBarController: UITabBarController {
     private let analyticsService: AnalyticsServiceProtocol
-    private let dataStore = Constants.appDelegate().dataStore
+    private let dataStore: DataStoreProtocol
     private var trackerStore: TrackerStore?
     private var statisticStore: StatisticStore?
 
@@ -30,7 +30,11 @@ final class TabBarController: UITabBarController {
         return view
     }()
 
-    init(analyticsService: AnalyticsServiceProtocol) {
+    init(
+        dataStore: DataStoreProtocol,
+        analyticsService: AnalyticsServiceProtocol
+    ) {
+        self.dataStore = dataStore
         self.analyticsService = analyticsService
         super.init(nibName: nil, bundle: nil)
     }
@@ -155,7 +159,8 @@ final class TabBarController: UITabBarController {
 #if DEBUG
 @available(iOS 17, *)
 #Preview("TabController") {
+    let dataStore = Constants.appDelegate().dataStore
     let analyticsService = AnalyticsService()
-    TabBarController(analyticsService: analyticsService)
+    TabBarController(dataStore: dataStore, analyticsService: analyticsService)
 }
 #endif

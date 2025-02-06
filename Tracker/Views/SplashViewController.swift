@@ -77,7 +77,10 @@ final class SplashViewController: UIViewController {
     }
 
     private func switchToTabBarController() {
-        let tabBarController = TabBarController(analyticsService: analyticsService)
+        let tabBarController = TabBarController(
+            dataStore: dataStore,
+            analyticsService: analyticsService
+        )
 
         guard let window = UIApplication.shared.windows.first else {
             assertionFailure("Invalid window configuration")
