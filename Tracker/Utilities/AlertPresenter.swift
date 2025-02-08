@@ -38,7 +38,7 @@ struct AlertPresenter {
             title: model.title,
             message: model.message,
             buttons: model.buttons,
-            //            identifier: model.identifier,
+            identifier: model.identifier,
             completion: model.completion ?? {}
         )
     }
@@ -48,14 +48,14 @@ struct AlertPresenter {
         title: String?,
         message: String?,
         buttons: [AlertButton],
-        //        identifier: String,
+        identifier: String,
         completion: @escaping () -> Void
     ) {
         let alert = UIAlertController(title: title,
                                       message: message,
                                       preferredStyle: .actionSheet)
         alert.view.subviews.first?.subviews.first?.subviews.first?.backgroundColor = .systemBackground
-        //        alert.view.accessibilityIdentifier = identifier
+        alert.view.accessibilityIdentifier = identifier
 
         for button in buttons {
             switch button {

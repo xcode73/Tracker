@@ -29,8 +29,9 @@ final class TrackerTableViewController: UITableViewController {
     // MARK: - Properties
     weak var delegate: TrackerTableViewControllerDelegate?
 
+    private let categoryStore: CategoryStoreProtocol
+
     private var tableType: TrackerTableType
-    private var dataStore: DataStoreProtocol
     private var titleSectionItems = [""]
     private var tableSectionItems = [String]()
 
@@ -65,10 +66,10 @@ final class TrackerTableViewController: UITableViewController {
     // MARK: - Init
     init(
         tableType: TrackerTableType,
-        dataStore: DataStoreProtocol
+        categoryStore: CategoryStoreProtocol
     ) {
         self.tableType = tableType
-        self.dataStore = dataStore
+        self.categoryStore = categoryStore
 
         super.init(nibName: nil, bundle: nil)
     }
@@ -333,7 +334,7 @@ final class TrackerTableViewController: UITableViewController {
             switch indexPath.row {
             case 0:
                 let viewController = CategoriesViewController(selectedCategory: category)
-                let viewModel = CategoriesViewModel(dataStore: dataStore)
+                let viewModel = CategoriesViewModel(categoryStore: categoryStore)
                 viewController.initialize(viewModel: viewModel)
                 viewController.delegate = self
                 let navigationController = UINavigationController(
@@ -489,32 +490,3 @@ extension TrackerTableViewController: ButtonsCellDelegate {
         delegate?.saveTracker(trackerUI: updatedTracker, categoryUI: updatedCategory)
     }
 }
-
-// MARK: - Preview
-#if DEBUG
-@available(iOS 17, *)
-#Preview("Special") {
-    let dataStore = Constants.appDelegate().dataStore
-    let viewController = TrackerTableViewController(
-        tableType: .special(Date()),
-        dataStore: dataStore
-    )
-    let navigationController = UINavigationController(rootViewController: viewController)
-    navigationController.modalPresentationStyle = .pageSheet
-
-    return navigationController
-}
-
-@available(iOS 17, *)
-#Preview("Regular") {
-    let dataStore = Constants.appDelegate().dataStore
-    let viewController = TrackerTableViewController(
-        tableType: .regular,
-        dataStore: dataStore
-    )
-    let navigationController = UINavigationController(rootViewController: viewController)
-    navigationController.modalPresentationStyle = .pageSheet
-
-    return navigationController
-}
-#endif

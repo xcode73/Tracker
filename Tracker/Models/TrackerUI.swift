@@ -68,7 +68,7 @@ struct TrackerUI: Identifiable, Equatable {
         self.date = date
     }
 
-    init(from entity: Tracker) {
+    init(from entity: TrackerCoreData) {
         self.id = entity.trackerId
         self.title = entity.title
         self.color = entity.color
@@ -76,7 +76,7 @@ struct TrackerUI: Identifiable, Equatable {
         self.isPinned = entity.isPinned
         self.date = entity.date
 
-        if let scheduleSet = entity.schedule as? Set<Schedule> {
+        if let scheduleSet = entity.schedule as? Set<ScheduleCoreData> {
             self.schedule = scheduleSet.map { $0.weekDay }
         } else {
             self.schedule = nil

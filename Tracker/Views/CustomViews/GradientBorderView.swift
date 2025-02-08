@@ -7,7 +7,7 @@
 
 import UIKit
 
-class GradientBorderView: UIView {
+final class GradientBorderView: UIView {
     private let gradientLayer = CAGradientLayer()
     private let shapeLayer = CAShapeLayer()
 

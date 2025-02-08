@@ -8,6 +8,7 @@
 import CoreData
 
 protocol TrackerStoreProtocol {
+    var delegate: TrackerStoreDelegate? { get set }
     var numberOfSections: Int { get }
     func updateFetchRequest(with filter: Filter, for date: Date) throws
     func updateFetchRequest(with searchText: String?, for date: Date) throws
@@ -17,9 +18,6 @@ protocol TrackerStoreProtocol {
     func saveTracker(from trackerUI: TrackerUI, categoryUI: CategoryUI) throws
     func deleteTracker(_ trackerUI: TrackerUI) throws
     func sectionTitle(at section: Int) -> String?
-    func deleteAllCategories() throws
-    func createMockCategories() throws
-    func createMockTrackers(_ mockTrackers: [MockTracker], mockDate: Date) throws
 }
 
 protocol TrackerStoreDelegate: AnyObject {
@@ -63,16 +61,16 @@ enum TrackerStoreUpdate: Hashable {
     case object(ObjectUpdate)
 }
 
-final class TrackerStore: NSObject {
+class TrackerStore: NSObject {
     // MARK: - Properties
     weak var delegate: TrackerStoreDelegate?
     private var inProgressChanges: [TrackerStoreUpdate] = []
 
-    private let context: NSManagedObjectContext
-    private let dataStore: DataStoreProtocol
+    let context: NSManagedObjectContext
+    let dataStore: DataStoreProtocol
     private var selectedFilter: Filter = .all
 
-    private var fetchedResultsController: NSFetchedResultsController<Tracker>
+    private var fetchedResultsController: NSFetchedResultsController<TrackerCoreData>
 
     // MARK: - Init
     init(
@@ -91,7 +89,7 @@ final class TrackerStore: NSObject {
         self.fetchedResultsController = NSFetchedResultsController()
     }
 
-    private func applySortAndRefresh(with fetchRequest: NSFetchRequest<Tracker>) throws {
+    private func applySortAndRefresh(with fetchRequest: NSFetchRequest<TrackerCoreData>) throws {
         fetchRequest.sortDescriptors = [
             NSSortDescriptor(key: "isPinned", ascending: false),
             NSSortDescriptor(key: "sectionTitle", ascending: false),
@@ -117,15 +115,15 @@ final class TrackerStore: NSObject {
         delegate?.didUpdate(inProgressChanges)
     }
 
-    private func findTracker(by id: UUID) -> Tracker? {
-        let fetchRequest: NSFetchRequest<Tracker> = Tracker.fetchRequest()
+    private func findTracker(by id: UUID) -> TrackerCoreData? {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         fetchRequest.predicate = PredicateFactory.TrackerPredicate.byId(id)
 
         return try? context.fetch(fetchRequest).first
     }
 
-    private func findCategory(by id: UUID) throws -> Category {
-        let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
+    private func findCategory(by id: UUID) throws -> CategoryCoraData {
+        let fetchRequest: NSFetchRequest<CategoryCoraData> = CategoryCoraData.fetchRequest()
         fetchRequest.predicate = PredicateFactory.CategoryPredicate.byId(id)
 
         guard
@@ -141,7 +139,7 @@ final class TrackerStore: NSObject {
 // MARK: - TrackerStoreProtocol
 extension TrackerStore: TrackerStoreProtocol {
     func updateFetchRequest(with filter: Filter, for date: Date) throws {
-        let newFetchRequest: NSFetchRequest<Tracker> = Tracker.fetchRequest()
+        let newFetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
 
         switch filter {
         case .completed:
@@ -160,7 +158,7 @@ extension TrackerStore: TrackerStoreProtocol {
     }
 
     func updateFetchRequest(with searchText: String?, for date: Date) throws {
-        let newFetchRequest: NSFetchRequest<Tracker> = Tracker.fetchRequest()
+        let newFetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
 
         if let searchText {
             newFetchRequest.predicate = PredicateFactory.TrackerPredicate.search(
@@ -212,12 +210,12 @@ extension TrackerStore: TrackerStoreProtocol {
     func saveTracker(from trackerUI: TrackerUI, categoryUI: CategoryUI) throws {
         do {
             let category = try findCategory(by: categoryUI.id)
-            let tracker: Tracker
+            let tracker: TrackerCoreData
 
             if let existingTracker = findTracker(by: trackerUI.id) {
                 tracker = existingTracker
             } else {
-                tracker = Tracker(context: context)
+                tracker = TrackerCoreData(context: context)
             }
 
             tracker.update(from: trackerUI, category: category, in: context)
@@ -235,83 +233,6 @@ extension TrackerStore: TrackerStoreProtocol {
 
         do {
             try dataStore.deleteItem(tracker)
-            try dataStore.saveContext()
-        } catch {
-            throw error
-        }
-    }
-
-    func deleteAllCategories() throws {
-        let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
-
-        do {
-            let categories = try context.fetch(fetchRequest)
-
-            for category in categories {
-                try dataStore.deleteItem(category)
-            }
-
-            try dataStore.saveContext()
-        } catch {
-            throw error
-        }
-    }
-
-    func createMockCategories() throws {
-        let categoryNames = ["Foo", "Baz"]
-
-        for name in categoryNames {
-            let category = Category(context: context)
-            category.categoryId = UUID()
-            category.title = name
-        }
-
-        do {
-            try dataStore.saveContext()
-        } catch {
-            throw error
-        }
-    }
-
-    func createMockTrackers(_ mockTrackers: [MockTracker], mockDate: Date) throws {
-        let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "title IN %@", ["Foo", "Baz"])
-        let existingCategories = try context.fetch(fetchRequest)
-
-        guard
-            let fooCategory = existingCategories.first(where: { $0.title == "Foo" }),
-            let bazCategory = existingCategories.first(where: { $0.title == "Baz" })
-        else {
-            throw TrackerStoreError.failedToFindMockCategories
-        }
-
-        var schedule: [WeekDay]?
-        var date: Date?
-
-        for mockTracker in mockTrackers {
-            if mockTracker.hasSchedule {
-                schedule = WeekDay.ordered()
-            } else {
-                date = mockDate
-            }
-
-            let trackerUI = TrackerUI(
-                id: UUID(),
-                title: mockTracker.name,
-                color: mockTracker.color,
-                emoji: mockTracker.emoji,
-                isPinned: mockTracker.isPinned,
-                schedule: schedule,
-                date: date
-            )
-
-            let tracker = Tracker(context: context)
-            let category = (mockTracker.categoryName == "Foo") ? fooCategory : bazCategory
-
-            tracker.update(from: trackerUI, category: category, in: context)
-        }
-
-        do {
             try dataStore.saveContext()
         } catch {
             throw error

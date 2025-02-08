@@ -204,13 +204,3 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         ])
     }
 }
-
-// MARK: - Preview
-#if DEBUG
-@available(iOS 17, *)
-#Preview() {
-    let dataStore = Constants.appDelegate().dataStore
-    let analyticsService = AnalyticsService()
-    TabBarController(dataStore: dataStore, analyticsService: analyticsService)
-}
-#endif

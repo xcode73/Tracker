@@ -110,11 +110,3 @@ class OnboardingContentViewController: UIViewController {
         ])
     }
 }
-
-// MARK: - Preview
-#if DEBUG
-@available(iOS 17, *)
-#Preview("Onboarding") {
-    OnboardingViewController()
-}
-#endif

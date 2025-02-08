@@ -16,6 +16,13 @@ protocol RecordStoreProtocol {
 
 enum RecordStoreError: Error {
     case failedToInitializeContext
+
+    var userFriendlyMessage: String {
+        switch self {
+        case .failedToInitializeContext:
+            return "Не удалось получить данные. Попробуйте еще раз."
+        }
+    }
 }
 
 final class RecordStore: NSObject {
@@ -39,10 +46,10 @@ final class RecordStore: NSObject {
 // MARK: - RecordStoreProtocol
 extension RecordStore: RecordStoreProtocol {
     func recordObject(for trackerId: UUID, date: Date) -> RecordUI? {
-        let request = NSFetchRequest<Record>(entityName: "Record")
+        let request = NSFetchRequest<RecordCoreData>(entityName: "RecordCoreData")
         request.predicate = NSPredicate(format: "%K == %@ AND %K == %@",
-                                        #keyPath(Record.trackerId), trackerId as NSUUID,
-                                        #keyPath(Record.date), date as NSDate)
+                                        #keyPath(RecordCoreData.trackerId), trackerId as NSUUID,
+                                        #keyPath(RecordCoreData.date), date as NSDate)
 
         guard let record = try? context.fetch(request).first else { return nil }
 
@@ -50,22 +57,22 @@ extension RecordStore: RecordStoreProtocol {
     }
 
     func fetchNumberOfRecords(for trackerId: UUID) -> Int? {
-        let request = NSFetchRequest<Record>(entityName: "Record")
+        let request = NSFetchRequest<RecordCoreData>(entityName: "RecordCoreData")
         request.predicate = NSPredicate(format: "%K == %@",
-                                        #keyPath(Record.trackerId),
+                                        #keyPath(RecordCoreData.trackerId),
                                         trackerId as NSUUID)
 
         return try? context.count(for: request)
     }
 
     func addRecord(_ record: RecordUI) throws {
-        let request = NSFetchRequest<Tracker>(entityName: "Tracker")
+        let request = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
         request.predicate = NSPredicate(format: "%K == %@",
-                                        #keyPath(Tracker.trackerId),
+                                        #keyPath(TrackerCoreData.trackerId),
                                         record.trackerId as NSUUID)
         guard let storedTracker = try? context.fetch(request).first else { return }
 
-        let recordCoreData = Record(context: context)
+        let recordCoreData = RecordCoreData(context: context)
         recordCoreData.date = record.date
         recordCoreData.trackerId = record.trackerId
         recordCoreData.tracker = storedTracker
@@ -74,11 +81,11 @@ extension RecordStore: RecordStoreProtocol {
     }
 
     func deleteRecord(_ record: RecordUI) throws {
-        let request = NSFetchRequest<Record>(entityName: "Record")
+        let request = NSFetchRequest<RecordCoreData>(entityName: "RecordCoreData")
         request.predicate = NSPredicate(format: "%K == %@ AND %K == %@",
-                                        #keyPath(Record.trackerId),
+                                        #keyPath(RecordCoreData.trackerId),
                                         record.trackerId as NSUUID,
-                                        #keyPath(Record.date),
+                                        #keyPath(RecordCoreData.date),
                                         record.date as NSDate)
         guard let storedRecord = try? context.fetch(request).first else { return }
 

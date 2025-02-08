@@ -9,7 +9,7 @@ import UIKit
 
 final class StatisticViewController: UIViewController {
     // MARK: - Properties
-    private let statisticStore: StatisticStoreProtocol
+    private var statisticStore: StatisticStoreProtocol
     private let analyticsService: AnalyticsServiceProtocol
 
     // MARK: - UI Components
@@ -62,6 +62,7 @@ final class StatisticViewController: UIViewController {
         self.analyticsService = analyticsService
 
         super.init(nibName: nil, bundle: nil)
+        self.statisticStore.delegate = self
     }
 
     required init?(coder: NSCoder) {
@@ -208,13 +209,3 @@ extension StatisticViewController: StatisticStoreDelegate {
         }
     }
 }
-
-// MARK: - Preview
-#if DEBUG
-@available(iOS 17, *)
-#Preview() {
-    let dataStore = Constants.appDelegate().dataStore
-    let analyticsService = AnalyticsService()
-    TabBarController(dataStore: dataStore, analyticsService: analyticsService)
-}
-#endif

@@ -103,3 +103,4 @@ iOSInjectionProject/
 *.lock
 
 APIKeys.swift
+TrackerTests/__Snapshots__/

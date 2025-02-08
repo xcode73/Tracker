@@ -30,16 +30,21 @@ enum AnalyticsItem: String {
     case delete
 }
 
-final class AnalyticsService: AnalyticsServiceProtocol {
-    func report(event: AnalyticsEvent, screen: AnalyticsScreen, item: AnalyticsItem?) {
-        AppMetrica.reportEvent(
-            name: event.rawValue,
-            parameters: toDictionary(
-                screen: screen,
-                item: item
-            ), onFailure: { error in
-                print("REPORT ERROR: %@", error.localizedDescription)
-            })
+final class AnalyticsService {
+    private var serviceType = String()
+
+    init() {
+        let serviceType = ProcessInfo.processInfo.environment["analytics_service"]
+        guard serviceType != "null" else { return }
+
+        guard
+            let configuration = AppMetricaConfiguration(apiKey: APIKeys.appMetricaKey)
+        else {
+            print("ERROR: AppMetrica configuration error")
+            return
+        }
+
+        AppMetrica.activate(with: configuration)
     }
 
     private func toDictionary(screen: AnalyticsScreen, item: AnalyticsItem?) -> [AnyHashable: Any] {
@@ -50,6 +55,20 @@ final class AnalyticsService: AnalyticsServiceProtocol {
             dict["item"] = item.rawValue
         }
         return dict
+    }
+}
+
+extension AnalyticsService: AnalyticsServiceProtocol {
+    func report(event: AnalyticsEvent, screen: AnalyticsScreen, item: AnalyticsItem?) {
+        guard serviceType != "null" else { return }
+        AppMetrica.reportEvent(
+            name: event.rawValue,
+            parameters: toDictionary(
+                screen: screen,
+                item: item
+            ), onFailure: { error in
+                print("REPORT ERROR: %@", error.localizedDescription)
+            })
     }
 }
 

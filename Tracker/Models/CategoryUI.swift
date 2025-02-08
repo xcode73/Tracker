@@ -18,11 +18,11 @@ struct CategoryUI: Equatable {
         self.trackers = trackers
     }
 
-    init(from entity: Category) {
+    init(from entity: CategoryCoraData) {
         self.id = entity.categoryId
         self.title = entity.title
 
-        if let trackersSet = entity.trackers as? Set<Tracker> {
+        if let trackersSet = entity.trackers as? Set<TrackerCoreData> {
             self.trackers = trackersSet.map { TrackerUI(from: $0) }
         } else {
             self.trackers = []

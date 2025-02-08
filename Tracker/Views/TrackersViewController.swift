@@ -9,34 +9,14 @@ import UIKit
 
 final class TrackersViewController: UIViewController {
     // MARK: - Properties
-    private let dataStore: DataStoreProtocol
-    var trackerStore: TrackerStoreProtocol
-    private var selectedFilter: Filter = UserDefaults.standard.loadFilter()
-    private var placeholderState: PlaceholderState = .trackers
+    private var trackerStore: TrackerStoreProtocol
+    private let scheduleStore: ScheduleStoreProtocol
+    private let recordStore: RecordStoreProtocol
+    private let categoryStore: CategoryStoreProtocol
     private let analyticsService: AnalyticsServiceProtocol
 
-    private lazy var scheduleStore: ScheduleStoreProtocol? = {
-        do {
-            try scheduleStore = ScheduleStore(dataStore: dataStore)
-            return scheduleStore
-        } catch {
-            placeholderState = .search
-            showStoreErrorAlert(NSLocalizedString("alertMessageScheduleStoreInitError",
-                                                  comment: ""))
-            return nil
-        }
-    }()
-
-    private lazy var recordStore: RecordStoreProtocol? = {
-        do {
-            try recordStore = RecordStore(dataStore: dataStore)
-            return recordStore
-        } catch {
-            placeholderState = .search
-            showStoreErrorAlert(NSLocalizedString("alertMessageRecordStoreInitError", comment: ""))
-            return nil
-        }
-    }()
+    private var selectedFilter: Filter = UserDefaults.standard.loadFilter()
+    private var placeholderState: PlaceholderState = .trackers
 
     private let params = Constants.trackersCollectionViewGeometricParam
 
@@ -124,15 +104,20 @@ final class TrackersViewController: UIViewController {
 
     // MARK: - Init
     init(
-        dataStore: DataStoreProtocol,
         trackerStore: TrackerStoreProtocol,
+        scheduleStore: ScheduleStoreProtocol,
+        recordStore: RecordStoreProtocol,
+        categoryStore: CategoryStoreProtocol,
         analyticsService: AnalyticsServiceProtocol
     ) {
-        self.dataStore = dataStore
         self.trackerStore = trackerStore
+        self.scheduleStore = scheduleStore
+        self.recordStore = recordStore
+        self.categoryStore = categoryStore
         self.analyticsService = analyticsService
 
         super.init(nibName: nil, bundle: nil)
+        self.trackerStore.delegate = self
     }
 
     required init?(coder: NSCoder) {
@@ -244,7 +229,7 @@ final class TrackersViewController: UIViewController {
     }
 
     private func updateCounterTitle(for trackerId: UUID) -> String {
-        let completedCount = recordStore?.fetchNumberOfRecords(for: trackerId) ?? 0
+        let completedCount = recordStore.fetchNumberOfRecords(for: trackerId) ?? 0
         let localizedFormatString = NSLocalizedString("trackers.daysCompleted", comment: "")
 
         return String(format: localizedFormatString, completedCount)
@@ -253,8 +238,10 @@ final class TrackersViewController: UIViewController {
     // MARK: - Show Tracker Detail
     private func showTrackerDetail(trackerUI: TrackerUI, categoryUI: CategoryUI) {
         let counterTitle = updateCounterTitle(for: trackerUI.id)
-        let viewController = TrackerTableViewController(tableType: .edit(trackerUI, categoryUI, counterTitle),
-                                                        dataStore: dataStore)
+        let viewController = TrackerTableViewController(
+            tableType: .edit(trackerUI, categoryUI, counterTitle),
+            categoryStore: categoryStore
+        )
         viewController.delegate = self
         let navigationController = UINavigationController(
             rootViewController: viewController
@@ -304,7 +291,7 @@ final class TrackersViewController: UIViewController {
             title: NSLocalizedString("alertTitleStoreError", comment: ""),
             message: message,
             buttons: [.cancelButton],
-            identifier: "Tracker Store Error Alert",
+            identifier: "Store Error Alert",
             completion: nil
         )
 
@@ -314,7 +301,7 @@ final class TrackersViewController: UIViewController {
     // MARK: - Actions
     @objc
     private func didTapAddButton() {
-        let viewController = TrackerTypeViewController(dataStore: dataStore,
+        let viewController = TrackerTypeViewController(categoryStore: categoryStore,
                                                        currentDate: datePicker.date.truncated)
         viewController.delegate = self
         let navigationController = UINavigationController( rootViewController: viewController )
@@ -418,7 +405,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         }
 
         let tracker = trackerStore.fetchTracker(at: indexPath)
-        let trackerRecord = recordStore?.recordObject(for: tracker.id, date: datePicker.date.truncated)
+        let trackerRecord = recordStore.recordObject(for: tracker.id, date: datePicker.date.truncated)
 
         cell.backgroundColor = .clear
         cell.delegate = self
@@ -606,14 +593,17 @@ extension TrackersViewController: TrackerCellDelegate {
             return
         }
 
-        if let record {
-            try? recordStore?.deleteRecord(record)
-        } else {
-            let newRecord = RecordUI(trackerId: tracker.id, date: datePicker.date.truncated)
-            try? recordStore?.addRecord(newRecord)
+        do {
+            if let record {
+                try recordStore.deleteRecord(record)
+            } else {
+                let newRecord = RecordUI(trackerId: tracker.id, date: datePicker.date.truncated)
+                try recordStore.addRecord(newRecord)
+            }
+            analyticsService.report(event: .click, screen: .main, item: .track)
+        } catch {
+            showStoreErrorAlert(error.localizedDescription)
         }
-
-        analyticsService.report(event: .click, screen: .main, item: .track)
     }
 }
 
@@ -705,13 +695,3 @@ extension TrackersViewController: TrackerStoreDelegate {
         }
     }
 }
-
-// MARK: - Preview
-#if DEBUG
-@available(iOS 17, *)
-#Preview() {
-    let dataStore = Constants.appDelegate().dataStore
-    let analyticsService = AnalyticsService()
-    TabBarController(dataStore: dataStore, analyticsService: analyticsService)
-}
-#endif

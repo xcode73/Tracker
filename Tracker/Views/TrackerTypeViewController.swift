@@ -15,7 +15,7 @@ protocol TrackerTypeViewControllerDelegate: AnyObject {
 final class TrackerTypeViewController: UIViewController {
     weak var delegate: TrackerTypeViewControllerDelegate?
     private var currentDate: Date
-    private let dataStore: DataStoreProtocol
+    private let categoryStore: CategoryStoreProtocol
 
     // MARK: - UI Components
     private lazy var buttonsStackView: UIStackView = {
@@ -50,11 +50,11 @@ final class TrackerTypeViewController: UIViewController {
 
     // MARK: - Init
     init(
-        dataStore: DataStoreProtocol,
+        categoryStore: CategoryStoreProtocol,
         currentDate: Date
     ) {
+        self.categoryStore = categoryStore
         self.currentDate = currentDate
-        self.dataStore = dataStore
 
         super.init(nibName: nil, bundle: nil)
     }
@@ -74,7 +74,7 @@ final class TrackerTypeViewController: UIViewController {
     @objc
     private func didTapRegularButton() {
         let viewController = TrackerTableViewController(tableType: .regular,
-                                                        dataStore: dataStore)
+                                                        categoryStore: categoryStore)
         viewController.delegate = self
         let navigationController = UINavigationController(
             rootViewController: viewController
@@ -86,7 +86,7 @@ final class TrackerTypeViewController: UIViewController {
     @objc
     private func didTapNonRegularButton() {
         let viewController = TrackerTableViewController(tableType: .special(currentDate),
-                                                        dataStore: dataStore)
+                                                        categoryStore: categoryStore)
         viewController.delegate = self
         let navigationController = UINavigationController(
             rootViewController: viewController
@@ -125,16 +125,3 @@ extension TrackerTypeViewController: TrackerTableViewControllerDelegate {
         dismiss(animated: true)
     }
 }
-
-// MARK: - Preview
-#if DEBUG
-@available(iOS 17, *)
-#Preview() {
-    let trackerDataStore = Constants.appDelegate().dataStore
-    let viewController = TrackerTypeViewController(dataStore: trackerDataStore, currentDate: Date())
-    let navigationController = UINavigationController(rootViewController: viewController)
-    navigationController.modalPresentationStyle = .pageSheet
-
-    return navigationController
-}
-#endif

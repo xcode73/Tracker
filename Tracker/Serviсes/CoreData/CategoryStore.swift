@@ -8,6 +8,7 @@
 import CoreData
 
 protocol CategoryStoreProtocol {
+    var delegate: CategoryStoreDelegate? { get set }
     var numberOfSections: Int { get }
     func numberOfRowsInSection(_ section: Int) -> Int
     func fetchCategory(at indexPath: IndexPath) -> CategoryUI
@@ -26,21 +27,28 @@ enum CategoryStoreUpdate: Hashable {
     case moved(from: IndexPath, to: IndexPath)
 }
 
-final class CategoryStore: NSObject {
-    enum CategoriesDataProviderError: Error {
-        case failedToInitializeContext
-    }
+enum CategoryStoreError: Error {
+    case failedToInitializeContext
 
+    var userFriendlyMessage: String {
+        switch self {
+        case .failedToInitializeContext:
+            return "Не удалось получить данные. Попробуйте еще раз."
+        }
+    }
+}
+
+final class CategoryStore: NSObject {
     weak var delegate: CategoryStoreDelegate?
     var inProgressChanges: [CategoryStoreUpdate] = []
 
     private let context: NSManagedObjectContext
     private let dataStore: DataStoreProtocol
 
-    private lazy var fetchedResultsController: NSFetchedResultsController<Category> = {
-        let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
+    private lazy var fetchedResultsController: NSFetchedResultsController<CategoryCoraData> = {
+        let fetchRequest: NSFetchRequest<CategoryCoraData> = CategoryCoraData.fetchRequest()
         fetchRequest.sortDescriptors = [
-            NSSortDescriptor(keyPath: \Category.title, ascending: true)
+            NSSortDescriptor(keyPath: \CategoryCoraData.title, ascending: true)
         ]
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
                                                                   managedObjectContext: context,
@@ -58,7 +66,7 @@ final class CategoryStore: NSObject {
         guard
             let context = dataStore.managedObjectContext
         else {
-            throw CategoriesDataProviderError.failedToInitializeContext
+            throw CategoryStoreError.failedToInitializeContext
         }
 
         self.delegate = delegate
@@ -66,8 +74,8 @@ final class CategoryStore: NSObject {
         self.dataStore = dataStore
     }
 
-    private func findCategory(by id: UUID) throws -> Category? {
-        let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
+    private func findCategory(by id: UUID) throws -> CategoryCoraData? {
+        let fetchRequest: NSFetchRequest<CategoryCoraData> = CategoryCoraData.fetchRequest()
         fetchRequest.predicate = PredicateFactory.CategoryPredicate.byId(id)
 
         return try context.fetch(fetchRequest).first
@@ -91,12 +99,12 @@ extension CategoryStore: CategoryStoreProtocol {
 
     func saveCategory(from categoryUI: CategoryUI) throws {
         do {
-            let category: Category
+            let category: CategoryCoraData
 
             if let existingCategory = try findCategory(by: categoryUI.id) {
                 category = existingCategory // Обновляем
             } else {
-                category = Category(context: context) // Создаем
+                category = CategoryCoraData(context: context) // Создаем
             }
 
             category.update(from: categoryUI, in: context)

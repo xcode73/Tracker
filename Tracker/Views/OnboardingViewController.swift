@@ -11,9 +11,14 @@ protocol OnboardingViewControllerDelegate: AnyObject {
     func onboardingCompleted()
 }
 
-final class OnboardingViewController: UIPageViewController {
+final class OnboardingViewController: UIPageViewController, StatisticStoreDelegate {
+    func didUpdate(_ updates: [StatisticStoreUpdate]) {
+
+    }
+
     // MARK: - Properties
     weak var onboardingDelegate: OnboardingViewControllerDelegate?
+    private let statisticStore: StatisticStoreProtocol
     private var currentIndex = 0
 
     private let onboardingItems = [
@@ -38,10 +43,16 @@ final class OnboardingViewController: UIPageViewController {
     }()
 
     // MARK: - Init
-    init() {
-        super.init(transitionStyle: .scroll,
-                   navigationOrientation: .horizontal,
-                   options: nil)
+    init(
+        statisticStore: StatisticStoreProtocol
+    ) {
+        self.statisticStore = statisticStore
+
+        super.init(
+            transitionStyle: .scroll,
+            navigationOrientation: .horizontal,
+            options: nil
+        )
     }
 
     required init(coder: NSCoder) {
@@ -79,6 +90,29 @@ final class OnboardingViewController: UIPageViewController {
             animated: true,
             completion: nil
         )
+    }
+
+    private func setupStatisticStore() {
+        do {
+            try statisticStore.setupStatisticStore()
+        } catch {
+            showStoreErrorAlert(
+                (error as? StatisticStoreError)?.userFriendlyMessage ?? error.localizedDescription
+            )
+        }
+    }
+
+    // MARK: - Alerts
+    func showStoreErrorAlert(_ message: String) {
+        let model = AlertModel(
+            title: NSLocalizedString("alertTitleStoreError", comment: ""),
+            message: message,
+            buttons: [.cancelButton],
+            identifier: "Store Error Alert",
+            completion: nil
+        )
+
+        AlertPresenter.showAlert(on: self, model: model)
     }
 
     // MARK: - Constraints
@@ -157,14 +191,7 @@ extension OnboardingViewController: CustomPageControlDelegate {
 extension OnboardingViewController: OnboardingContentViewControllerDelegate {
     func didTapConfirmButton() {
         UserDefaults.standard.isOnboardingCompleted = true
+        setupStatisticStore()
         onboardingDelegate?.onboardingCompleted()
     }
 }
-
-// MARK: - Preview
-#if DEBUG
-@available(iOS 17, *)
-#Preview("Onboarding") {
-    OnboardingViewController()
-}
-#endif

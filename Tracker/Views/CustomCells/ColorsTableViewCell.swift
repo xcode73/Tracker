@@ -114,32 +114,3 @@ extension ColorsTableViewCell: UICollectionViewDelegateFlowLayout {
         delegate?.didSelectColor(color: colors[indexPath.row])
     }
 }
-
-// MARK: - Preview
-#if DEBUG
-@available(iOS 17, *)
-#Preview("Special") {
-    let dataStore = Constants.appDelegate().dataStore
-    let viewController = TrackerTableViewController(
-        tableType: .special(Date()),
-        dataStore: dataStore
-    )
-    let navigationController = UINavigationController(rootViewController: viewController)
-    navigationController.modalPresentationStyle = .pageSheet
-
-    return navigationController
-}
-
-@available(iOS 17, *)
-#Preview("Regular") {
-    let dataStore = Constants.appDelegate().dataStore
-    let viewController = TrackerTableViewController(
-        tableType: .regular,
-        dataStore: dataStore
-    )
-    let navigationController = UINavigationController(rootViewController: viewController)
-    navigationController.modalPresentationStyle = .pageSheet
-
-    return navigationController
-}
-#endif

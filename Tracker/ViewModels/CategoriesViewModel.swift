@@ -11,36 +11,24 @@ final class CategoriesViewModel {
     var onChange: Binding<[CategoryStoreUpdate]>?
     var onErrorStateChange: Binding<String?>?
 
-    private let dataStore: DataStoreProtocol
+    private var categoryStore: CategoryStoreProtocol
 
-    private lazy var categoryStore: CategoryStoreProtocol? = {
-        do {
-            try categoryStore = CategoryStore(
-                dataStore,
-                delegate: self
-            )
-            return categoryStore
-        } catch {
-            onErrorStateChange?("Данные недоступны.")
-            return nil
-        }
-    }()
-
-    init(dataStore: DataStoreProtocol) {
-        self.dataStore = dataStore
+    init(categoryStore: CategoryStoreProtocol) {
+        self.categoryStore = categoryStore
+        self.categoryStore.delegate = self
     }
 
     func numberOfRowsInSection(section: Int) -> Int? {
-        categoryStore?.numberOfRowsInSection(section)
+        categoryStore.numberOfRowsInSection(section)
     }
 
     func getCategory(at indexPath: IndexPath) -> CategoryUI? {
-        categoryStore?.fetchCategory(at: indexPath)
+        categoryStore.fetchCategory(at: indexPath)
     }
 
     func saveCategory(from categoryUI: CategoryUI) throws {
         do {
-            try categoryStore?.saveCategory(from: categoryUI)
+            try categoryStore.saveCategory(from: categoryUI)
         } catch {
             throw NSError(
                 domain: "AppError",
@@ -53,7 +41,7 @@ final class CategoriesViewModel {
     }
 
     func deleteCategory(at indexPath: IndexPath) {
-        try? categoryStore?.deleteCategory(at: indexPath)
+        try? categoryStore.deleteCategory(at: indexPath)
     }
 }
 

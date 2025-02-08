@@ -21,14 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard
             let appDelegate = UIApplication.shared.delegate as? AppDelegate
         else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
-                    print("AppDelegate найден после задержки")
-                } else {
-                    print("Ошибка: AppDelegate не найден")
-                }
-            }
-            return
+            fatalError("could not get app delegate ")
         }
 
         let analyticsService = appDelegate.analyticsService
@@ -41,6 +34,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {
-        try? Constants.appDelegate().dataStore.saveContext()
+        guard
+            let appDelegate = UIApplication.shared.delegate as? AppDelegate
+        else {
+            fatalError("could not get app delegate ")
+        }
+
+        do {
+            try appDelegate.dataStore.saveContext()
+        } catch {
+            print("Failed to save context: \(error)")
+        }
     }
 }

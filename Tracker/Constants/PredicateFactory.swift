@@ -40,7 +40,7 @@ enum PredicateFactory {
         static func completed(on date: Date) -> NSPredicate {
             NSPredicate(
                 format: "ANY %K.%K == %@",
-                #keyPath(Tracker.records), #keyPath(Record.date), date as NSDate
+                #keyPath(TrackerCoreData.records), #keyPath(RecordCoreData.date), date as NSDate
             )
         }
 
@@ -76,7 +76,7 @@ enum PredicateFactory {
 
     enum RecordPredicate {
 //        static func byTrackerId(_ trackerId: UUID) -> NSPredicate {
-//            return NSPredicate(format: "%K == %@", #keyPath(Record.tracker.trackerId), trackerId as CVarArg)
+//            return NSPredicate(format: "%K == %@", #keyPath(RecordCoreData.tracker.trackerId), trackerId as CVarArg)
 //        }
     }
 }
@@ -85,14 +85,14 @@ private extension PredicateFactory {
     static func bySearchText(_ searchText: String) -> NSPredicate {
         NSPredicate(
             format: "%K CONTAINS[cd] %@",
-            #keyPath(Tracker.title), searchText
+            #keyPath(TrackerCoreData.title), searchText
         )
     }
 
     static func byDate(_ date: Date) -> NSPredicate {
         NSPredicate(
             format: "%K == %@",
-            #keyPath(Tracker.date), date as NSDate
+            #keyPath(TrackerCoreData.date), date as NSDate
         )
     }
 
@@ -100,15 +100,15 @@ private extension PredicateFactory {
         let weekday = WeekDay(date: date)
         return NSPredicate(
             format: "ANY %K.%K == %lld",
-            #keyPath(Tracker.schedule), #keyPath(Schedule.weekDay), weekday.rawValue
+            #keyPath(TrackerCoreData.schedule), #keyPath(ScheduleCoreData.weekDay), weekday.rawValue
         )
     }
 
     static func byRecords(_ date: Date) -> NSPredicate {
         NSPredicate(
             format: "SUBQUERY(%K, $record, $record.%K == %@).@count == 0",
-            #keyPath(Tracker.records),
-            #keyPath(Record.date),
+            #keyPath(TrackerCoreData.records),
+            #keyPath(RecordCoreData.date),
             date as NSDate
         )
     }

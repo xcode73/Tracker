@@ -1,6 +1,6 @@
 //
 //  Tracker.swift
-//  Tracker
+//  TrackerCoreData
 //
 //  Created by Nikolai Eremenko on 21.11.2024.
 //
@@ -8,8 +8,8 @@
 
 import CoreData
 
-@objc(Tracker)
-public class Tracker: NSManagedObject, Identifiable {
+@objc(TrackerCoreData)
+public class TrackerCoreData: NSManagedObject, Identifiable {
     @NSManaged public var color: String
     @NSManaged public var date: Date?
     @NSManaged public var emoji: String
@@ -17,17 +17,17 @@ public class Tracker: NSManagedObject, Identifiable {
     @NSManaged public var trackerId: UUID
     @NSManaged public var sectionTitle: String
     @NSManaged public var isPinned: Bool
-    @NSManaged public var category: Category
+    @NSManaged public var category: CategoryCoraData
     @NSManaged public var records: NSSet?
     @NSManaged public var schedule: NSSet?
 
-    @nonobjc public class func fetchRequest() -> NSFetchRequest<Tracker> {
-        return NSFetchRequest<Tracker>(entityName: "Tracker")
+    @nonobjc public class func fetchRequest() -> NSFetchRequest<TrackerCoreData> {
+        return NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
     }
 }
 
-extension Tracker {
-    func update(from trackerUI: TrackerUI, category: Category, in context: NSManagedObjectContext) {
+extension TrackerCoreData {
+    func update(from trackerUI: TrackerUI, category: CategoryCoraData, in context: NSManagedObjectContext) {
         self.trackerId = trackerUI.id
         self.title = trackerUI.title
         self.color = trackerUI.color
@@ -37,7 +37,7 @@ extension Tracker {
         self.category = category
         self.sectionTitle = isPinned ? NSLocalizedString("sectionHeaderPinned", comment: "") : (category.title)
 
-        if let existingSchedules = self.schedule as? Set<Schedule> {
+        if let existingSchedules = self.schedule as? Set<ScheduleCoreData> {
             for schedule in existingSchedules {
                 context.delete(schedule)
             }
@@ -45,7 +45,7 @@ extension Tracker {
 
         if let newSchedule = trackerUI.schedule {
             for weekDay in newSchedule {
-                let schedule = Schedule(context: context)
+                let schedule = ScheduleCoreData(context: context)
                 schedule.weekDay = weekDay
                 schedule.tracker = self
             }

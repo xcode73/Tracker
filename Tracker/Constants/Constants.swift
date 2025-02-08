@@ -25,14 +25,6 @@ enum Constants {
         "YPSelection16", "YPSelection17", "YPSelection18"
     ]
 
-    static func appDelegate() -> AppDelegate {
-        guard let delegate = UIApplication.shared.delegate as? AppDelegate else {
-            fatalError("could not get app delegate ")
-        }
-
-        return delegate
-     }
-
     static let trackersCollectionViewGeometricParam = GeometricParams(
         cellCount: 2,
         topInset: 8,

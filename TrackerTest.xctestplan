@@ -1,0 +1,39 @@
+{
+  "configurations" : [
+    {
+      "id" : "82BD4838-44AC-4464-A2E2-228312CA5109",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "environmentVariableEntries" : [
+      {
+        "key" : "analytics_service",
+        "value" : "null"
+      },
+      {
+        "key" : "persistent_store_type",
+        "value" : "in_memory"
+      }
+    ],
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Tracker.xcodeproj",
+      "identifier" : "912B598A2D4EDB7200BBF3BF",
+      "name" : "TrackerTests"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Tracker.xcodeproj",
+        "identifier" : "912B598A2D4EDB7200BBF3BF",
+        "name" : "TrackerTests"
+      }
+    }
+  ],
+  "version" : 1
+}

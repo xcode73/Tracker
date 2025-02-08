@@ -1,0 +1,23 @@
+{
+  "configurations" : [
+    {
+      "id" : "5A464C0C-27DB-444C-9EB0-515F5A5E228D",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "environmentVariableEntries" : [
+      {
+        "key" : "persistent_store_type",
+        "value" : "in_memory"
+      }
+    ]
+  },
+  "testTargets" : [
+
+  ],
+  "version" : 1
+}

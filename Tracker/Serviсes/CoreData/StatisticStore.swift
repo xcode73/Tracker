@@ -8,6 +8,7 @@
 import CoreData
 
 protocol StatisticStoreProtocol {
+    var delegate: StatisticStoreDelegate? { get set }
     var numberOfSections: Int { get }
     func numberOfRowsInSection(_ section: Int) -> Int
     func setupStatisticStore() throws
@@ -59,8 +60,8 @@ final class StatisticStore: NSObject {
     private let context: NSManagedObjectContext
     private let dataStore: DataStoreProtocol
 
-    private lazy var fetchedResultsController: NSFetchedResultsController<Statistic> = {
-        let fetchRequest: NSFetchRequest<Statistic> = Statistic.fetchRequest()
+    private lazy var fetchedResultsController: NSFetchedResultsController<StatisticCoreData> = {
+        let fetchRequest: NSFetchRequest<StatisticCoreData> = StatisticCoreData.fetchRequest()
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "statisticId", ascending: true)]
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest,
                                                                   managedObjectContext: context,
@@ -88,8 +89,8 @@ final class StatisticStore: NSObject {
     }
 
     // MARK: - Helpers
-    private func findStatistic(by id: Int) throws -> Statistic? {
-        let fetchRequest: NSFetchRequest<Statistic> = Statistic.fetchRequest()
+    private func findStatistic(by id: Int) throws -> StatisticCoreData? {
+        let fetchRequest: NSFetchRequest<StatisticCoreData> = StatisticCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "statisticId == %d", id)
 
         do {
@@ -100,9 +101,9 @@ final class StatisticStore: NSObject {
         }
     }
 
-    /// Fetches grouped Record entries by date.
+    /// Fetches grouped RecordCoreData entries by date.
     private func fetchGroupedRecords() throws -> [NSDictionary] {
-        let request = NSFetchRequest<NSDictionary>(entityName: "Record")
+        let request = NSFetchRequest<NSDictionary>(entityName: "RecordCoreData")
 
         let dateExpression = NSExpressionDescription()
         dateExpression.name = "date"
@@ -125,17 +126,21 @@ final class StatisticStore: NSObject {
     }
 
     /// Fetches all trackers from Core Data.
-    private func fetchAllTrackers() throws -> [Tracker] {
-        let trackerFetchRequest: NSFetchRequest<Tracker> = Tracker.fetchRequest()
+    private func fetchAllTrackers() throws -> [TrackerCoreData] {
+        let trackerFetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         return try context.fetch(trackerFetchRequest)
     }
 
     /// Determines which trackers are active on a given date.
-    private func getActiveTrackers(for date: Date, allTrackers: [Tracker], calendar: Calendar) -> [Tracker] {
+    private func getActiveTrackers(
+        for date: Date,
+        allTrackers: [TrackerCoreData],
+        calendar: Calendar
+    ) -> [TrackerCoreData] {
         allTrackers.filter { tracker in
             if let trackerDate = tracker.date {
                 return calendar.isDate(trackerDate, inSameDayAs: date)
-            } else if let schedule = tracker.schedule as? Set<Schedule> {
+            } else if let schedule = tracker.schedule as? Set<ScheduleCoreData> {
                 let weekday = calendar.component(.weekday, from: date)
                 return schedule.contains { $0.weekDay.rawValue == weekday }
             }
@@ -207,7 +212,7 @@ extension StatisticStore: StatisticStoreProtocol {
     }
 
     func fetchNumberOfRecords() throws -> Int {
-        let fetchRequest: NSFetchRequest<Record> = Record.fetchRequest()
+        let fetchRequest: NSFetchRequest<RecordCoreData> = RecordCoreData.fetchRequest()
 
         do {
             return try context.fetch(fetchRequest).count
@@ -234,12 +239,12 @@ extension StatisticStore: StatisticStoreProtocol {
             ]
 
             for statisticUI in statisticsUI {
-                let statistic: Statistic
+                let statistic: StatisticCoreData
 
                 if (try findStatistic(by: statisticUI.statisticId)) != nil {
                     throw StatisticStoreError.statisticAlreadyExists
                 } else {
-                    statistic = Statistic(context: context)
+                    statistic = StatisticCoreData(context: context)
                 }
 
                 statistic.update(from: statisticUI, in: context)

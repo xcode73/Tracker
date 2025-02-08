@@ -6,12 +6,10 @@
 //
 
 import UIKit
-import CoreData
-import AppMetricaCore
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    lazy var dataStore: DataStoreProtocol = {
+    let dataStore: DataStoreProtocol = {
         do {
             return try DataStore()
         } catch {
@@ -19,18 +17,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }()
 
-    var analyticsService = AnalyticsService()
+    let analyticsService: AnalyticsServiceProtocol = {
+        return AnalyticsService()
+    }()
 
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        guard
-            let configuration = AppMetricaConfiguration(apiKey: APIKeys.appMetricaKey)
-        else {
-            print("Failed to initialize AppMetricaConfiguration")
-            return true
-        }
-
-        AppMetrica.activate(with: configuration)
 
         return true
     }

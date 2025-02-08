@@ -362,22 +362,3 @@ extension CategoriesViewController: CategoryViewControllerDelegate {
         }
     }
 }
-
-//// MARK: - Preview
-// #if DEBUG
-// @available(iOS 17, *)
-// #Preview("Categories") {
-//    let dataStore = Constants.appDelegate().dataStore
-//
-//    let viewModel = CategoriesViewModel(dataStore: dataStore)
-//    let viewController = CategoriesViewController(selectedCategory: nil)
-//    viewController.initialize(viewModel: viewModel)
-//
-//    let navigationController = UINavigationController(
-//        rootViewController: viewController
-//    )
-//    navigationController.modalPresentationStyle = .pageSheet
-//
-//    return navigationController
-// }
-// #endif

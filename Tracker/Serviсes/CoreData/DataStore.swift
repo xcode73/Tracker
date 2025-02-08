@@ -9,6 +9,7 @@
 //
 
 import CoreData
+import UIKit
 
 protocol DataStoreProtocol {
     var managedObjectContext: NSManagedObjectContext? { get }
@@ -40,29 +41,17 @@ enum DataStoreError: Error {
 
 final class DataStore {
     private let modelName = "Tracker"
-    private static let storeURL: URL = {
-        NSPersistentContainer.defaultDirectoryURL().appendingPathComponent("data-store.sqlite")
-    }()
     private let container: NSPersistentContainer
     private let context: NSManagedObjectContext
+    private let storeURL: URL?
 
     init() throws {
-        guard let modelUrl = Bundle(for: DataStore.self).url(forResource: modelName, withExtension: "momd"),
-              let model = NSManagedObjectModel(contentsOf: modelUrl)
-        else {
-            throw DataStoreError.modelNotFound
-        }
+        let storeType = ProcessInfo.processInfo.environment["persistent_store_type"] ?? "sqlite"
+        let useInMemoryStore = (storeType == "in_memory")
 
-        do {
-            container = try NSPersistentContainer.load(
-                name: modelName,
-                model: model,
-                url: DataStore.storeURL
-            )
-            context = container.newBackgroundContext()
-        } catch {
-            throw DataStoreError.failedToLoadPersistentContainer(error)
-        }
+        self.container = try NSPersistentContainer.makeContainer(name: modelName, useInMemoryStore: useInMemoryStore)
+        self.context = container.newBackgroundContext()
+        self.storeURL = container.persistentStoreDescriptions.first?.url
     }
 
     func performSync<R>(_ action: (NSManagedObjectContext) throws -> R) throws -> R {
@@ -100,10 +89,13 @@ final class DataStore {
 
     private func cleanUpReferencesToPersistentStores() {
         let coordinator = container.persistentStoreCoordinator
+        guard !coordinator.persistentStores.isEmpty else { return }
+
         DispatchQueue.global(qos: .background).async {
+            guard let storeURL = self.storeURL else { return }
             for store in coordinator.persistentStores {
                 do {
-                    try coordinator.destroyPersistentStore(at: DataStore.storeURL, ofType: store.type, options: nil)
+                    try coordinator.destroyPersistentStore(at: storeURL, ofType: store.type, options: nil)
                 } catch {
                     print("Failed to destroy persistent store: \(error)")
                 }

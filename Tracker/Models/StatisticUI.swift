@@ -18,7 +18,7 @@ struct StatisticUI {
         self.value = value
     }
 
-    init(from entity: Statistic) {
+    init(from entity: StatisticCoreData) {
         self.statisticId = Int(entity.statisticId)
         self.title = entity.title
         self.value = Int(entity.value)
