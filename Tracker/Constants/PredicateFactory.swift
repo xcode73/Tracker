@@ -75,9 +75,22 @@ enum PredicateFactory {
     }
 
     enum RecordPredicate {
-//        static func byTrackerId(_ trackerId: UUID) -> NSPredicate {
-//            return NSPredicate(format: "%K == %@", #keyPath(RecordCoreData.tracker.trackerId), trackerId as CVarArg)
-//        }
+        static func byId(_ id: UUID) -> NSPredicate {
+            NSPredicate(format: "%K == %@", #keyPath(RecordCoreData.trackerId), id as NSUUID)
+        }
+
+        static func byDate(_ date: Date) -> NSPredicate {
+            NSPredicate(format: "%K == %@", #keyPath(RecordCoreData.date), date as NSDate)
+        }
+
+        static func byTrackerIdAndDate(_ id: UUID, date: Date) -> NSPredicate {
+            NSCompoundPredicate(
+                andPredicateWithSubpredicates: [
+                    byId(id),
+                    byDate(date)
+                ]
+            )
+        }
     }
 }
 

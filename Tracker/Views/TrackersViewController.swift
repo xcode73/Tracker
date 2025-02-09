@@ -228,16 +228,28 @@ final class TrackersViewController: UIViewController {
         ])
     }
 
-    private func updateCounterTitle(for trackerId: UUID) -> String {
-        let completedCount = recordStore.fetchNumberOfRecords(for: trackerId) ?? 0
-        let localizedFormatString = NSLocalizedString("trackers.daysCompleted", comment: "")
+    private func updateCounterTitle(for trackerId: UUID) throws -> String {
+        do {
+            let completedCount = try recordStore.fetchNumberOfRecords(for: trackerId)
+            let localizedFormatString = NSLocalizedString("trackers.daysCompleted", comment: "")
 
-        return String(format: localizedFormatString, completedCount)
+            return String(format: localizedFormatString, completedCount)
+        } catch {
+            throw error
+        }
     }
 
     // MARK: - Show Tracker Detail
     private func showTrackerDetail(trackerUI: TrackerUI, categoryUI: CategoryUI) {
-        let counterTitle = updateCounterTitle(for: trackerUI.id)
+        let counterTitle: String
+
+        do {
+            counterTitle = try updateCounterTitle(for: trackerUI.id)
+        } catch {
+            showStoreErrorAlert(error.localizedDescription)
+            return
+        }
+
         let viewController = TrackerTableViewController(
             tableType: .edit(trackerUI, categoryUI, counterTitle),
             categoryStore: categoryStore
@@ -268,6 +280,15 @@ final class TrackersViewController: UIViewController {
             try trackerStore.saveTracker(from: trackerUI, categoryUI: categoryUI)
         } catch {
             showStoreErrorAlert(error.localizedDescription)
+        }
+    }
+
+    private func fetchRecord(for trackerUI: TrackerUI) -> RecordUI? {
+        do {
+            return try recordStore.fetchRecord(for: trackerUI, date: datePicker.date.truncated)
+        } catch {
+            showStoreErrorAlert(error.localizedDescription)
+            return nil
         }
     }
 
@@ -404,15 +425,23 @@ extension TrackersViewController: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
 
-        let tracker = trackerStore.fetchTracker(at: indexPath)
-        let trackerRecord = recordStore.recordObject(for: tracker.id, date: datePicker.date.truncated)
+        let trackerUI = trackerStore.fetchTracker(at: indexPath)
+        let trackerRecord = fetchRecord(for: trackerUI)
+        let counterTitle: String
+
+        do {
+            counterTitle = try updateCounterTitle(for: trackerUI.id)
+        } catch {
+            showStoreErrorAlert(error.localizedDescription)
+            return UICollectionViewCell()
+        }
 
         cell.backgroundColor = .clear
         cell.delegate = self
         cell.configure(
-            tracker: tracker,
+            tracker: trackerUI,
             record: trackerRecord,
-            completedTitle: updateCounterTitle(for: tracker.id)
+            completedTitle: counterTitle
         )
 
         return cell

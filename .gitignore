@@ -102,5 +102,5 @@ iOSInjectionProject/
 *.swp
 *.lock
 
-APIKeys.swift
+Constants/APIKeys.swift
 TrackerTests/__Snapshots__/

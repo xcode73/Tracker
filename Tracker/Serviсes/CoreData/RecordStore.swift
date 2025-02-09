@@ -10,17 +10,20 @@ import CoreData
 protocol RecordStoreProtocol {
     func addRecord(_ record: RecordUI) throws
     func deleteRecord(_ record: RecordUI) throws
-    func recordObject(for trackerId: UUID, date: Date) -> RecordUI?
-    func fetchNumberOfRecords(for trackerId: UUID) -> Int?
+    func fetchRecord(for trackerUI: TrackerUI, date: Date) throws -> RecordUI?
+    func fetchNumberOfRecords(for trackerId: UUID) throws -> Int
 }
 
 enum RecordStoreError: Error {
     case failedToInitializeContext
+    case failedToFindRecord
 
     var userFriendlyMessage: String {
         switch self {
         case .failedToInitializeContext:
             return "Не удалось получить данные. Попробуйте еще раз."
+        case .failedToFindRecord:
+            return "Запись не найдена"
         }
     }
 }
@@ -45,51 +48,64 @@ final class RecordStore: NSObject {
 
 // MARK: - RecordStoreProtocol
 extension RecordStore: RecordStoreProtocol {
-    func recordObject(for trackerId: UUID, date: Date) -> RecordUI? {
-        let request = NSFetchRequest<RecordCoreData>(entityName: "RecordCoreData")
-        request.predicate = NSPredicate(format: "%K == %@ AND %K == %@",
-                                        #keyPath(RecordCoreData.trackerId), trackerId as NSUUID,
-                                        #keyPath(RecordCoreData.date), date as NSDate)
+    func fetchRecord(for trackerUI: TrackerUI, date: Date) throws -> RecordUI? {
+        do {
+            let fetchRequest: NSFetchRequest<RecordCoreData> = RecordCoreData.fetchRequest()
+            fetchRequest.predicate = PredicateFactory.RecordPredicate.byTrackerIdAndDate(trackerUI.id, date: date)
+            guard let record = try context.fetch(fetchRequest).first else { return nil }
 
-        guard let record = try? context.fetch(request).first else { return nil }
-
-        return RecordUI(trackerId: record.trackerId, date: record.date)
+            return RecordUI(from: record)
+        } catch {
+            throw error
+        }
     }
 
-    func fetchNumberOfRecords(for trackerId: UUID) -> Int? {
-        let request = NSFetchRequest<RecordCoreData>(entityName: "RecordCoreData")
-        request.predicate = NSPredicate(format: "%K == %@",
-                                        #keyPath(RecordCoreData.trackerId),
-                                        trackerId as NSUUID)
-
-        return try? context.count(for: request)
+    func fetchNumberOfRecords(for trackerId: UUID) throws -> Int {
+        do {
+            let fetchRequest: NSFetchRequest<RecordCoreData> = RecordCoreData.fetchRequest()
+            fetchRequest.predicate = PredicateFactory.RecordPredicate.byId(trackerId)
+            return try context.count(for: fetchRequest)
+        } catch {
+            throw error
+        }
     }
 
-    func addRecord(_ record: RecordUI) throws {
-        let request = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
-        request.predicate = NSPredicate(format: "%K == %@",
-                                        #keyPath(TrackerCoreData.trackerId),
-                                        record.trackerId as NSUUID)
-        guard let storedTracker = try? context.fetch(request).first else { return }
+    func addRecord(_ recordUI: RecordUI) throws {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = PredicateFactory.TrackerPredicate.byId(recordUI.trackerId)
+        guard
+            let trackerCoreData = try context.fetch(fetchRequest).first
+        else {
+            throw TrackerStoreError.failedToFindTracker
+        }
 
-        let recordCoreData = RecordCoreData(context: context)
-        recordCoreData.date = record.date
-        recordCoreData.trackerId = record.trackerId
-        recordCoreData.tracker = storedTracker
+        do {
+            let recordCoreData = RecordCoreData(context: context)
+            recordCoreData.update(from: recordUI, tracker: trackerCoreData, in: context)
 
-        try? dataStore.saveContext()
+            try dataStore.saveContext()
+        } catch {
+            throw error
+        }
     }
 
     func deleteRecord(_ record: RecordUI) throws {
-        let request = NSFetchRequest<RecordCoreData>(entityName: "RecordCoreData")
-        request.predicate = NSPredicate(format: "%K == %@ AND %K == %@",
-                                        #keyPath(RecordCoreData.trackerId),
-                                        record.trackerId as NSUUID,
-                                        #keyPath(RecordCoreData.date),
-                                        record.date as NSDate)
-        guard let storedRecord = try? context.fetch(request).first else { return }
+        do {
+            let fetchRequest: NSFetchRequest<RecordCoreData> = RecordCoreData.fetchRequest()
+            fetchRequest.predicate = PredicateFactory.RecordPredicate.byTrackerIdAndDate(
+                record.trackerId,
+                date: record.date
+            )
+            guard
+                let recordCoreData = try context.fetch(fetchRequest).first
+            else {
+                throw RecordStoreError.failedToFindRecord
+            }
 
-        try? dataStore.deleteItem(storedRecord)
-        try? dataStore.saveContext()
+            try dataStore.deleteItem(recordCoreData)
+            try dataStore.saveContext()
+        } catch {
+            throw error
+        }
     }
 }

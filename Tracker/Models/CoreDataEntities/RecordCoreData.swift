@@ -18,3 +18,11 @@ public class RecordCoreData: NSManagedObject, Identifiable {
         return NSFetchRequest<RecordCoreData>(entityName: "RecordCoreData")
     }
 }
+
+extension RecordCoreData {
+    func update(from recordUI: RecordUI, tracker: TrackerCoreData, in context: NSManagedObjectContext) {
+        self.date = recordUI.date
+        self.trackerId = recordUI.trackerId
+        self.tracker = tracker
+    }
+}

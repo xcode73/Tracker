@@ -102,9 +102,9 @@ extension CategoryStore: CategoryStoreProtocol {
             let category: CategoryCoraData
 
             if let existingCategory = try findCategory(by: categoryUI.id) {
-                category = existingCategory // Обновляем
+                category = existingCategory
             } else {
-                category = CategoryCoraData(context: context) // Создаем
+                category = CategoryCoraData(context: context)
             }
 
             category.update(from: categoryUI, in: context)
@@ -116,8 +116,12 @@ extension CategoryStore: CategoryStoreProtocol {
 
     func deleteCategory(at indexPath: IndexPath) throws {
         let category = fetchedResultsController.object(at: indexPath)
-        try? dataStore.deleteItem(category)
-        try? dataStore.saveContext()
+        do {
+            try dataStore.deleteItem(category)
+            try dataStore.saveContext()
+        } catch {
+            throw error
+        }
     }
 }
 
