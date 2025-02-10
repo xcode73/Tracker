@@ -1,5 +1,8 @@
 # Tracker - Habit Tracking iOS App
 
+![tracker1](https://github.com/user-attachments/assets/6f2f13fd-d595-4a52-9f53-fc42e5a1b200)
+![tracker2](https://github.com/user-attachments/assets/322935b2-c6ea-4d47-b0c3-e66b0864b88b)
+
 ## Links
 
 [Design in Figma](https://www.figma.com/file/gONgrq8Q5PfEs1LUo7KX4h/Tracker?type=design&node-id=0-1&mode=design)
