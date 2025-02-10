@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23605" systemVersion="24D60" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="CategoryCoraData" representedClassName=".CategoryCoraData" syncable="YES">
+        <attribute name="categoryId" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="title" attributeType="String"/>
+        <relationship name="trackers" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="TrackerCoreData" inverseName="category" inverseEntity="TrackerCoreData"/>
+    </entity>
+    <entity name="RecordCoreData" representedClassName=".RecordCoreData" syncable="YES">
+        <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="trackerId" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="tracker" maxCount="1" deletionRule="Nullify" destinationEntity="TrackerCoreData" inverseName="records" inverseEntity="TrackerCoreData"/>
+    </entity>
+    <entity name="ScheduleCoreData" representedClassName=".ScheduleCoreData" syncable="YES">
+        <attribute name="weekDay" attributeType="Integer 16" valueTransformerName="DaysValueTransformer" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="tracker" maxCount="1" deletionRule="Nullify" destinationEntity="TrackerCoreData" inverseName="schedule" inverseEntity="TrackerCoreData"/>
+    </entity>
+    <entity name="StatisticCoreData" representedClassName=".StatisticCoreData" syncable="YES">
+        <attribute name="statisticId" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="value" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
+    <entity name="TrackerCoreData" representedClassName=".TrackerCoreData" syncable="YES">
+        <attribute name="color" attributeType="String"/>
+        <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="emoji" attributeType="String"/>
+        <attribute name="isPinned" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="sectionTitle" attributeType="String"/>
+        <attribute name="title" attributeType="String"/>
+        <attribute name="trackerId" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="category" maxCount="1" deletionRule="Nullify" destinationEntity="CategoryCoraData" inverseName="trackers" inverseEntity="CategoryCoraData"/>
+        <relationship name="records" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="RecordCoreData" inverseName="tracker" inverseEntity="RecordCoreData"/>
+        <relationship name="schedule" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ScheduleCoreData" inverseName="tracker" inverseEntity="ScheduleCoreData"/>
+    </entity>
+</model>
