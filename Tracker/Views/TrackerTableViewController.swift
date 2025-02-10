@@ -333,7 +333,8 @@ final class TrackerTableViewController: UITableViewController {
         if indexPath.section == 1 {
             switch indexPath.row {
             case 0:
-                let viewController = CategoriesViewController(selectedCategory: category)
+                let selectedCategory = CategoryUI(from: newCategory)
+                let viewController = CategoriesViewController(selectedCategory: selectedCategory)
                 let viewModel = CategoriesViewModel(categoryStore: categoryStore)
                 viewController.initialize(viewModel: viewModel)
                 viewController.delegate = self

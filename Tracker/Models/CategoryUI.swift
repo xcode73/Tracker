@@ -28,4 +28,21 @@ struct CategoryUI: Equatable {
             self.trackers = []
         }
     }
+
+    init(from newCategory: NewCategoryUI) {
+        guard
+            let id = newCategory.categoryId,
+            let title = newCategory.title,
+            let trackers = newCategory.trackers
+        else {
+            self.id = UUID()
+            self.title = ""
+            self.trackers = []
+            return
+        }
+
+        self.id = id
+        self.title = title
+        self.trackers = trackers
+    }
 }

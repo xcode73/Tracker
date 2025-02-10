@@ -12,9 +12,7 @@ protocol CategoriesViewControllerDelegate: AnyObject {
 }
 
 final class CategoriesViewController: UIViewController {
-    // MARK: - Properties
     weak var delegate: CategoriesViewControllerDelegate?
-
     private var viewModel: CategoriesViewModel?
     private var selectedCategory: CategoryUI?
 

@@ -30,13 +30,7 @@ final class CategoriesViewModel {
         do {
             try categoryStore.saveCategory(from: categoryUI)
         } catch {
-            throw NSError(
-                domain: "AppError",
-                code: 404,
-                userInfo: [
-                    NSLocalizedDescriptionKey: NSLocalizedString("alertMessageTrackerStoreTracker", comment: "")
-                ]
-            )
+            throw error
         }
     }
 

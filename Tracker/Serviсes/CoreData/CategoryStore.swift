@@ -75,10 +75,14 @@ final class CategoryStore: NSObject {
     }
 
     private func findCategory(by id: UUID) throws -> CategoryCoraData? {
-        let fetchRequest: NSFetchRequest<CategoryCoraData> = CategoryCoraData.fetchRequest()
-        fetchRequest.predicate = PredicateFactory.CategoryPredicate.byId(id)
+        do {
+            let fetchRequest: NSFetchRequest<CategoryCoraData> = CategoryCoraData.fetchRequest()
+            fetchRequest.predicate = PredicateFactory.CategoryPredicate.byId(id)
 
-        return try context.fetch(fetchRequest).first
+            return try context.fetch(fetchRequest).first
+        } catch {
+            throw error
+        }
     }
 }
 
@@ -93,8 +97,8 @@ extension CategoryStore: CategoryStoreProtocol {
     }
 
     func fetchCategory(at indexPath: IndexPath) -> CategoryUI {
-        let category = fetchedResultsController.object(at: indexPath)
-        return CategoryUI(from: category)
+        let categoryCoreData = fetchedResultsController.object(at: indexPath)
+        return CategoryUI(from: categoryCoreData)
     }
 
     func saveCategory(from categoryUI: CategoryUI) throws {
@@ -108,9 +112,9 @@ extension CategoryStore: CategoryStoreProtocol {
             }
 
             category.update(from: categoryUI, in: context)
-
             try dataStore.saveContext()
         } catch {
+            throw error
         }
     }
 
